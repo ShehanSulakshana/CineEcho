@@ -42,4 +42,3 @@ lib/
 
 #### © 2026 CineEcho. Built with Flutter.
 
->>>>>>> b5d27db1ea1f4f4bc3083a246f2c90faea4d5996
