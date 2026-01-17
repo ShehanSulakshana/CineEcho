@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "526164299476",
+    "project_id": "cine-echo-app",
+    "storage_bucket": "cine-echo-app.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:526164299476:android:9dce832bf2b77633933541",
+        "android_client_info": {
+          "package_name": "com.example.cine_echo"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB_mojkazgqZJghBns2NCPed-LU6cBXz9g"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

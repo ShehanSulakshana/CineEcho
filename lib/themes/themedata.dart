@@ -13,10 +13,56 @@ class AppTheme {
         fontSize: 30,
       ),
 
+      bodyLarge: TextStyle(
+        color: Colors.white,
+        fontWeight: FontWeight.bold,
+        fontSize: 30,
+      ),
+
       bodyMedium: TextStyle(
         color: Colors.white,
         fontSize: 15,
         fontWeight: FontWeight.bold,
+      ),
+
+      titleMedium: TextStyle(
+        color: Colors.white,
+        fontSize: 20,
+        fontWeight: FontWeight.bold,
+      ),
+
+      bodySmall: TextStyle(color: Colors.white, fontSize: 15),
+
+      titleSmall: TextStyle(
+        color: Color.fromARGB(255, 37, 150, 190),
+        fontWeight: FontWeight.bold,
+        fontSize: 15,
+      ),
+    ),
+
+    inputDecorationTheme: InputDecorationTheme(
+      filled: true,
+      fillColor: Color(0xFF0A2A3A),
+      contentPadding: EdgeInsets.symmetric(vertical: 20.0, horizontal: 16.0),
+
+      hintStyle: TextStyle(
+        color: const Color.fromARGB(95, 255, 255, 255),
+        fontSize: 15,
+      ),
+      labelStyle: TextStyle(
+        color: Color(0xFF2596BE),
+        fontSize: 14,
+        fontWeight: FontWeight.normal,
+      ),
+
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(11),
+        borderSide: BorderSide(color: Colors.white24),
+      ),
+
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(11),
+        borderSide: BorderSide(color: Color(0xFF2596BE), width: 2),
       ),
     ),
   );
