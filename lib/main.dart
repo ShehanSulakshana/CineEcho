@@ -1,5 +1,7 @@
-
+import 'package:cine_echo/screens/auth/reset_password_screen.dart';
+import 'package:cine_echo/screens/home_screen.dart';
 import 'package:cine_echo/screens/onboard_screen.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import './themes/themedata.dart';
 
@@ -22,7 +24,19 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'CineEcho',
       theme: AppTheme.defaultTheme,
-      home: const OnboardScreen(),
+      home: StreamBuilder(
+        stream: FirebaseAuth.instance.authStateChanges(),
+        builder: (context, asyncSnapshot) {
+          if (asyncSnapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          if (asyncSnapshot.data != null) {
+            return HomeScreen();
+          } else {
+            return const OnboardScreen();
+          }
+        },
+      ),
     );
   }
 }

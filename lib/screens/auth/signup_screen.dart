@@ -1,3 +1,6 @@
+import 'package:cine_echo/screens/auth/login_screen.dart';
+import 'package:cine_echo/screens/home_screen.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class SignUpScreen extends StatefulWidget {
@@ -16,6 +19,38 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
+
+  Future<void> createUserWithEmailAndPassword() async {
+    try {
+      final UserCredential = await FirebaseAuth.instance
+          .createUserWithEmailAndPassword(
+            email: _emailController.text.trim(),
+            password: _passwordController.text.trim(),
+          );
+
+      _showSnackBar(
+        "Account created successfully! Welcome aboard.",
+        Colors.green,
+      );
+
+      Navigator.pushAndRemoveUntil(
+        // ignore: use_build_context_synchronously
+        context,
+        MaterialPageRoute(builder: (_) => HomeScreen()),
+        (route) => false,
+      );
+    } on FirebaseAuthException catch (e) {
+      _showSnackBar(e.message!, Colors.red);
+    } catch (e) {
+      _showSnackBar(e.toString(), Colors.red);
+    }
+  }
+
+  void _showSnackBar(String e, Color color) {
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(e), backgroundColor: color));
+  }
 
   @override
   void dispose() {
@@ -66,10 +101,12 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     textAlignVertical: TextAlignVertical.center,
                     style: Theme.of(context).textTheme.bodySmall,
                     validator: (value) {
-                      if (value == null || value.isEmpty)
+                      if (value == null || value.isEmpty) {
                         return 'Username required';
-                      if (value.length < 3)
+                      }
+                      if (value.length < 3) {
                         return 'Username must be 3+ characters';
+                      }
                       return null;
                     },
                     decoration: InputDecoration(
@@ -100,8 +137,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     textAlignVertical: TextAlignVertical.center,
                     style: Theme.of(context).textTheme.bodySmall,
                     validator: (value) {
-                      if (value == null || value.isEmpty)
+                      if (value == null || value.isEmpty) {
                         return 'Email required';
+                      }
                       if (!value.contains('@')) return 'Invalid email';
                       return null;
                     },
@@ -134,10 +172,12 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     textAlignVertical: TextAlignVertical.center,
                     style: Theme.of(context).textTheme.bodySmall,
                     validator: (value) {
-                      if (value == null || value.isEmpty)
+                      if (value == null || value.isEmpty) {
                         return 'Password required';
-                      if (value.length < 8)
+                      }
+                      if (value.length < 8) {
                         return 'Password must be 8+ characters';
+                      }
                       return null;
                     },
                     decoration: InputDecoration(
@@ -180,10 +220,12 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     style: Theme.of(context).textTheme.bodySmall,
                     autovalidateMode: AutovalidateMode.onUserInteraction,
                     validator: (value) {
-                      if (value == null || value.isEmpty)
+                      if (value == null || value.isEmpty) {
                         return 'Confirm password';
-                      if (value != _passwordController.text)
+                      }
+                      if (value != _passwordController.text) {
                         return "Passwords don't match";
+                      }
                       return null;
                     },
 
@@ -221,24 +263,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     width: double.infinity,
                     height: 65,
                     child: ElevatedButton(
-                      onPressed: () {
+                      onPressed: () async {
                         if (_formKey.currentState!.validate()) {
-                          final username = _usernameController.text.trim();
-                          final email = _emailController.text.trim();
-                          final password = _passwordController.text;
-
-                          debugPrint('=== CineEcho Register ===');
-                          debugPrint('Username: $username');
-                          debugPrint('Email: $email');
-                          debugPrint('Password: $password');
-
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text('Register: $username'),
-                              backgroundColor: Colors.green,
-                            ),
-                          );
-                          // TODO: FirebaseAuth.createUserWithEmailAndPassword
+                          await createUserWithEmailAndPassword();
                         }
                       },
                       style: ButtonStyle(
@@ -271,7 +298,12 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       GestureDetector(
                         onTap: () {
                           // TODO: Navigate to Login
-                          Navigator.pop(context); // Back to login
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => LoginScreen(),
+                            ),
+                          ); // Back to login
                         },
                         child: Text(
                           " Login Now",

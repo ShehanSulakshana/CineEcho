@@ -1,5 +1,8 @@
+import 'package:cine_echo/screens/auth/reset_password_screen.dart';
 import 'package:cine_echo/screens/auth/signup_screen.dart';
+import 'package:cine_echo/screens/home_screen.dart';
 import 'package:cine_echo/themes/pallets.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 enum FieldType { email, password, text }
@@ -24,6 +27,34 @@ class _LoginScreenState extends State<LoginScreen> {
     _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
+  }
+
+  Future<void> loginUserWithEmailPassword() async {
+    try {
+      final UserCredential = await FirebaseAuth.instance
+          .signInWithEmailAndPassword(
+            email: _emailController.text.trim(),
+            password: _passwordController.text.trim(),
+          );
+      _showSnackBar("Welcome back! Signed in successfully.", Colors.green);
+
+      Navigator.pushAndRemoveUntil(
+        // ignore: use_build_context_synchronously
+        context,
+        MaterialPageRoute(builder: (_) => HomeScreen()),
+        (route) => false,
+      );
+    } on FirebaseAuthException catch (e) {
+      _showSnackBar(e.message!, Colors.red);
+    } catch (e) {
+      _showSnackBar(e.toString(), Colors.red);
+    }
+  }
+
+  void _showSnackBar(String e, Color color) {
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(e), backgroundColor: color));
   }
 
   @override
@@ -146,6 +177,12 @@ class _LoginScreenState extends State<LoginScreen> {
                       child: GestureDetector(
                         onTap: () {
                           // TODO: Forgot Password navigation
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => ResetPasswordScreen(),
+                            ),
+                          );
                         },
                         child: Text(
                           "Forgot Password?",
@@ -159,22 +196,9 @@ class _LoginScreenState extends State<LoginScreen> {
                     width: double.infinity,
                     height: 65,
                     child: ElevatedButton(
-                      onPressed: () {
+                      onPressed: () async {
                         if (_formKey.currentState!.validate()) {
-                          final email = _emailController.text.trim();
-                          final password = _passwordController.text;
-
-                          debugPrint('=== CineEcho Login ===');
-                          debugPrint('Email: $email');
-                          debugPrint('Password: $password');
-
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text('Login: $email'),
-                              backgroundColor: Colors.green,
-                            ),
-                          );
-                          // TODO: FirebaseAuth.signInWithEmailAndPassword
+                          await loginUserWithEmailPassword();
                         }
                       },
                       style: ButtonStyle(
@@ -250,7 +274,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       GestureDetector(
                         onTap: () {
                           // TODO: Navigate to Sign Up
-                          Navigator.push(
+                          Navigator.pushReplacement(
                             context,
                             MaterialPageRoute(
                               builder: (context) => SignUpScreen(),
