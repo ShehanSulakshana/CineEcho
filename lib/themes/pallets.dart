@@ -2,4 +2,8 @@ import 'package:flutter/material.dart';
 
 final ashColor = Colors.white24;
 final lightblueColor = Color.fromARGB(255, 37, 150, 190);
-final navActive = Color.fromARGB(255, 0, 132, 255);
+final blueColor = Color.fromARGB(255, 72, 108, 254);
+
+final navActive = Color.fromARGB(255, 0, 102, 255);
+final carouselIndicatorColor = Color.fromARGB(255, 93, 212, 255);
+final currentIndicatorColor = Color.fromARGB(255, 0, 132, 255);
