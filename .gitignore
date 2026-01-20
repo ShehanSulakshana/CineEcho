@@ -170,4 +170,7 @@ app.*.symbols
 firebase_options.dart
 .env
 .env.g.dart
+<<<<<<< HEAD
 *.g.dart
+=======
+>>>>>>> 10d8dd9c6f656993743d91731ac61e13cda8d034
