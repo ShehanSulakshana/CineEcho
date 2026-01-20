@@ -2,7 +2,12 @@ import 'package:flutter/material.dart';
 
 class HorizontalSliderWidget extends StatelessWidget {
   final String title;
-  const HorizontalSliderWidget({super.key, required this.title});
+  final List<dynamic> dataList;
+  const HorizontalSliderWidget({
+    super.key,
+    required this.title,
+    required this.dataList,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -46,12 +51,19 @@ class HorizontalSliderWidget extends StatelessWidget {
 
         // Horizontal Scroll
         SizedBox(
-          height: 200, // Increased for poster + text space
+          height: 200,
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.symmetric(horizontal: 15),
             itemCount: 20,
             itemBuilder: (context, index) {
+              final item = dataList[index];
+              final title = item['title'] ?? item['name'] ?? 'Unknown';
+              final releaseYear = DateTime.parse(
+                item['first_air_date'] ?? item['release_date'],
+              ).year.toString();
+              final imagePath = item['poster_path'];
+              final imageLink = "https://image.tmdb.org/t/p/w400$imagePath";
               return Padding(
                 padding: const EdgeInsets.only(right: 12),
                 child: GestureDetector(
@@ -79,12 +91,20 @@ class HorizontalSliderWidget extends StatelessWidget {
                           ),
                           child: ClipRRect(
                             borderRadius: BorderRadius.circular(12),
-                            child: Image.asset(
-                              'assets/images/poster.jpg',
-                              fit: BoxFit.cover,
-                              width: double.infinity,
-                              height: double.infinity,
-                            ),
+                            child: imageLink.isEmpty
+                                ? Image.asset(
+                                    'assets/splash/logo.png',
+                                    fit: BoxFit.cover,
+                                  )
+                                : FadeInImage(
+                                    image: NetworkImage(imageLink),
+                                    placeholder: const AssetImage(
+                                      'assets/splash/logo.png',
+                                    ),
+                                    fit: BoxFit.cover,
+                                    height: double.infinity,
+                                    width: double.infinity,
+                                  ),
                           ),
                         ),
 
@@ -93,7 +113,7 @@ class HorizontalSliderWidget extends StatelessWidget {
                         SizedBox(
                           width: 90,
                           child: Text(
-                            'Inception',
+                            title,
                             style: Theme.of(context).textTheme.bodyMedium
                                 ?.copyWith(
                                   fontWeight: FontWeight.w600,
@@ -108,7 +128,7 @@ class HorizontalSliderWidget extends StatelessWidget {
 
                         // Year + Rating (smaller)
                         Text(
-                          '2010',
+                          releaseYear,
                           style: Theme.of(context).textTheme.bodySmall
                               ?.copyWith(color: Colors.white70, fontSize: 11),
                         ),

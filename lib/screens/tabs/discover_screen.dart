@@ -17,7 +17,12 @@ class DiscoverScreen extends StatefulWidget {
 
 class _DiscoverScreenState extends State<DiscoverScreen> {
   late List<dynamic> trending;
-  late List<dynamic> nowPlaying;
+  late List<dynamic> popularMovie;
+  late List<dynamic> popularTv;
+  late List<dynamic> topRatedMovie;
+  late List<dynamic> topRatedTv;
+  late List<dynamic> upcomingMovies;
+
   bool _isLoading = true;
 
   @override
@@ -29,7 +34,11 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
   Future<void> _loadData() async {
     try {
       trending = await fetchSectionData('/trending/all/day');
-      //nowPlaying = await fetchSectionData('/movie/now_playing');
+      popularMovie = await fetchSectionData('/movie/popular');
+      popularTv = await fetchSectionData('/tv/popular');
+      topRatedMovie = await fetchSectionData('/movie/top_rated');
+      topRatedTv = await fetchSectionData('/tv/top_rated');
+      upcomingMovies = await fetchSectionData('/movie/upcoming');
       if (mounted) {
         setState(() {
           _isLoading = false;
@@ -127,12 +136,30 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
                         ],
                       ),
                       const SizedBox(height: 20),
-                      const HorizontalSliderWidget(title: "Popular Movies"),
-                      const HorizontalSliderWidget(title: "Popular Tv"),
-                      const HorizontalSliderWidget(title: "Top Rates Movies"),
-                      const HorizontalSliderWidget(title: "Top Rated Tv"),
-                      const HorizontalSliderWidget(title: "Upcoming Movies"),
+                      HorizontalSliderWidget(
+                        title: "Popular Movies",
+                        dataList: popularMovie,
+                      ),
+                      HorizontalSliderWidget(
+                        title: "Popular Tv",
+                        dataList: popularTv,
+                      ),
+                      HorizontalSliderWidget(
+                        title: "Top Rates Movies",
+                        dataList: topRatedMovie,
+                      ),
+                      HorizontalSliderWidget(
+                        title: "Top Rated Tv",
+                        dataList: topRatedTv,
+                      ),
+                      HorizontalSliderWidget(
+                        title: "Upcoming Movies",
+                        dataList: upcomingMovies,
+                      ),
+
+                      SizedBox(height: 100,)
                     ],
+
                   ),
                 ],
               ),

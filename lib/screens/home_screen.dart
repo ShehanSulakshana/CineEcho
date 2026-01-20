@@ -54,17 +54,17 @@ class _HomeScreenState extends State<HomeScreen> {
                 height: 90,
                 alignment: Alignment.center,
 
-                margin: EdgeInsets.only(left: 15, right: 15, bottom: 10),
+                margin: EdgeInsets.only(left: 15, right: 15, bottom: 5),
 
                 child: ClipRRect(
                   clipBehavior: Clip.hardEdge,
                   borderRadius: BorderRadiusGeometry.circular(50),
                   child: BackdropFilter(
-                    filter: ImageFilter.blur(sigmaX: 25, sigmaY: 25),
+                    filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
 
                     child: Container(
-                      color: lightblueColor.withAlpha(35),
-                      height: 80,
+                      color: Theme.of(context).primaryColor.withAlpha(30),
+                      height: 70,
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         crossAxisAlignment: CrossAxisAlignment.center,
@@ -79,9 +79,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             child: Icon(
                               isActive ? activeIcons[index] : icons[index],
                               size: 40,
-                              color: isActive
-                                  ? Color(0xFF9B5DE5)
-                                  : Colors.white.withOpacity(0.4),
+                              color: isActive ? navActive : navNonActive,
                             ),
                           );
                         }),
