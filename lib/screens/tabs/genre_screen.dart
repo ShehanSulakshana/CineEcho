@@ -1,3 +1,4 @@
+import 'package:cine_echo/widgets/custom_appbar.dart';
 import 'package:flutter/material.dart';
 
 class GenreScreen extends StatelessWidget {
@@ -5,6 +6,9 @@ class GenreScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Center(child: Text("GENRE"));
+    return Scaffold(
+      appBar: CustomAppBar(),
+      body: Center(child: Text("GENRE")),
+    );
   }
 }

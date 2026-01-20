@@ -1,3 +1,4 @@
+import 'package:cine_echo/widgets/custom_appbar.dart';
 import 'package:flutter/material.dart';
 
 class PersonalScreen extends StatelessWidget {
@@ -5,6 +6,9 @@ class PersonalScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Center(child: Text("PERSONAL"));
+    return Scaffold(
+      appBar: CustomAppBar(),
+      body: Center(child: Text("PERSONAL")),
+    );
   }
 }
