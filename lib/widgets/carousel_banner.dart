@@ -3,11 +3,15 @@ import 'package:flutter/material.dart';
 class CarouselBannerWidget extends StatelessWidget {
   final String title;
   final String rating;
+  final String releaseYear;
+  final String imageLink;
 
   const CarouselBannerWidget({
     super.key,
     required this.title,
     required this.rating,
+    required this.releaseYear,
+    required this.imageLink,
   });
 
   @override
@@ -30,21 +34,26 @@ class CarouselBannerWidget extends StatelessWidget {
           children: [
             // Banner Image
             Positioned.fill(
-              child: Image.asset('assets/images/banner.jpg', fit: BoxFit.cover),
+              child: imageLink.isEmpty
+                  ? Image.asset('assets/splash/logo.png', fit: BoxFit.cover)
+                  : FadeInImage(
+                      image: NetworkImage(imageLink),
+                      placeholder: const AssetImage('assets/splash/logo.png'),
+                      fit: BoxFit.cover,
+                    ),
             ),
 
-            // GRADIENT FROM UNDERNEATH (key change)
             Positioned.fill(
               child: Container(
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
-                    begin: Alignment.bottomCenter, // ← STARTS FROM BOTTOM
-                    end: Alignment.topCenter, // ← FADES UP
+                    begin: Alignment.bottomCenter,
+                    end: Alignment.topCenter,
                     colors: [
-                      Colors.black.withOpacity(0.95), // Dark bottom
-                      Colors.transparent, // Clear top
+                      Colors.black.withOpacity(0.95),
+                      Colors.transparent,
                     ],
-                    stops: const [0.0, 0.6], // 60% gradient
+                    stops: const [0.0, 0.8],
                   ),
                 ),
               ),
@@ -52,19 +61,18 @@ class CarouselBannerWidget extends StatelessWidget {
 
             SafeArea(
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(20, 0, 20, 30),
+                padding: const EdgeInsets.fromLTRB(20, 0, 20, 10),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.end,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Main Title - Larger + Bold
                     Text(
                       title,
                       style: Theme.of(context).textTheme.headlineSmall
                           ?.copyWith(
                             fontWeight: FontWeight.bold,
                             color: Colors.white,
-                            fontSize: 23,
+                            fontSize: 20,
                             shadows: [
                               const Shadow(
                                 color: Colors.black,
@@ -73,7 +81,6 @@ class CarouselBannerWidget extends StatelessWidget {
                               ),
                             ],
                           ),
-                      maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
 
@@ -83,7 +90,7 @@ class CarouselBannerWidget extends StatelessWidget {
                       children: [
                         // Year
                         Text(
-                          "2020",
+                          releaseYear,
                           style: Theme.of(context).textTheme.bodyMedium
                               ?.copyWith(
                                 color: Colors.white70,
@@ -114,14 +121,14 @@ class CarouselBannerWidget extends StatelessWidget {
                               const Icon(
                                 Icons.star,
                                 color: Colors.amber,
-                                size: 14,
+                                size: 11,
                               ),
                               const SizedBox(width: 4),
                               Text(
                                 rating,
                                 style: const TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.bold,
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w400,
                                   color: Colors.white,
                                 ),
                               ),
