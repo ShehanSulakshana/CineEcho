@@ -169,3 +169,4 @@ app.*.symbols
 # API KEYS
 firebase_options.dart
 .env
+.env.g.dart
