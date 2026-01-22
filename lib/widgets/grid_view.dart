@@ -1,29 +1,83 @@
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
-class GridViewWidget extends StatelessWidget {
+class GridViewWidget extends StatefulWidget {
   final List<dynamic> dataList;
-  const GridViewWidget({super.key, required this.dataList});
+  final VoidCallback onLoadMore;
+  final bool isLoadingMore;
+  final bool hasMorePages;
+
+  const GridViewWidget({
+    super.key,
+    required this.dataList,
+    required this.onLoadMore,
+    required this.isLoadingMore,
+    required this.hasMorePages,
+  });
+
+  @override
+  State<GridViewWidget> createState() => _GridViewWidgetState();
+}
+
+class _GridViewWidgetState extends State<GridViewWidget> {
+  late ScrollController _scrollController;
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController = ScrollController();
+    _scrollController.addListener(_onScroll);
+  }
+
+  @override
+  void dispose() {
+    _scrollController.removeListener(_onScroll);
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    if (_scrollController.position.pixels >=
+        _scrollController.position.maxScrollExtent - 500) {
+      if (widget.hasMorePages && !widget.isLoadingMore) {
+        widget.onLoadMore();
+      }
+    }
+  }
+
+  String _extractYear(dynamic dateString) {
+    try {
+      if (dateString == null || dateString.toString().isEmpty) {
+        return 'Unknown';
+      }
+      final parsedDate = DateTime.parse(dateString.toString());
+      return parsedDate.year.toString();
+    } catch (e) {
+      return 'Unknown';
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return GridView.builder(
+      controller: _scrollController,
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 3,
         childAspectRatio: 2 / 3,
       ),
-      itemCount: dataList.length,
+      itemCount: widget.dataList.length + (widget.isLoadingMore ? 1 : 0),
       shrinkWrap: true,
       padding: EdgeInsets.only(top: 20, bottom: 100),
       itemBuilder: (BuildContext context, int index) {
-        final item = dataList[index];
+        // Show loading indicator at the end
+        if (index == widget.dataList.length) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        final item = widget.dataList[index];
         final title = item['title'] ?? item['name'] ?? 'Unknown';
-        final releaseYear =
-            (item['first_air_date'] ?? item['release_date']) != null
-            ? DateTime.parse(
-                item['first_air_date'] ?? item['release_date'],
-              ).year.toString()
-            : 'Unknown';
+        final releaseYear = _extractYear(
+          item['first_air_date'] ?? item['release_date'],
+        );
         final imagePath = item['poster_path'];
         final imageLink = "https://image.tmdb.org/t/p/w400$imagePath";
 
@@ -39,7 +93,6 @@ class GridViewWidget extends StatelessWidget {
                 //TODO: Navigate to movie details
               },
               child: SizedBox(
-                //width: 90,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -75,9 +128,7 @@ class GridViewWidget extends StatelessWidget {
                               ),
                       ),
                     ),
-
                     const SizedBox(height: 8),
-
                     SizedBox(
                       width: 90,
                       child: Text(
@@ -90,9 +141,7 @@ class GridViewWidget extends StatelessWidget {
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
-
                     const SizedBox(height: 2),
-
                     // Year + Rating (smaller)
                     Text(
                       releaseYear,

@@ -11,6 +11,27 @@ class TmdbServices {
     return data['results'];
   }
 
+  Future<Map<String, dynamic>> fetchGenreDataPaginated(
+    String mediaType,
+    int genreId, {
+    int page = 1,
+  }) async {
+    final endpoint = mediaType == 'movie' ? '/discover/movie' : '/discover/tv';
+    final url =
+        'https://api.themoviedb.org/3$endpoint?api_key=${Env.tmdbApiKey}'
+        '&with_genres=$genreId'
+        '&language=en-US'
+        '&page=$page';
+
+    final response = await http.get(Uri.parse(url));
+    final data = json.decode(response.body);
+    return {
+      'results': data['results'] as List<dynamic>,
+      'total_pages': data['total_pages'] as int,
+      'current_page': page,
+    };
+  }
+
   Future<List<dynamic>> fetchGenreData(String mediaType, int genreId) async {
     final endpoint = mediaType == 'movie' ? '/discover/movie' : '/discover/tv';
     final url =
