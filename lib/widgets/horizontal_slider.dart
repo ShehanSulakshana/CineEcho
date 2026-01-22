@@ -64,6 +64,11 @@ class HorizontalSliderWidget extends StatelessWidget {
               ).year.toString();
               final imagePath = item['poster_path'];
               final imageLink = "https://image.tmdb.org/t/p/w400$imagePath";
+
+              bool imageLoadingError = false;
+              if (imagePath == null) {
+                imageLoadingError = true;
+              }
               return Padding(
                 padding: const EdgeInsets.only(right: 12),
                 child: GestureDetector(
@@ -91,7 +96,7 @@ class HorizontalSliderWidget extends StatelessWidget {
                           ),
                           child: ClipRRect(
                             borderRadius: BorderRadius.circular(12),
-                            child: imageLink.isEmpty
+                            child: imageLink.isEmpty || imageLoadingError
                                 ? Image.asset(
                                     'assets/splash/logo.png',
                                     fit: BoxFit.cover,

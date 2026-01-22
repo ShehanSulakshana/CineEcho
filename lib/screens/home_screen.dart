@@ -36,7 +36,7 @@ class _HomeScreenState extends State<HomeScreen> {
     Icons.person_rounded,
   ];
 
-  int currentPage = 0;
+  int currentPage = 1;
 
   @override
   Widget build(BuildContext context) {

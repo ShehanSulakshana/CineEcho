@@ -1,12 +1,10 @@
+import 'package:cine_echo/services/tmdb_services.dart';
 import 'package:cine_echo/themes/pallets.dart';
 import 'package:cine_echo/widgets/carousel_banner.dart';
 import 'package:cine_echo/widgets/custom_appbar.dart';
 import 'package:cine_echo/widgets/horizontal_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_carousel_widget/flutter_carousel_widget.dart';
-import 'package:cine_echo/config/env.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
 
 class DiscoverScreen extends StatefulWidget {
   const DiscoverScreen({super.key});
@@ -24,6 +22,7 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
   late List<dynamic> upcomingMovies;
 
   bool _isLoading = true;
+  final TmdbServices _tmdbServices = TmdbServices();
 
   @override
   void initState() {
@@ -33,33 +32,25 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
 
   Future<void> _loadData() async {
     try {
-      trending = await fetchSectionData('/trending/all/day');
-      popularMovie = await fetchSectionData('/movie/popular');
-      popularTv = await fetchSectionData('/tv/popular');
-      topRatedMovie = await fetchSectionData('/movie/top_rated');
-      topRatedTv = await fetchSectionData('/tv/top_rated');
-      upcomingMovies = await fetchSectionData('/movie/upcoming');
+      trending = await _tmdbServices.fetchSectionData('/trending/all/day');
+      popularMovie = await _tmdbServices.fetchSectionData('/movie/popular');
+      popularTv = await _tmdbServices.fetchSectionData('/tv/popular');
+      topRatedMovie = await _tmdbServices.fetchSectionData('/movie/top_rated');
+      topRatedTv = await _tmdbServices.fetchSectionData('/tv/top_rated');
+      upcomingMovies = await _tmdbServices.fetchSectionData('/movie/upcoming');
+
       if (mounted) {
         setState(() {
           _isLoading = false;
         });
       }
     } catch (e) {
-      print('Error loading data: $e');
       if (mounted) {
         setState(() {
           _isLoading = false;
         });
       }
     }
-  }
-
-  Future<List<dynamic>> fetchSectionData(String endpoint) async {
-    final url =
-        'https://api.themoviedb.org/3$endpoint?api_key=${Env.tmdbApiKey}';
-    final response = await http.get(Uri.parse(url));
-    final data = json.decode(response.body);
-    return data['results'];
   }
 
   @override
@@ -104,6 +95,7 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
                                 item['first_air_date'] ?? item['release_date'],
                               );
                               final imagePath = item['backdrop_path'];
+                              //TODO : Handle net image null error
                               return CarouselBannerWidget(
                                 title: title,
                                 rating: rating,
@@ -157,9 +149,8 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
                         dataList: upcomingMovies,
                       ),
 
-                      SizedBox(height: 100,)
+                      SizedBox(height: 100),
                     ],
-
                   ),
                 ],
               ),
