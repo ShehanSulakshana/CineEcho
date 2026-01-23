@@ -3,9 +3,12 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 class TmdbServices {
-  Future<Map<String, dynamic>> fetchSectionData(String endpoint) async {
+  Future<Map<String, dynamic>> fetchSectionData(
+    String endpoint, {
+    int page = 1,
+  }) async {
     final url =
-        'https://api.themoviedb.org/3$endpoint?api_key=${Env.tmdbApiKey}';
+        'https://api.themoviedb.org/3$endpoint?api_key=${Env.tmdbApiKey}&page=$page';
     final response = await http.get(Uri.parse(url));
     final data = json.decode(response.body);
     return {

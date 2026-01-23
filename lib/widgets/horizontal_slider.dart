@@ -5,11 +5,13 @@ class HorizontalSliderWidget extends StatelessWidget {
   final String title;
   final List<dynamic> dataList;
   final String endpoint;
+  final int totalPages;
   const HorizontalSliderWidget({
     super.key,
     required this.title,
     required this.endpoint,
     required this.dataList,
+    required this.totalPages,
   });
 
   @override
@@ -39,8 +41,12 @@ class HorizontalSliderWidget extends StatelessWidget {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) =>
-                          SeemoreScreen(endpoint: endpoint, appbarTitle: title),
+                      builder: (context) => SeemoreScreen(
+                        endpoint: endpoint,
+                        appbarTitle: title,
+                        initialData: dataList,
+                        initialTotalPages: totalPages,
+                      ),
                     ),
                   );
                 },
@@ -61,7 +67,7 @@ class HorizontalSliderWidget extends StatelessWidget {
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.symmetric(horizontal: 15),
-            itemCount: 20,
+            itemCount: dataList.length > 20 ? 20 : dataList.length,
             itemBuilder: (context, index) {
               final item = dataList[index];
               final title = item['title'] ?? item['name'] ?? 'Unknown';

@@ -21,6 +21,12 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
   late List<dynamic> topRatedTv;
   late List<dynamic> upcomingMovies;
 
+  int popularMovieTotalPages = 1;
+  int popularTvTotalPages = 1;
+  int topRatedMovieTotalPages = 1;
+  int topRatedTvTotalPages = 1;
+  int upcomingMoviesTotalPages = 1;
+
   bool _isLoading = true;
   final TmdbServices _tmdbServices = TmdbServices();
 
@@ -37,25 +43,33 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
             '/trending/all/day',
           ))['results'] ??
           [];
-      popularMovie =
-          (await _tmdbServices.fetchSectionData('/movie/popular'))['results'] ??
-          [];
-      popularTv =
-          (await _tmdbServices.fetchSectionData('/tv/popular'))['results'] ??
-          [];
-      topRatedMovie =
-          (await _tmdbServices.fetchSectionData(
-            '/movie/top_rated',
-          ))['results'] ??
-          [];
-      topRatedTv =
-          (await _tmdbServices.fetchSectionData('/tv/top_rated'))['results'] ??
-          [];
-      upcomingMovies =
-          (await _tmdbServices.fetchSectionData(
-            '/movie/upcoming',
-          ))['results'] ??
-          [];
+      final popularMovieData = await _tmdbServices.fetchSectionData(
+        '/movie/popular',
+      );
+      popularMovie = popularMovieData['results'] ?? [];
+      popularMovieTotalPages = popularMovieData['total_pages'] ?? 1;
+
+      final popularTvData = await _tmdbServices.fetchSectionData('/tv/popular');
+      popularTv = popularTvData['results'] ?? [];
+      popularTvTotalPages = popularTvData['total_pages'] ?? 1;
+
+      final topRatedMovieData = await _tmdbServices.fetchSectionData(
+        '/movie/top_rated',
+      );
+      topRatedMovie = topRatedMovieData['results'] ?? [];
+      topRatedMovieTotalPages = topRatedMovieData['total_pages'] ?? 1;
+
+      final topRatedTvData = await _tmdbServices.fetchSectionData(
+        '/tv/top_rated',
+      );
+      topRatedTv = topRatedTvData['results'] ?? [];
+      topRatedTvTotalPages = topRatedTvData['total_pages'] ?? 1;
+
+      final upcomingMoviesData = await _tmdbServices.fetchSectionData(
+        '/movie/upcoming',
+      );
+      upcomingMovies = upcomingMoviesData['results'] ?? [];
+      upcomingMoviesTotalPages = upcomingMoviesData['total_pages'] ?? 1;
 
       if (mounted) {
         setState(() {
@@ -150,26 +164,31 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
                         title: "Popular Movies",
                         endpoint: '/trending/all/day',
                         dataList: popularMovie,
+                        totalPages: popularMovieTotalPages,
                       ),
                       HorizontalSliderWidget(
                         title: "Popular Tv",
                         endpoint: '/tv/popular',
                         dataList: popularTv,
+                        totalPages: popularTvTotalPages,
                       ),
                       HorizontalSliderWidget(
                         title: "Top Rated Movies",
                         endpoint: '/movie/top_rated',
                         dataList: topRatedMovie,
+                        totalPages: topRatedMovieTotalPages,
                       ),
                       HorizontalSliderWidget(
                         title: "Top Rated Tv",
                         endpoint: '/tv/top_rated',
                         dataList: topRatedTv,
+                        totalPages: topRatedTvTotalPages,
                       ),
                       HorizontalSliderWidget(
                         title: "Upcoming Movies",
                         endpoint: '/movie/upcoming',
                         dataList: upcomingMovies,
+                        totalPages: upcomingMoviesTotalPages,
                       ),
 
                       SizedBox(height: 100),
