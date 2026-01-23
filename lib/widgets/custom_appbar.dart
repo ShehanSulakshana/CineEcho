@@ -2,6 +2,7 @@ import 'package:cine_echo/themes/pallets.dart';
 import 'package:flutter/material.dart';
 
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
+  
   const CustomAppBar({super.key});
 
   @override

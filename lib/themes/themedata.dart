@@ -1,3 +1,4 @@
+import 'package:cine_echo/themes/pallets.dart';
 import 'package:flutter/material.dart';
 
 class AppTheme {
@@ -63,6 +64,23 @@ class AppTheme {
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(11),
         borderSide: BorderSide(color: Color(0xFF2596BE), width: 2),
+      ),
+    ),
+
+    appBarTheme: AppBarTheme(
+      //foregroundColor: Color.fromARGB(255, 39, 61, 254),
+      backgroundColor: Color.fromARGB(255, 0, 25, 42),
+      elevation: 2.5,
+      shadowColor: const Color.fromARGB(36, 0, 0, 0),
+      centerTitle: true,
+      titleTextStyle: TextStyle(
+        color: Color.fromARGB(255, 39, 61, 254),
+        fontWeight: FontWeight.bold,
+        fontSize: 27,
+      ),
+      iconTheme: IconThemeData(
+        size: 27,
+        color: Color.fromARGB(255, 39, 61, 254),
       ),
     ),
   );

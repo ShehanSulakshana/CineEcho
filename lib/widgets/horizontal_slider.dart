@@ -1,11 +1,14 @@
+import 'package:cine_echo/screens/specific/seemore_screen.dart';
 import 'package:flutter/material.dart';
 
 class HorizontalSliderWidget extends StatelessWidget {
   final String title;
   final List<dynamic> dataList;
+  final String endpoint;
   const HorizontalSliderWidget({
     super.key,
     required this.title,
+    required this.endpoint,
     required this.dataList,
   });
 
@@ -31,17 +34,20 @@ class HorizontalSliderWidget extends StatelessWidget {
                 ),
               ),
               const Spacer(),
-              Padding(
-                padding: const EdgeInsets.only(right: 15),
-                child: GestureDetector(
-                  onTap: () {
-                    //TODO: Navigate to full list
-                  },
-                  child: const Icon(
-                    Icons.arrow_forward_ios_rounded,
-                    color: Colors.white70,
-                    size: 20,
-                  ),
+              IconButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) =>
+                          SeemoreScreen(endpoint: endpoint, appbarTitle: title),
+                    ),
+                  );
+                },
+                icon: Icon(
+                  Icons.arrow_forward_ios_rounded,
+                  color: Colors.white70,
+                  size: 20,
                 ),
               ),
             ],

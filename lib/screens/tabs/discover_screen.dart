@@ -32,12 +32,30 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
 
   Future<void> _loadData() async {
     try {
-      trending = await _tmdbServices.fetchSectionData('/trending/all/day');
-      popularMovie = await _tmdbServices.fetchSectionData('/movie/popular');
-      popularTv = await _tmdbServices.fetchSectionData('/tv/popular');
-      topRatedMovie = await _tmdbServices.fetchSectionData('/movie/top_rated');
-      topRatedTv = await _tmdbServices.fetchSectionData('/tv/top_rated');
-      upcomingMovies = await _tmdbServices.fetchSectionData('/movie/upcoming');
+      trending =
+          (await _tmdbServices.fetchSectionData(
+            '/trending/all/day',
+          ))['results'] ??
+          [];
+      popularMovie =
+          (await _tmdbServices.fetchSectionData('/movie/popular'))['results'] ??
+          [];
+      popularTv =
+          (await _tmdbServices.fetchSectionData('/tv/popular'))['results'] ??
+          [];
+      topRatedMovie =
+          (await _tmdbServices.fetchSectionData(
+            '/movie/top_rated',
+          ))['results'] ??
+          [];
+      topRatedTv =
+          (await _tmdbServices.fetchSectionData('/tv/top_rated'))['results'] ??
+          [];
+      upcomingMovies =
+          (await _tmdbServices.fetchSectionData(
+            '/movie/upcoming',
+          ))['results'] ??
+          [];
 
       if (mounted) {
         setState(() {
@@ -130,22 +148,27 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
                       const SizedBox(height: 20),
                       HorizontalSliderWidget(
                         title: "Popular Movies",
+                        endpoint: '/trending/all/day',
                         dataList: popularMovie,
                       ),
                       HorizontalSliderWidget(
                         title: "Popular Tv",
+                        endpoint: '/tv/popular',
                         dataList: popularTv,
                       ),
                       HorizontalSliderWidget(
-                        title: "Top Rates Movies",
+                        title: "Top Rated Movies",
+                        endpoint: '/movie/top_rated',
                         dataList: topRatedMovie,
                       ),
                       HorizontalSliderWidget(
                         title: "Top Rated Tv",
+                        endpoint: '/tv/top_rated',
                         dataList: topRatedTv,
                       ),
                       HorizontalSliderWidget(
                         title: "Upcoming Movies",
+                        endpoint: '/movie/upcoming',
                         dataList: upcomingMovies,
                       ),
 

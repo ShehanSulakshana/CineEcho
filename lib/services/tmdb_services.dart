@@ -3,12 +3,15 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 class TmdbServices {
-  Future<List<dynamic>> fetchSectionData(String endpoint) async {
+  Future<Map<String, dynamic>> fetchSectionData(String endpoint) async {
     final url =
         'https://api.themoviedb.org/3$endpoint?api_key=${Env.tmdbApiKey}';
     final response = await http.get(Uri.parse(url));
     final data = json.decode(response.body);
-    return data['results'];
+    return {
+      'results': data['results'] as List<dynamic>,
+      'total_pages': data['total_pages'] as int,
+    };
   }
 
   Future<Map<String, dynamic>> fetchGenreDataPaginated(
