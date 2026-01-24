@@ -102,8 +102,9 @@ class _LoginScreenState extends State<LoginScreen> {
                       textAlignVertical: TextAlignVertical.center,
                       style: Theme.of(context).textTheme.bodySmall,
                       validator: (value) {
-                        if (value == null || value.isEmpty)
+                        if (value == null || value.isEmpty) {
                           return 'Email required';
+                        }
                         if (!value.contains('@')) return 'Invalid email';
                         return null;
                       },
@@ -136,10 +137,12 @@ class _LoginScreenState extends State<LoginScreen> {
                       textAlignVertical: TextAlignVertical.center,
                       style: Theme.of(context).textTheme.bodySmall,
                       validator: (value) {
-                        if (value == null || value.isEmpty)
+                        if (value == null || value.isEmpty) {
                           return 'Password required';
-                        if (value.length < 8)
+                        }
+                        if (value.length < 8) {
                           return 'Password must be 8+ characters';
+                        }
                         return null;
                       },
                       decoration: InputDecoration(

@@ -1,4 +1,3 @@
-import 'package:cine_echo/themes/pallets.dart';
 import 'package:flutter/material.dart';
 
 class AppTheme {
@@ -83,5 +82,9 @@ class AppTheme {
         color: Color.fromARGB(255, 39, 61, 254),
       ),
     ),
+
+    // snackBarTheme: SnackBarThemeData(
+    //   backgroundColor: Color.fromARGB(255, 39, 61, 254),
+    // )
   );
 }

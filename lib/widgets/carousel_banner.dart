@@ -101,7 +101,7 @@ class CarouselBannerWidget extends StatelessWidget {
 
                         const SizedBox(width: 12),
 
-                        // Modern Glass Rating Pill
+                        
                         Container(
                           padding: const EdgeInsets.symmetric(
                             horizontal: 8,

@@ -30,9 +30,12 @@ class _GenreScreenState extends State<GenreScreen>
 
     movieGenreTab = _GenreTab(
       type: "movie",
-      genreList: GenreListClass().movieGenreList,
+      genreList: GenreListClass.getMovieGenreList(),
     );
-    tvGenreTab = _GenreTab(type: "tv", genreList: GenreListClass().tvGenreList);
+    tvGenreTab = _GenreTab(
+      type: "tv",
+      genreList: GenreListClass.getTvGenreList(),
+    );
   }
 
   @override
@@ -99,6 +102,7 @@ class _GenreTabState extends State<_GenreTab> {
   int selectedGenreIndex = 0;
   bool _isLoading = true;
   bool _isLoadingMore = false;
+  bool _isRequestInFlight = false;
   late List<dynamic> resultList;
   int _currentPage = 1;
   int _totalPages = 1;
@@ -106,7 +110,9 @@ class _GenreTabState extends State<_GenreTab> {
   final TmdbServices _tmdbServices = TmdbServices();
 
   Future<void> _loadData({bool loadMore = false}) async {
+    if (_isRequestInFlight) return; // prevent overlapping calls
     try {
+      _isRequestInFlight = true;
       if (!loadMore) {
         _currentPage = 1;
       }
@@ -137,11 +143,18 @@ class _GenreTabState extends State<_GenreTab> {
           _isLoadingMore = false;
         });
       }
+    } finally {
+      _isRequestInFlight = false;
     }
   }
 
+  Future<void> _onRefresh() async {
+    _isLoadingMore = false;
+    await _loadData(loadMore: false);
+  }
+
   void _loadMoreData() {
-    if (_currentPage < _totalPages && !_isLoadingMore) {
+    if (_currentPage < _totalPages && !_isLoadingMore && !_isRequestInFlight) {
       setState(() {
         _isLoadingMore = true;
         _currentPage++;
@@ -153,6 +166,7 @@ class _GenreTabState extends State<_GenreTab> {
   @override
   void initState() {
     super.initState();
+    resultList = [];
     _loadData();
   }
 
@@ -206,11 +220,14 @@ class _GenreTabState extends State<_GenreTab> {
         Expanded(
           child: _isLoading
               ? const Center(child: CircularProgressIndicator())
-              : GridViewWidget(
-                  dataList: resultList,
-                  onLoadMore: _loadMoreData,
-                  isLoadingMore: _isLoadingMore,
-                  hasMorePages: _currentPage < _totalPages,
+              : RefreshIndicator(
+                  onRefresh: _onRefresh,
+                  child: GridViewWidget(
+                    dataList: resultList,
+                    onLoadMore: _loadMoreData,
+                    isLoadingMore: _isLoadingMore,
+                    hasMorePages: _currentPage < _totalPages,
+                  ),
                 ),
         ),
       ],

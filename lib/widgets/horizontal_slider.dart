@@ -1,3 +1,4 @@
+import 'package:cine_echo/screens/specific/details_screen.dart';
 import 'package:cine_echo/screens/specific/seemore_screen.dart';
 import 'package:flutter/material.dart';
 
@@ -75,7 +76,7 @@ class HorizontalSliderWidget extends StatelessWidget {
                 item['first_air_date'] ?? item['release_date'],
               ).year.toString();
               final imagePath = item['poster_path'];
-              final imageLink = "https://image.tmdb.org/t/p/w400$imagePath";
+              final imageLink = "https://image.tmdb.org/t/p/w342$imagePath";
 
               bool imageLoadingError = false;
               if (imagePath == null) {
@@ -85,7 +86,13 @@ class HorizontalSliderWidget extends StatelessWidget {
                 padding: const EdgeInsets.only(right: 12),
                 child: GestureDetector(
                   onTap: () {
-                    //TODO: Navigate to movie details
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            DetailsScreen(dataMap: dataList[index]),
+                      ),
+                    );
                   },
                   child: SizedBox(
                     width: 90,

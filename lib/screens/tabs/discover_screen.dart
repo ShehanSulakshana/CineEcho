@@ -1,3 +1,4 @@
+import 'package:cine_echo/screens/specific/details_screen.dart';
 import 'package:cine_echo/services/tmdb_services.dart';
 import 'package:cine_echo/themes/pallets.dart';
 import 'package:cine_echo/widgets/carousel_banner.dart';
@@ -128,12 +129,23 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
                               );
                               final imagePath = item['backdrop_path'];
                               //TODO : Handle net image null error
-                              return CarouselBannerWidget(
-                                title: title,
-                                rating: rating,
-                                releaseYear: releaseYear.year.toString(),
-                                imageLink:
-                                    "https://image.tmdb.org/t/p/w400$imagePath",
+                              return GestureDetector(
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) =>
+                                          DetailsScreen(dataMap: item),
+                                    ),
+                                  );
+                                },
+                                child: CarouselBannerWidget(
+                                  title: title,
+                                  rating: rating,
+                                  releaseYear: releaseYear.year.toString(),
+                                  imageLink:
+                                      "https://image.tmdb.org/t/p/w780$imagePath",
+                                ),
                               );
                             },
                             options: FlutterCarouselOptions(
@@ -162,7 +174,7 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
                       const SizedBox(height: 20),
                       HorizontalSliderWidget(
                         title: "Popular Movies",
-                        endpoint: '/trending/all/day',
+                        endpoint: '/movie/popular',
                         dataList: popularMovie,
                         totalPages: popularMovieTotalPages,
                       ),

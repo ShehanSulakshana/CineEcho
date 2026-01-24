@@ -1,6 +1,6 @@
-import 'package:cine_echo/screens/auth/reset_password_screen.dart';
-import 'package:cine_echo/screens/home_screen.dart';
 import 'package:cine_echo/screens/onboard_screen.dart';
+import 'package:cine_echo/screens/specific/details_screen.dart';
+import 'package:cine_echo/screens/home_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import './themes/themedata.dart';
