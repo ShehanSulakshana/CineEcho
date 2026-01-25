@@ -50,4 +50,15 @@ class TmdbServices {
     final data = json.decode(response.body);
     return data['results'];
   }
+
+  Future<Map<String, dynamic>> fetchDetails(String id, String type) async {
+    final url =
+        'https://api.themoviedb.org/3/${type.trim()}/${id.trim()}'
+        '?api_key=${Env.tmdbApiKey}'
+        '&append_to_response=videos,credits,recommendations'
+        '&language=en-US';
+
+    final response = await http.get(Uri.parse(url));
+    return json.decode(response.body);
+  }
 }

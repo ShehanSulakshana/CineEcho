@@ -56,7 +56,7 @@ class _ContentSectionState extends State<ContentSection> {
   final TmdbServices _tmdbServices = TmdbServices();
 
   Future<void> _loadData({bool loadMore = false}) async {
-    if (_isRequestInFlight) return; 
+    if (_isRequestInFlight) return;
     try {
       _isRequestInFlight = true;
       if (!loadMore) {
@@ -91,7 +91,7 @@ class _ContentSectionState extends State<ContentSection> {
   }
 
   Future<void> _onRefresh() async {
-    _isLoadingMore = false; 
+    _isLoadingMore = false;
     await _loadData(loadMore: false);
   }
 
@@ -133,6 +133,7 @@ class _ContentSectionState extends State<ContentSection> {
                     onLoadMore: _loadMoreData,
                     isLoadingMore: _isLoadingMore,
                     hasMorePages: _currentPage < _totalPages,
+                    typeData: widget.endpoint,
                   ),
                 ),
         ),

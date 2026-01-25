@@ -88,8 +88,6 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // Remove _loadData() call from here - it should only be in initState()
-
     return Scaffold(
       appBar: CustomAppBar(),
       body: _isLoading
@@ -108,14 +106,14 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
                         mainAxisAlignment: MainAxisAlignment.start,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Padding(
-                            padding: const EdgeInsets.only(left: 15),
-                            child: Text(
-                              "Trending",
-                              style: Theme.of(context).textTheme.titleMedium,
-                            ),
-                          ),
-                          const SizedBox(height: 15),
+                          // Padding(
+                          //   padding: const EdgeInsets.only(left: 15),
+                          //   child: Text(
+                          //     "Trending",
+                          //     style: Theme.of(context).textTheme.titleMedium,
+                          //   ),
+                          // ),
+                          //const SizedBox(height: 15),
                           FlutterCarousel.builder(
                             itemCount: 10,
                             itemBuilder: (context, index, currentIndex) {
@@ -128,14 +126,17 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
                                 item['first_air_date'] ?? item['release_date'],
                               );
                               final imagePath = item['backdrop_path'];
+                              final type = item['media_type'] ?? 'movie';
                               //TODO : Handle net image null error
                               return GestureDetector(
                                 onTap: () {
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                      builder: (context) =>
-                                          DetailsScreen(dataMap: item),
+                                      builder: (context) => DetailsScreen(
+                                        dataMap: item,
+                                        typeData: type,
+                                      ),
                                     ),
                                   );
                                 },

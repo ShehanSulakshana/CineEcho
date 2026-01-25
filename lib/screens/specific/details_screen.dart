@@ -1,37 +1,116 @@
 import 'dart:ui';
 
 import 'package:cine_echo/models/genre_list.dart';
+import 'package:cine_echo/services/tmdb_services.dart';
 import 'package:cine_echo/themes/pallets.dart';
 import 'package:cine_echo/widgets/cast_horizontal_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:marquee/marquee.dart';
+import 'package:url_launcher/url_launcher.dart';
 
-class DetailsScreen extends StatelessWidget {
-  const DetailsScreen({super.key, required this.dataMap});
+class DetailsScreen extends StatefulWidget {
+  const DetailsScreen({
+    super.key,
+    required this.dataMap,
+    required this.typeData,
+  });
 
   final Map<String, dynamic> dataMap;
+  final String typeData;
+
+  @override
+  State<DetailsScreen> createState() => _DetailsScreenState();
+}
+
+class _DetailsScreenState extends State<DetailsScreen> {
+  bool _isLoading = true;
+  late Map<String, dynamic> moreDetailsMap;
+  late String runtime;
+  String trailerKey = '';
+  List<dynamic> cast = const [];
+  List<dynamic> recommendations = const [];
+
+  String getType(String typeData) {
+    final String type;
+    if (typeData.contains('movie')) {
+      type = 'movie';
+    } else {
+      type = 'tv';
+    }
+    return type;
+  }
+
+  final TmdbServices _tmdbServices = TmdbServices();
+
+  @override
+  void initState() {
+    _loadData();
+    super.initState();
+  }
+
+  Future<void> _loadData() async {
+    moreDetailsMap = await _tmdbServices.fetchDetails(
+      widget.dataMap['id'].toString(),
+      getType(widget.typeData),
+    );
+
+    if (getType(widget.typeData) == 'movie') {
+      final int minutes =
+          int.tryParse(moreDetailsMap['runtime']?.toString() ?? '0') ?? 0;
+      final int hours = minutes ~/ 60;
+      final int mins = minutes % 60;
+      runtime = '0${hours}h ${mins}m';
+    }
+
+    cast = moreDetailsMap['credits']['cast'];
+    recommendations = moreDetailsMap['recommendations']['results'];
+    trailerKey = getTrailerKey();
+
+    if (mounted) {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  String getTrailerKey() {
+    final dynamic results = moreDetailsMap['videos']?['results'];
+    final List<dynamic> videos = results is List ? results : const <dynamic>[];
+    if (videos.isEmpty) return '';
+    try {
+      final trailer = videos.firstWhere(
+        (video) =>
+            video['type'] == 'Trailer' &&
+            video['site'] == 'YouTube' &&
+            video['key'] != null,
+        orElse: () => null,
+      );
+      return trailer?['key']?.toString() ?? '';
+    } catch (e) {
+      return '';
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    final title = dataMap['title'] ?? dataMap['name'] ?? 'Unknown';
-    final rating = (dataMap['vote_average'] ?? 0.0).toStringAsFixed(1);
+    final title =
+        widget.dataMap['title'] ?? widget.dataMap['name'] ?? 'Unknown';
+    final rating = (widget.dataMap['vote_average'] ?? 0.0).toStringAsFixed(1);
     final releaseYear = DateTime.parse(
-      dataMap['first_air_date'] ?? dataMap['release_date'],
+      widget.dataMap['first_air_date'] ?? widget.dataMap['release_date'],
     ).year.toString();
-    
-    final bannerPath = dataMap['backdrop_path'];
-    final posterPath = dataMap['poster_path'];
+    final bannerPath = widget.dataMap['backdrop_path'];
+    final posterPath = widget.dataMap['poster_path'];
     final bannerLink = "https://image.tmdb.org/t/p/w780/$bannerPath";
     final posterLink = "https://image.tmdb.org/t/p/w342/$posterPath";
-
-    final overview = dataMap['overview'] ?? 'Overview not available for this.';
+    final overview =
+        widget.dataMap['overview'] ?? 'Overview not available for this.';
 
     final Map<int, dynamic> allGenreMap = GenreListClass.getGenreMap();
 
     String getGenre() {
-      print(dataMap.toString());
       var buffer = StringBuffer();
-      final List<dynamic> genreIdList = dataMap['genre_ids'];
+      final List<dynamic> genreIdList = widget.dataMap['genre_ids'];
       for (var i = 0; i < genreIdList.length; i++) {
         final genreId = genreIdList[i];
         final genreName = allGenreMap[genreId];
@@ -80,17 +159,19 @@ class DetailsScreen extends StatelessWidget {
                               begin: Alignment.bottomCenter,
                               end: Alignment.topCenter,
                               colors: [
-                                Theme.of(context).scaffoldBackgroundColor,
                                 Theme.of(
                                   context,
-                                ).scaffoldBackgroundColor.withAlpha(245),
+                                ).scaffoldBackgroundColor.withAlpha(254),
+                                Theme.of(
+                                  context,
+                                ).scaffoldBackgroundColor.withAlpha(230),
                                 Theme.of(
                                   context,
                                 ).scaffoldBackgroundColor.withAlpha(150),
 
                                 Colors.transparent,
                               ],
-                              stops: const [0.0, 0.1, 0.4, 0.6],
+                              stops: const [0.0, 0.1, 0.3, 0.5],
                             ),
                           ),
                         ),
@@ -106,10 +187,17 @@ class DetailsScreen extends StatelessWidget {
                               decoration: BoxDecoration(
                                 color: Theme.of(
                                   context,
-                                ).primaryColor.withAlpha(30),
+                                ).scaffoldBackgroundColor.withAlpha(60),
                                 shape: BoxShape.circle,
                               ),
                               child: IconButton(
+                                style: ButtonStyle(
+                                  // backgroundColor: WidgetStatePropertyAll(
+                                  //   Theme.of(
+                                  //     context,
+                                  //   ).scaffoldBackgroundColor.withAlpha(50),
+                                  // ),
+                                ),
                                 onPressed: () => Navigator.of(context).pop(),
                                 icon: const Icon(
                                   Icons.arrow_back_ios_new_rounded,
@@ -167,37 +255,45 @@ class DetailsScreen extends StatelessWidget {
                                   children: [
                                     SizedBox(
                                       height: 50,
-                                      child: Marquee(
-                                        text: title,
-                                        style: Theme.of(
-                                          context,
-                                        ).textTheme.bodyLarge,
-                                        scrollAxis: Axis.horizontal,
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.center,
-                                        blankSpace: 20.0,
-                                        velocity: 30.0,
-                                        pauseAfterRound: const Duration(
-                                          seconds: 1,
-                                        ),
-                                        accelerationDuration: const Duration(
-                                          seconds: 1,
-                                        ),
-                                        accelerationCurve: Curves.linear,
-                                        decelerationDuration: const Duration(
-                                          milliseconds: 500,
-                                        ),
-                                        decelerationCurve: Curves.easeOut,
-                                      ),
+                                      child: title.length > 15
+                                          ? Marquee(
+                                              text: title,
+                                              style: Theme.of(
+                                                context,
+                                              ).textTheme.bodyLarge,
+                                              scrollAxis: Axis.horizontal,
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.center,
+                                              blankSpace: 20.0,
+                                              velocity: 30.0,
+                                              pauseAfterRound: const Duration(
+                                                seconds: 1,
+                                              ),
+                                              accelerationDuration:
+                                                  const Duration(seconds: 2),
+                                              accelerationCurve: Curves.linear,
+                                              decelerationDuration:
+                                                  const Duration(
+                                                    milliseconds: 500,
+                                                  ),
+                                              decelerationCurve: Curves.easeOut,
+                                            )
+                                          : Text(
+                                              title,
+                                              overflow: TextOverflow.ellipsis,
+                                              style: Theme.of(
+                                                context,
+                                              ).textTheme.bodyLarge,
+                                            ),
                                     ),
-                                    SizedBox(height: 10),
+                                    //SizedBox(height: 5),
                                     Container(
                                       decoration: BoxDecoration(
                                         color: Theme.of(
                                           context,
                                         ).scaffoldBackgroundColor,
                                         border: Border.all(color: ashColor),
-                                        borderRadius: BorderRadius.circular(15),
+                                        borderRadius: BorderRadius.circular(5),
                                       ),
                                       padding: EdgeInsets.symmetric(
                                         horizontal: 10,
@@ -219,28 +315,24 @@ class DetailsScreen extends StatelessWidget {
                                         ],
                                       ),
                                     ),
-                                    SizedBox(height: 10),
-                                    Row(
-                                      //TODO: COMIBINE THESE TEXTS
-                                      children: [
-                                        Text(
-                                          releaseYear,
-                                          style: TextStyle(fontSize: 13),
-                                        ),
-                                        Text(
-                                          " • ",
-                                          style: TextStyle(fontSize: 13),
-                                        ),
-                                        Text(
-                                          "3h 20m",
-                                          style: TextStyle(fontSize: 13),
-                                        ),
-                                      ],
+                                    SizedBox(height: 5),
+
+                                    Text(
+                                      !_isLoading &&
+                                              getType(widget.typeData) ==
+                                                  'movie'
+                                          ? "$releaseYear • $runtime"
+                                          : !_isLoading &&
+                                                getType(widget.typeData) == 'tv'
+                                          ? releaseYear
+                                          : "_",
+                                      style: TextStyle(fontSize: 12),
                                     ),
-                                    SizedBox(height: 10),
+
+                                    SizedBox(height: 3),
                                     Text(
                                       getGenre(),
-                                      style: TextStyle(fontSize: 14),
+                                      style: TextStyle(fontSize: 13),
                                     ),
                                   ],
                                 ),
@@ -258,7 +350,10 @@ class DetailsScreen extends StatelessWidget {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Buttons(),
+                            Buttons(
+                              trailerKey: trailerKey,
+                              isLoading: _isLoading,
+                            ),
 
                             SizedBox(height: 30),
                             Text(
@@ -279,7 +374,10 @@ class DetailsScreen extends StatelessWidget {
                           ],
                         ),
                       ),
-                      CastHorizontalSlider(),
+
+                      _isLoading
+                          ? SizedBox()
+                          : CastHorizontalSlider(castList: cast),
                     ],
                   ),
                 ],
@@ -293,7 +391,9 @@ class DetailsScreen extends StatelessWidget {
 }
 
 class Buttons extends StatefulWidget {
-  const Buttons({super.key});
+  final String trailerKey;
+  final bool isLoading;
+  const Buttons({super.key, required this.trailerKey, required this.isLoading});
 
   @override
   State<Buttons> createState() => _ButtonsState();
@@ -301,7 +401,7 @@ class Buttons extends StatefulWidget {
 
 class _ButtonsState extends State<Buttons> with TickerProviderStateMixin {
   late bool isFavorite;
-  late bool markeAsWatched;
+  late bool markeAsWatched; //TODO : Implement marked as watchd & is favorite
 
   late AnimationController _favoriteController;
   late AnimationController _trailerController;
@@ -523,9 +623,31 @@ class _ButtonsState extends State<Buttons> with TickerProviderStateMixin {
                             Colors.white.withAlpha(26),
                           ),
                         ),
-                        onPressed: () {
-                          // Trailer functionality here
-                        },
+                        onPressed:
+                            widget.trailerKey.isNotEmpty && !widget.isLoading
+                            ? () async {
+                                final Uri ytlink = Uri.parse(
+                                  "https://www.youtube.com/watch?v=${widget.trailerKey}",
+                                );
+                                final launched = await launchUrl(
+                                  ytlink,
+                                  mode: LaunchMode.externalApplication,
+                                );
+                                if (!launched && mounted) {
+                                  ScaffoldMessenger.of(context)
+                                    ..clearSnackBars()
+                                    ..showSnackBar(
+                                      SnackBar(
+                                        content: const Text(
+                                          'Could not launch trailer',
+                                        ),
+                                        duration: const Duration(seconds: 2),
+                                        behavior: SnackBarBehavior.floating,
+                                      ),
+                                    );
+                                }
+                              }
+                            : null,
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           mainAxisSize: MainAxisSize.min,

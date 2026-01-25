@@ -89,8 +89,10 @@ class HorizontalSliderWidget extends StatelessWidget {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) =>
-                            DetailsScreen(dataMap: dataList[index]),
+                        builder: (context) => DetailsScreen(
+                          dataMap: dataList[index],
+                          typeData: endpoint,
+                        ),
                       ),
                     );
                   },

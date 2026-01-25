@@ -227,6 +227,7 @@ class _GenreTabState extends State<_GenreTab> {
                     onLoadMore: _loadMoreData,
                     isLoadingMore: _isLoadingMore,
                     hasMorePages: _currentPage < _totalPages,
+                    typeData: widget.type,
                   ),
                 ),
         ),

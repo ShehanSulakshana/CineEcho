@@ -1,3 +1,4 @@
+import 'package:cine_echo/screens/specific/details_screen.dart';
 import 'package:flutter/material.dart';
 
 class GridViewWidget extends StatefulWidget {
@@ -5,6 +6,7 @@ class GridViewWidget extends StatefulWidget {
   final VoidCallback onLoadMore;
   final bool isLoadingMore;
   final bool hasMorePages;
+  final String typeData;
 
   const GridViewWidget({
     super.key,
@@ -12,6 +14,7 @@ class GridViewWidget extends StatefulWidget {
     required this.onLoadMore,
     required this.isLoadingMore,
     required this.hasMorePages,
+    required this.typeData,
   });
 
   @override
@@ -87,7 +90,12 @@ class _GridViewWidgetState extends State<GridViewWidget> {
                 padding: const EdgeInsets.only(right: 12),
                 child: GestureDetector(
                   onTap: () {
-                    //TODO: Navigate to movie details
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => DetailsScreen(dataMap: item, typeData: widget.typeData)
+                      ),
+                    );
                   },
                   child: SizedBox(
                     child: Column(
