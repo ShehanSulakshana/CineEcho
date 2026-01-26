@@ -7,6 +7,7 @@ import 'package:cine_echo/widgets/cast_horizontal_slider.dart';
 import 'package:cine_echo/widgets/horizontal_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:marquee/marquee.dart';
+import 'package:redacted/redacted.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class DetailsScreen extends StatefulWidget {
@@ -289,6 +290,9 @@ class _DetailsScreenState extends State<DetailsScreen> {
                                               style: Theme.of(
                                                 context,
                                               ).textTheme.bodyLarge,
+                                            ).redacted(
+                                              context: context,
+                                              redact: _isLoading,
                                             ),
                                     ),
                                     //SizedBox(height: 5),
@@ -319,6 +323,9 @@ class _DetailsScreenState extends State<DetailsScreen> {
                                           ),
                                         ],
                                       ),
+                                    ).redacted(
+                                      context: context,
+                                      redact: _isLoading,
                                     ),
                                     SizedBox(height: 5),
 
@@ -332,12 +339,18 @@ class _DetailsScreenState extends State<DetailsScreen> {
                                           ? releaseYear
                                           : "_",
                                       style: TextStyle(fontSize: 12),
+                                    ).redacted(
+                                      context: context,
+                                      redact: _isLoading,
                                     ),
 
                                     SizedBox(height: 3),
                                     Text(
                                       getGenre(),
                                       style: TextStyle(fontSize: 13),
+                                    ).redacted(
+                                      context: context,
+                                      redact: _isLoading,
                                     ),
                                   ],
                                 ),
@@ -363,38 +376,49 @@ class _DetailsScreenState extends State<DetailsScreen> {
                             SizedBox(height: 30),
                             Text(
                               "Overview",
-                              style: Theme.of(context).textTheme.titleMedium,
+                              style: Theme.of(context).textTheme.titleMedium
+                                  ?.copyWith(
+                                    fontWeight: FontWeight.w700,
+                                    color: Colors.white,
+                                    fontSize: 18,
+                                    letterSpacing: 0.3,
+                                  ),
                               textAlign: TextAlign.start,
-                            ),
-                            SizedBox(height: 5),
+                            ).redacted(context: context, redact: _isLoading),
+                            SizedBox(height: 12),
                             Text(
                               overview,
                               style: TextStyle(
                                 color: Colors.white,
-                                fontSize: 16,
+                                fontSize: 15,
+                                fontWeight: FontWeight.w500,
+                                letterSpacing: 0.2,
+                                height: 1.6,
                               ),
                               textAlign: TextAlign.justify,
-                            ),
-                            SizedBox(height: 30),
+                            ).redacted(context: context, redact: _isLoading),
+                            SizedBox(height: 25),
                           ],
                         ),
                       ),
 
-                      _isLoading
-                          ? SizedBox()
-                          : CastHorizontalSlider(castList: cast),
+                      CastHorizontalSlider(
+                        castList: cast,
+                        isLoading: _isLoading,
+                      ),
 
                       //recommendations slider
-                      SizedBox(height: 30),
+                      SizedBox(height: 25),
 
-                      _isLoading && recommendations.isEmpty
-                          ? SizedBox()
-                          : HorizontalSliderWidget(
+                      // ignore: prefer_is_empty
+                      !_isLoading && recommendations.isNotEmpty
+                          ? HorizontalSliderWidget(
                               title: "Recommendations",
                               endpoint: "movie",
                               dataList: recommendations,
                               totalPages: totalRecommendationPages,
-                            ),
+                            )
+                          : SizedBox(),
                     ],
                   ),
                 ],

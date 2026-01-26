@@ -38,6 +38,12 @@ class AppTheme {
         fontWeight: FontWeight.bold,
         fontSize: 15,
       ),
+
+      displayMedium: TextStyle(
+        color: Colors.white,
+        fontSize: 15,
+        fontWeight: FontWeight.w900,
+      ),
     ),
 
     inputDecorationTheme: InputDecorationTheme(

@@ -1,8 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:redacted/redacted.dart';
 
 class CastHorizontalSlider extends StatelessWidget {
   final List<dynamic> castList;
-  const CastHorizontalSlider({super.key, required this.castList});
+  final bool isLoading;
+  const CastHorizontalSlider({
+    super.key,
+    required this.castList,
+    required this.isLoading,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -16,8 +22,8 @@ class CastHorizontalSlider extends StatelessWidget {
             style: Theme.of(context).textTheme.titleMedium,
             textAlign: TextAlign.start,
           ),
-        ),
-        SizedBox(height: 10),
+        ).redacted(context: context, redact: isLoading),
+        SizedBox(height: 12),
         SizedBox(
           height: 160,
           child: ListView.builder(
@@ -39,7 +45,7 @@ class CastHorizontalSlider extends StatelessWidget {
                       width: 80,
                       child: ClipRRect(
                         borderRadius: BorderRadiusGeometry.circular(100),
-                        child: image.toString().isEmpty
+                        child: image == null
                             ? Image.asset(
                                 'assets/splash/logo.png',
                                 fit: BoxFit.cover,
@@ -55,17 +61,33 @@ class CastHorizontalSlider extends StatelessWidget {
                               ),
                       ),
                     ),
-                    SizedBox(height: 8),
+                    SizedBox(height: 10),
+                    // Actor Name
                     Text(
                       name,
-                      style: TextStyle(fontSize: 13),
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.w700,
+                        color: Colors.white,
+                        fontSize: 13,
+                        letterSpacing: 0.2,
+                        height: 1.3,
+                      ),
                       textAlign: TextAlign.center,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
+                    SizedBox(height: 4),
+                    // Character Name
                     Text(
                       character,
-                      style: TextStyle(fontSize: 12),
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        fontWeight: FontWeight.w500,
+                        color: Colors.white70,
+                        fontSize: 11,
+                        letterSpacing: 0.1,
+                        fontStyle: FontStyle.italic,
+                        height: 1.2,
+                      ),
                       textAlign: TextAlign.center,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
