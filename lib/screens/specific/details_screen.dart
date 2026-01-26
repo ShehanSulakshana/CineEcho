@@ -4,6 +4,7 @@ import 'package:cine_echo/models/genre_list.dart';
 import 'package:cine_echo/services/tmdb_services.dart';
 import 'package:cine_echo/themes/pallets.dart';
 import 'package:cine_echo/widgets/cast_horizontal_slider.dart';
+import 'package:cine_echo/widgets/horizontal_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:marquee/marquee.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -29,6 +30,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
   String trailerKey = '';
   List<dynamic> cast = const [];
   List<dynamic> recommendations = const [];
+  int totalRecommendationPages = 1;
 
   String getType(String typeData) {
     final String type;
@@ -64,6 +66,9 @@ class _DetailsScreenState extends State<DetailsScreen> {
 
     cast = moreDetailsMap['credits']['cast'];
     recommendations = moreDetailsMap['recommendations']['results'];
+    totalRecommendationPages =
+        moreDetailsMap['recommendations']['total_pages'] ?? 1;
+
     trailerKey = getTrailerKey();
 
     if (mounted) {
@@ -344,7 +349,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
                       SizedBox(height: 20),
                       Padding(
                         padding: EdgeInsetsGeometry.symmetric(
-                          horizontal: 20,
+                          horizontal: 15,
                           vertical: 15,
                         ),
                         child: Column(
@@ -378,6 +383,18 @@ class _DetailsScreenState extends State<DetailsScreen> {
                       _isLoading
                           ? SizedBox()
                           : CastHorizontalSlider(castList: cast),
+
+                      //recommendations slider
+                      SizedBox(height: 30),
+
+                      _isLoading && recommendations.isEmpty
+                          ? SizedBox()
+                          : HorizontalSliderWidget(
+                              title: "Recommendations",
+                              endpoint: "movie",
+                              dataList: recommendations,
+                              totalPages: totalRecommendationPages,
+                            ),
                     ],
                   ),
                 ],

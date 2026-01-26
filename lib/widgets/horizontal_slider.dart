@@ -15,6 +15,14 @@ class HorizontalSliderWidget extends StatelessWidget {
     required this.totalPages,
   });
 
+  String getType({int indexOfItem = 0}) {
+    if (endpoint.contains('movie') || endpoint.contains('tv')) {
+      return endpoint;
+    } else {
+      return dataList[indexOfItem]['media_type'].toString();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -43,7 +51,7 @@ class HorizontalSliderWidget extends StatelessWidget {
                     context,
                     MaterialPageRoute(
                       builder: (context) => SeemoreScreen(
-                        endpoint: endpoint,
+                        endpoint: getType(),
                         appbarTitle: title,
                         initialData: dataList,
                         initialTotalPages: totalPages,
@@ -91,7 +99,7 @@ class HorizontalSliderWidget extends StatelessWidget {
                       MaterialPageRoute(
                         builder: (context) => DetailsScreen(
                           dataMap: dataList[index],
-                          typeData: endpoint,
+                          typeData: getType(indexOfItem: index),
                         ),
                       ),
                     );

@@ -10,7 +10,7 @@ class CastHorizontalSlider extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: const EdgeInsets.only(left: 20),
+          padding: const EdgeInsets.only(left: 15),
           child: Text(
             "Cast",
             style: Theme.of(context).textTheme.titleMedium,
