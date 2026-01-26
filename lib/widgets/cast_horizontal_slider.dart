@@ -1,3 +1,4 @@
+import 'package:cine_echo/screens/specific/cast_details.dart';
 import 'package:flutter/material.dart';
 import 'package:redacted/redacted.dart';
 
@@ -31,6 +32,7 @@ class CastHorizontalSlider extends StatelessWidget {
             itemCount: castList.length,
             itemBuilder: (BuildContext context, int index) {
               final itemMap = castList[index];
+              final actorId = itemMap['id'];
               final name = itemMap['name'] ?? 'Unknown';
               final character = itemMap['character'] ?? 'Unknown';
               final image = itemMap['profile_path'];
@@ -43,22 +45,38 @@ class CastHorizontalSlider extends StatelessWidget {
                     SizedBox(
                       height: 80,
                       width: 80,
-                      child: ClipRRect(
-                        borderRadius: BorderRadiusGeometry.circular(100),
-                        child: image == null
-                            ? Image.asset(
-                                'assets/splash/logo.png',
-                                fit: BoxFit.cover,
-                              )
-                            : FadeInImage(
-                                image: NetworkImage(
-                                  'https://image.tmdb.org/t/p/w342/$image',
+                      child: Hero(
+                        tag: 'profileImage_$actorId',
+                        child: GestureDetector(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => CastDetails(
+                                  actorId: actorId.toString(),
+                                  imagePath: image,
                                 ),
-                                placeholder: const AssetImage(
-                                  'assets/splash/logo.png',
-                                ),
-                                fit: BoxFit.cover,
                               ),
+                            );
+                          },
+                          child: ClipRRect(
+                            borderRadius: BorderRadiusGeometry.circular(100),
+                            child: image == null
+                                ? Image.asset(
+                                    'assets/splash/logo.png',
+                                    fit: BoxFit.cover,
+                                  )
+                                : FadeInImage(
+                                    image: NetworkImage(
+                                      'https://image.tmdb.org/t/p/w342/$image',
+                                    ),
+                                    placeholder: const AssetImage(
+                                      'assets/splash/logo.png',
+                                    ),
+                                    fit: BoxFit.cover,
+                                  ),
+                          ),
+                        ),
                       ),
                     ),
                     SizedBox(height: 10),

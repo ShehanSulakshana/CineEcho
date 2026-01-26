@@ -61,4 +61,13 @@ class TmdbServices {
     final response = await http.get(Uri.parse(url));
     return json.decode(response.body);
   }
+
+  Future<Map<String, dynamic>> fetchCastDetails(String id) async {
+    final url =
+        'https://api.themoviedb.org/3/person/$id'
+        '?api_key=${Env.tmdbApiKey}'
+        '&append_to_response=movie_credits';
+    final response = await http.get(Uri.parse(url));
+    return json.decode(response.body);
+  }
 }

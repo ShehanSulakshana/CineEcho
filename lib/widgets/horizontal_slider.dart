@@ -8,6 +8,7 @@ class HorizontalSliderWidget extends StatefulWidget {
   final String endpoint;
   final int totalPages;
   final bool showElements;
+  final bool showmoreButton;
   final Duration fadeDuration;
 
   const HorizontalSliderWidget({
@@ -17,6 +18,7 @@ class HorizontalSliderWidget extends StatefulWidget {
     required this.dataList,
     required this.totalPages,
     this.showElements = true,
+    this.showmoreButton = true,
     this.fadeDuration = const Duration(milliseconds: 600),
   });
 
@@ -76,26 +78,28 @@ class _HorizontalSliderWidgetState extends State<HorizontalSliderWidget> {
                   ),
                 ),
                 const Spacer(),
-                IconButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => SeemoreScreen(
-                          endpoint: getType(),
-                          appbarTitle: widget.title,
-                          initialData: widget.dataList,
-                          initialTotalPages: widget.totalPages,
+                widget.showmoreButton
+                    ? IconButton(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => SeemoreScreen(
+                                endpoint: getType(),
+                                appbarTitle: widget.title,
+                                initialData: widget.dataList,
+                                initialTotalPages: widget.totalPages,
+                              ),
+                            ),
+                          );
+                        },
+                        icon: Icon(
+                          Icons.arrow_forward_ios_rounded,
+                          color: Colors.white70,
+                          size: 20,
                         ),
-                      ),
-                    );
-                  },
-                  icon: Icon(
-                    Icons.arrow_forward_ios_rounded,
-                    color: Colors.white70,
-                    size: 20,
-                  ),
-                ),
+                      )
+                    : SizedBox(),
               ],
             ),
           ),

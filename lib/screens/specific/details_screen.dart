@@ -197,13 +197,6 @@ class _DetailsScreenState extends State<DetailsScreen> {
                                 shape: BoxShape.circle,
                               ),
                               child: IconButton(
-                                style: ButtonStyle(
-                                  // backgroundColor: WidgetStatePropertyAll(
-                                  //   Theme.of(
-                                  //     context,
-                                  //   ).scaffoldBackgroundColor.withAlpha(50),
-                                  // ),
-                                ),
                                 onPressed: () => Navigator.of(context).pop(),
                                 icon: const Icon(
                                   Icons.arrow_back_ios_new_rounded,
