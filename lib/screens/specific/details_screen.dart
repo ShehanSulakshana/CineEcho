@@ -1,7 +1,7 @@
 import 'dart:ui';
 
 import 'package:cine_echo/models/genre_list.dart';
-import 'package:cine_echo/services/tmdb_services.dart';
+import 'package:cine_echo/providers/tmdb_provider.dart';
 import 'package:cine_echo/themes/pallets.dart';
 import 'package:cine_echo/widgets/cast_horizontal_slider.dart';
 import 'package:cine_echo/widgets/horizontal_slider.dart';
@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:marquee/marquee.dart';
 import 'package:redacted/redacted.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:provider/provider.dart';
 
 class DetailsScreen extends StatefulWidget {
   const DetailsScreen({
@@ -49,8 +50,6 @@ class _DetailsScreenState extends State<DetailsScreen> {
     return type;
   }
 
-  final TmdbServices _tmdbServices = TmdbServices();
-
   @override
   void initState() {
     _loadData();
@@ -58,7 +57,8 @@ class _DetailsScreenState extends State<DetailsScreen> {
   }
 
   Future<void> _loadData() async {
-    moreDetailsMap = await _tmdbServices.fetchDetails(
+    final tmdbProvider = Provider.of<TmdbProvider>(context, listen: false);
+    moreDetailsMap = await tmdbProvider.fetchDetails(
       widget.id.toString(),
       getType(widget.typeData),
     );

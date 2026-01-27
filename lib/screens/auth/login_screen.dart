@@ -2,8 +2,10 @@ import 'package:cine_echo/screens/auth/reset_password_screen.dart';
 import 'package:cine_echo/screens/auth/signup_screen.dart';
 import 'package:cine_echo/screens/home_screen.dart';
 import 'package:cine_echo/themes/pallets.dart';
+import 'package:cine_echo/providers/auth_provider.dart' as auth_provider;
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 enum FieldType { email, password, text }
 
@@ -31,11 +33,14 @@ class _LoginScreenState extends State<LoginScreen> {
 
   Future<void> loginUserWithEmailPassword() async {
     try {
-      final UserCredential = await FirebaseAuth.instance
-          .signInWithEmailAndPassword(
-            email: _emailController.text.trim(),
-            password: _passwordController.text.trim(),
-          );
+      final authProvider = Provider.of<auth_provider.AuthenticationProvider>(
+        context,
+        listen: false,
+      );
+      await authProvider.signIn(
+        email: _emailController.text.trim(),
+        password: _passwordController.text.trim(),
+      );
       _showSnackBar("Welcome back! Signed in successfully.", Colors.green);
 
       Navigator.pushAndRemoveUntil(

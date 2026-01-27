@@ -1,10 +1,11 @@
-import 'package:cine_echo/services/tmdb_services.dart';
+import 'package:cine_echo/providers/tmdb_provider.dart';
 import 'package:cine_echo/themes/pallets.dart';
 import 'package:cine_echo/widgets/custom_appbar.dart';
 import 'package:cine_echo/widgets/grid_view.dart';
 import 'package:cine_echo/models/genre_list.dart';
 
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class GenreScreen extends StatefulWidget {
   const GenreScreen({super.key});
@@ -100,65 +101,44 @@ class _GenreTab extends StatefulWidget {
 
 class _GenreTabState extends State<_GenreTab> {
   int selectedGenreIndex = 0;
-  bool _isLoading = true;
-  bool _isLoadingMore = false;
   bool _isRequestInFlight = false;
-  late List<dynamic> resultList;
-  int _currentPage = 1;
-  int _totalPages = 1;
-
-  final TmdbServices _tmdbServices = TmdbServices();
 
   Future<void> _loadData({bool loadMore = false}) async {
-    if (_isRequestInFlight) return; // prevent overlapping calls
+    if (_isRequestInFlight) return;
+
     try {
       _isRequestInFlight = true;
+      final genre = widget.genreList[selectedGenreIndex];
+      final tmdbProvider = Provider.of<TmdbProvider>(context, listen: false);
+      final key = '${widget.type}_${genre['id']}';
+
       if (!loadMore) {
-        _currentPage = 1;
+        tmdbProvider.resetGenreData(key);
       }
 
-      final genre = widget.genreList[selectedGenreIndex];
-      final data = await _tmdbServices.fetchGenreDataPaginated(
+      await tmdbProvider.loadGenreData(
         widget.type,
         genre['id'],
-        page: _currentPage,
+        loadMore: loadMore,
       );
-
-      if (mounted) {
-        setState(() {
-          if (loadMore) {
-            resultList.addAll(data['results']);
-            _isLoadingMore = false;
-          } else {
-            resultList = data['results'];
-            _isLoading = false;
-          }
-          _totalPages = data['total_pages'];
-        });
-      }
-    } catch (e) {
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-          _isLoadingMore = false;
-        });
-      }
     } finally {
       _isRequestInFlight = false;
     }
   }
 
   Future<void> _onRefresh() async {
-    _isLoadingMore = false;
     await _loadData(loadMore: false);
   }
 
   void _loadMoreData() {
-    if (_currentPage < _totalPages && !_isLoadingMore && !_isRequestInFlight) {
-      setState(() {
-        _isLoadingMore = true;
-        _currentPage++;
-      });
+    final genre = widget.genreList[selectedGenreIndex];
+    final tmdbProvider = Provider.of<TmdbProvider>(context, listen: false);
+    final key = '${widget.type}_${genre['id']}';
+
+    if (!_isRequestInFlight &&
+        !tmdbProvider.isGenreLoadingMore(key) &&
+        tmdbProvider.getGenreCurrentPage(key) <
+            tmdbProvider.getGenreTotalPages(key)) {
       _loadData(loadMore: true);
     }
   }
@@ -166,72 +146,85 @@ class _GenreTabState extends State<_GenreTab> {
   @override
   void initState() {
     super.initState();
-    resultList = [];
-    _loadData();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadData();
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        Container(
-          padding: EdgeInsets.only(top: 8),
-          height: 60,
-          child: ListView.builder(
-            scrollDirection: Axis.horizontal,
-            itemCount: widget.genreList.length,
-            padding: EdgeInsets.only(left: 8),
-            itemBuilder: (BuildContext context, int index) {
-              final Map<String, dynamic> genre = widget.genreList[index];
-              return Padding(
-                padding: EdgeInsets.only(right: 5),
-                child: GestureDetector(
-                  child: Chip(
-                    label: Text(genre['name']),
-                    labelStyle: selectedGenreIndex == index
-                        ? TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 15,
-                          )
-                        : Theme.of(context).textTheme.bodySmall,
-                    backgroundColor: selectedGenreIndex == index
-                        ? Theme.of(context).primaryColor
-                        : Theme.of(context).scaffoldBackgroundColor,
-                    shape: RoundedRectangleBorder(
-                      side: BorderSide(color: ashColor),
-                      borderRadius: BorderRadius.circular(25),
+    final genre = widget.genreList[selectedGenreIndex];
+    final key = '${widget.type}_${genre['id']}';
+
+    return Consumer<TmdbProvider>(
+      builder: (context, tmdbProvider, _) {
+        final resultList = tmdbProvider.getGenreData(key);
+        final isLoading = tmdbProvider.isGenreLoading(key);
+        final isLoadingMore = tmdbProvider.isGenreLoadingMore(key);
+        final currentPage = tmdbProvider.getGenreCurrentPage(key);
+        final totalPages = tmdbProvider.getGenreTotalPages(key);
+
+        return Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Container(
+              padding: EdgeInsets.only(top: 8),
+              height: 60,
+              child: ListView.builder(
+                scrollDirection: Axis.horizontal,
+                itemCount: widget.genreList.length,
+                padding: EdgeInsets.only(left: 8),
+                itemBuilder: (BuildContext context, int index) {
+                  final Map<String, dynamic> genre = widget.genreList[index];
+                  return Padding(
+                    padding: EdgeInsets.only(right: 5),
+                    child: GestureDetector(
+                      child: Chip(
+                        label: Text(genre['name']),
+                        labelStyle: selectedGenreIndex == index
+                            ? TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 15,
+                              )
+                            : Theme.of(context).textTheme.bodySmall,
+                        backgroundColor: selectedGenreIndex == index
+                            ? Theme.of(context).primaryColor
+                            : Theme.of(context).scaffoldBackgroundColor,
+                        shape: RoundedRectangleBorder(
+                          side: BorderSide(color: ashColor),
+                          borderRadius: BorderRadius.circular(25),
+                        ),
+                      ),
+                      onTap: () {
+                        setState(() {
+                          selectedGenreIndex = index;
+                        });
+                        _loadData();
+                      },
                     ),
-                  ),
-                  onTap: () {
-                    setState(() {
-                      selectedGenreIndex = index;
-                      _isLoading = true;
-                    });
-                    _loadData();
-                  },
-                ),
-              );
-            },
-          ),
-        ),
-        Expanded(
-          child: _isLoading
-              ? const Center(child: CircularProgressIndicator())
-              : RefreshIndicator(
-                  onRefresh: _onRefresh,
-                  child: GridViewWidget(
-                    dataList: resultList,
-                    onLoadMore: _loadMoreData,
-                    isLoadingMore: _isLoadingMore,
-                    hasMorePages: _currentPage < _totalPages,
-                    typeData: widget.type,
-                  ),
-                ),
-        ),
-      ],
+                  );
+                },
+              ),
+            ),
+            Expanded(
+              child: isLoading
+                  ? const Center(child: CircularProgressIndicator())
+                  : RefreshIndicator(
+                      onRefresh: _onRefresh,
+                      child: GridViewWidget(
+                        dataList: resultList,
+                        onLoadMore: _loadMoreData,
+                        isLoadingMore: isLoadingMore,
+                        hasMorePages: currentPage < totalPages,
+                        typeData: widget.type,
+                      ),
+                    ),
+            ),
+          ],
+        );
+      },
     );
   }
 }

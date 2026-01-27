@@ -8,7 +8,11 @@ class PersonalScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: CustomAppBar(),
-      body: Center(child: Text("PERSONAL")),
+      body: SingleChildScrollView(
+        child:Column(children: [
+          
+        ],)
+      ),
     );
   }
 }

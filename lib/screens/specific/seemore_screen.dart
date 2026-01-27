@@ -1,7 +1,8 @@
-import 'package:cine_echo/services/tmdb_services.dart';
+import 'package:cine_echo/providers/tmdb_provider.dart';
 import 'package:cine_echo/widgets/appbar_with_title.dart';
 import 'package:cine_echo/widgets/grid_view.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class SeemoreScreen extends StatelessWidget {
   final String endpoint;
@@ -30,7 +31,6 @@ class SeemoreScreen extends StatelessWidget {
   }
 }
 
-// Content Section -> handle data loading.
 class ContentSection extends StatefulWidget {
   final String endpoint;
   final List<dynamic> initialData;
@@ -53,7 +53,6 @@ class _ContentSectionState extends State<ContentSection> {
   late List<dynamic> resultList;
   int _currentPage = 1;
   int _totalPages = 1;
-  final TmdbServices _tmdbServices = TmdbServices();
 
   Future<void> _loadData({bool loadMore = false}) async {
     if (_isRequestInFlight) return;
@@ -62,7 +61,8 @@ class _ContentSectionState extends State<ContentSection> {
       if (!loadMore) {
         _currentPage = 1;
       }
-      final data = await _tmdbServices.fetchSectionData(
+      final tmdbProvider = Provider.of<TmdbProvider>(context, listen: false);
+      final data = await tmdbProvider.fetchSectionData(
         widget.endpoint,
         page: _currentPage,
       );

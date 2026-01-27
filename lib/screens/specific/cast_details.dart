@@ -1,11 +1,12 @@
 import 'dart:ui';
 
 import 'package:cine_echo/main.dart';
-import 'package:cine_echo/services/tmdb_services.dart';
+import 'package:cine_echo/providers/tmdb_provider.dart';
 import 'package:cine_echo/themes/pallets.dart';
 import 'package:cine_echo/widgets/horizontal_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:redacted/redacted.dart';
+import 'package:provider/provider.dart';
 
 class CastDetails extends StatefulWidget {
   final String actorId;
@@ -29,10 +30,9 @@ class _CastDetailsState extends State<CastDetails> {
   late List movieCredits = [];
   bool _isLoading = true;
 
-  final TmdbServices _tmdbServices = TmdbServices();
-
   Future<void> _loadData() async {
-    dataMap = await _tmdbServices.fetchCastDetails(widget.actorId);
+    final tmdbProvider = Provider.of<TmdbProvider>(context, listen: false);
+    dataMap = await tmdbProvider.fetchCastDetails(widget.actorId);
 
     if (widget.imagePath.isNotEmpty) {
       imageLink = "https://image.tmdb.org/t/p/w342/${widget.imagePath}";

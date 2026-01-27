@@ -1,7 +1,9 @@
 import 'package:cine_echo/screens/auth/login_screen.dart';
 import 'package:cine_echo/screens/home_screen.dart';
+import 'package:cine_echo/providers/auth_provider.dart' as auth_provider;
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({super.key});
@@ -22,11 +24,14 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
   Future<void> createUserWithEmailAndPassword() async {
     try {
-      final UserCredential = await FirebaseAuth.instance
-          .createUserWithEmailAndPassword(
-            email: _emailController.text.trim(),
-            password: _passwordController.text.trim(),
-          );
+      final authProvider = Provider.of<auth_provider.AuthenticationProvider>(
+        context,
+        listen: false,
+      );
+      await authProvider.createAccount(
+        email: _emailController.text.trim(),
+        password: _passwordController.text.trim(),
+      );
 
       _showSnackBar(
         "Account created successfully! Welcome aboard.",
