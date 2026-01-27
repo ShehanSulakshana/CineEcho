@@ -118,6 +118,7 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
                             itemCount: 10,
                             itemBuilder: (context, index, currentIndex) {
                               final item = trending[index];
+                              final id = item['id'];
                               final title =
                                   item['title'] ?? item['name'] ?? 'Unknown';
                               final rating = (item['vote_average'] ?? 0.0)
@@ -136,6 +137,8 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
                                       builder: (context) => DetailsScreen(
                                         dataMap: item,
                                         typeData: type,
+                                        id: id.toString(),
+                                        heroSource: 'carousel',
                                       ),
                                     ),
                                   );

@@ -15,6 +15,22 @@ void main() async {
   runApp(const MyApp());
 }
 
+class NoStretchBehavior extends MaterialScrollBehavior {
+  const NoStretchBehavior();
+
+  @override
+  ScrollPhysics getScrollPhysics(BuildContext context) =>
+      const ClampingScrollPhysics(); 
+  @override
+  Widget buildOverscrollIndicator(
+    BuildContext context,
+    Widget child,
+    ScrollableDetails details,
+  ) {
+    return child; 
+  }
+}
+
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 

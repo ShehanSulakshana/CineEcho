@@ -15,10 +15,16 @@ class DetailsScreen extends StatefulWidget {
     super.key,
     required this.dataMap,
     required this.typeData,
+    required this.id,
+    required this.heroSource,
+    this.unique = '',
   });
 
   final Map<String, dynamic> dataMap;
   final String typeData;
+  final String id;
+  final String heroSource;
+  final String unique;
 
   @override
   State<DetailsScreen> createState() => _DetailsScreenState();
@@ -53,7 +59,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
 
   Future<void> _loadData() async {
     moreDetailsMap = await _tmdbServices.fetchDetails(
-      widget.dataMap['id'].toString(),
+      widget.id.toString(),
       getType(widget.typeData),
     );
 
@@ -149,7 +155,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
                             ? Image.asset(
                                 'assets/splash/logo.png',
                                 fit: BoxFit.cover,
-                              )
+                              ).redacted(context: context, redact: _isLoading)
                             : FadeInImage(
                                 image: NetworkImage(bannerLink),
                                 placeholder: const AssetImage(
@@ -223,22 +229,31 @@ class _DetailsScreenState extends State<DetailsScreen> {
                           children: [
                             SizedBox(
                               height: 180,
-                              child: ClipRRect(
-                                borderRadius: BorderRadiusGeometry.circular(20),
-                                child: AspectRatio(
-                                  aspectRatio: 2 / 3,
-                                  child: posterLink.isEmpty
-                                      ? Image.asset(
-                                          'assets/splash/logo.png',
-                                          fit: BoxFit.cover,
-                                        )
-                                      : FadeInImage(
-                                          image: NetworkImage(posterLink),
-                                          placeholder: const AssetImage(
+                              child: Hero(
+                                tag:
+                                    "${widget.heroSource}_poster_${widget.id}_${widget.unique}",
+                                child: ClipRRect(
+                                  borderRadius: BorderRadiusGeometry.circular(
+                                    20,
+                                  ),
+                                  child: AspectRatio(
+                                    aspectRatio: 2 / 3,
+                                    child: posterLink.isEmpty
+                                        ? Image.asset(
                                             'assets/splash/logo.png',
+                                            fit: BoxFit.cover,
+                                          ).redacted(
+                                            context: context,
+                                            redact: _isLoading,
+                                          )
+                                        : FadeInImage(
+                                            image: NetworkImage(posterLink),
+                                            placeholder: const AssetImage(
+                                              'assets/splash/logo.png',
+                                            ),
+                                            fit: BoxFit.cover,
                                           ),
-                                          fit: BoxFit.cover,
-                                        ),
+                                  ),
                                 ),
                               ),
                             ),
@@ -410,6 +425,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
                               endpoint: "movie",
                               dataList: recommendations,
                               totalPages: totalRecommendationPages,
+                              showmoreButton: false,
                             )
                           : SizedBox(),
                     ],

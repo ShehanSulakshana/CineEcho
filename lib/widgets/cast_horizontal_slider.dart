@@ -39,26 +39,26 @@ class CastHorizontalSlider extends StatelessWidget {
               return Container(
                 padding: EdgeInsets.symmetric(horizontal: 15, vertical: 0),
                 width: 110,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: [
-                    SizedBox(
-                      height: 80,
-                      width: 80,
-                      child: Hero(
-                        tag: 'profileImage_$actorId',
-                        child: GestureDetector(
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => CastDetails(
-                                  actorId: actorId.toString(),
-                                  imagePath: image,
-                                ),
-                              ),
-                            );
-                          },
+                child: GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => CastDetails(
+                          actorId: actorId.toString(),
+                          imagePath: image,
+                        ),
+                      ),
+                    );
+                  },
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      SizedBox(
+                        height: 80,
+                        width: 80,
+                        child: Hero(
+                          tag: 'profileImage_$actorId',
                           child: ClipRRect(
                             borderRadius: BorderRadiusGeometry.circular(100),
                             child: image == null
@@ -78,39 +78,39 @@ class CastHorizontalSlider extends StatelessWidget {
                           ),
                         ),
                       ),
-                    ),
-                    SizedBox(height: 10),
-                    // Actor Name
-                    Text(
-                      name,
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        fontWeight: FontWeight.w700,
-                        color: Colors.white,
-                        fontSize: 13,
-                        letterSpacing: 0.2,
-                        height: 1.3,
+                      SizedBox(height: 10),
+                      // Actor Name
+                      Text(
+                        name,
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.w700,
+                          color: Colors.white,
+                          fontSize: 13,
+                          letterSpacing: 0.2,
+                          height: 1.3,
+                        ),
+                        textAlign: TextAlign.center,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
                       ),
-                      textAlign: TextAlign.center,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    SizedBox(height: 4),
-                    // Character Name
-                    Text(
-                      character,
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        fontWeight: FontWeight.w500,
-                        color: Colors.white70,
-                        fontSize: 11,
-                        letterSpacing: 0.1,
-                        fontStyle: FontStyle.italic,
-                        height: 1.2,
+                      SizedBox(height: 4),
+                      // Character Name
+                      Text(
+                        character,
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          fontWeight: FontWeight.w500,
+                          color: Colors.white70,
+                          fontSize: 11,
+                          letterSpacing: 0.1,
+                          fontStyle: FontStyle.italic,
+                          height: 1.2,
+                        ),
+                        textAlign: TextAlign.center,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
-                      textAlign: TextAlign.center,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               );
             },

@@ -86,6 +86,7 @@ class _GridViewWidgetState extends State<GridViewWidget> {
             padding: EdgeInsets.only(top: 20, bottom: 100),
             itemBuilder: (BuildContext context, int index) {
               final item = widget.dataList[index];
+              final id = item['id'];
               final title = item['title'] ?? item['name'] ?? 'Unknown';
               final releaseYear = _extractYear(
                 item['first_air_date'] ?? item['release_date'],
@@ -108,6 +109,9 @@ class _GridViewWidgetState extends State<GridViewWidget> {
                           builder: (context) => DetailsScreen(
                             dataMap: item,
                             typeData: widget.typeData,
+                            id: id.toString(),
+                            heroSource: 'gridview',
+                            unique: widget.typeData,
                           ),
                         ),
                       );
@@ -130,22 +134,25 @@ class _GridViewWidgetState extends State<GridViewWidget> {
                                 ),
                               ],
                             ),
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(12),
-                              child: imageLink.isEmpty || imageLoadingError
-                                  ? Image.asset(
-                                      'assets/splash/logo.png',
-                                      fit: BoxFit.cover,
-                                    )
-                                  : FadeInImage(
-                                      image: NetworkImage(imageLink),
-                                      placeholder: const AssetImage(
+                            child: Hero(
+                              tag: "gridview_poster_${id}_${widget.typeData}",
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(12),
+                                child: imageLink.isEmpty || imageLoadingError
+                                    ? Image.asset(
                                         'assets/splash/logo.png',
+                                        fit: BoxFit.cover,
+                                      )
+                                    : FadeInImage(
+                                        image: NetworkImage(imageLink),
+                                        placeholder: const AssetImage(
+                                          'assets/splash/logo.png',
+                                        ),
+                                        fit: BoxFit.cover,
+                                        height: double.infinity,
+                                        width: double.infinity,
                                       ),
-                                      fit: BoxFit.cover,
-                                      height: double.infinity,
-                                      width: double.infinity,
-                                    ),
+                              ),
                             ),
                           ),
                           const SizedBox(height: 8),

@@ -116,6 +116,7 @@ class _HorizontalSliderWidgetState extends State<HorizontalSliderWidget> {
                   : widget.dataList.length,
               itemBuilder: (context, index) {
                 final item = widget.dataList[index];
+                final id = item['id'];
                 final title = item['title'] ?? item['name'] ?? 'Unknown';
                 final releaseYear = DateTime.parse(
                   item['first_air_date'] ?? item['release_date'],
@@ -137,6 +138,9 @@ class _HorizontalSliderWidgetState extends State<HorizontalSliderWidget> {
                           builder: (context) => DetailsScreen(
                             dataMap: widget.dataList[index],
                             typeData: getType(indexOfItem: index),
+                            id: id.toString(),
+                            heroSource: 'slider',
+                            unique: widget.endpoint,
                           ),
                         ),
                       );
@@ -160,22 +164,25 @@ class _HorizontalSliderWidgetState extends State<HorizontalSliderWidget> {
                                 ),
                               ],
                             ),
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(12),
-                              child: imageLink.isEmpty || imageLoadingError
-                                  ? Image.asset(
-                                      'assets/splash/logo.png',
-                                      fit: BoxFit.cover,
-                                    )
-                                  : FadeInImage(
-                                      image: NetworkImage(imageLink),
-                                      placeholder: const AssetImage(
+                            child: Hero(
+                              tag: "slider_poster_${id}_${widget.endpoint}",
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(12),
+                                child: imageLink.isEmpty || imageLoadingError
+                                    ? Image.asset(
                                         'assets/splash/logo.png',
+                                        fit: BoxFit.cover,
+                                      )
+                                    : FadeInImage(
+                                        image: NetworkImage(imageLink),
+                                        placeholder: const AssetImage(
+                                          'assets/splash/logo.png',
+                                        ),
+                                        fit: BoxFit.cover,
+                                        height: double.infinity,
+                                        width: double.infinity,
                                       ),
-                                      fit: BoxFit.cover,
-                                      height: double.infinity,
-                                      width: double.infinity,
-                                    ),
+                              ),
                             ),
                           ),
 
