@@ -9,6 +9,7 @@ class HorizontalSliderWidget extends StatefulWidget {
   final int totalPages;
   final bool showElements;
   final bool showmoreButton;
+  final bool fromCast;
   final Duration fadeDuration;
 
   const HorizontalSliderWidget({
@@ -20,6 +21,7 @@ class HorizontalSliderWidget extends StatefulWidget {
     this.showElements = true,
     this.showmoreButton = true,
     this.fadeDuration = const Duration(milliseconds: 600),
+    this.fromCast = false,
   });
 
   @override
@@ -118,9 +120,16 @@ class _HorizontalSliderWidgetState extends State<HorizontalSliderWidget> {
                 final item = widget.dataList[index];
                 final id = item['id'];
                 final title = item['title'] ?? item['name'] ?? 'Unknown';
-                final releaseYear = DateTime.parse(
-                  item['first_air_date'] ?? item['release_date'],
-                ).year.toString();
+                String? dateString =
+                    item['first_air_date'] ?? item['release_date'];
+                String releaseYear = 'Unknown';
+                if (dateString != null && dateString.isNotEmpty) {
+                  try {
+                    releaseYear = DateTime.parse(dateString).year.toString();
+                  } catch (e) {
+                    releaseYear = 'Unknown';
+                  }
+                }
                 final imagePath = item['poster_path'];
                 final imageLink = "https://image.tmdb.org/t/p/w342$imagePath";
 
@@ -141,6 +150,7 @@ class _HorizontalSliderWidgetState extends State<HorizontalSliderWidget> {
                             id: id.toString(),
                             heroSource: 'slider',
                             unique: widget.endpoint,
+                            fromCast: widget.fromCast,
                           ),
                         ),
                       );
@@ -165,7 +175,9 @@ class _HorizontalSliderWidgetState extends State<HorizontalSliderWidget> {
                               ],
                             ),
                             child: Hero(
-                              tag: "slider_poster_${id}_${widget.endpoint}",
+                              tag: widget.fromCast
+                                  ? 'inActive$id '
+                                  : "slider_poster_${id}_${widget.endpoint}",
                               child: ClipRRect(
                                 borderRadius: BorderRadius.circular(12),
                                 child: imageLink.isEmpty || imageLoadingError

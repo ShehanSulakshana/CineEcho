@@ -19,6 +19,7 @@ class DetailsScreen extends StatefulWidget {
     required this.id,
     required this.heroSource,
     this.unique = '',
+    this.fromCast = false,
   });
 
   final Map<String, dynamic> dataMap;
@@ -26,6 +27,7 @@ class DetailsScreen extends StatefulWidget {
   final String id;
   final String heroSource;
   final String unique;
+  final bool fromCast;
 
   @override
   State<DetailsScreen> createState() => _DetailsScreenState();
@@ -71,10 +73,10 @@ class _DetailsScreenState extends State<DetailsScreen> {
       runtime = '0${hours}h ${mins}m';
     }
 
-    cast = moreDetailsMap['credits']['cast'];
-    recommendations = moreDetailsMap['recommendations']['results'];
+    cast = moreDetailsMap['credits']?['cast'] ?? [];
+    recommendations = moreDetailsMap['recommendations']?['results'] ?? [];
     totalRecommendationPages =
-        moreDetailsMap['recommendations']['total_pages'] ?? 1;
+        moreDetailsMap['recommendations']?['total_pages'] ?? 1;
 
     trailerKey = getTrailerKey();
 
@@ -413,6 +415,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
                       CastHorizontalSlider(
                         castList: cast,
                         isLoading: _isLoading,
+                        fromCast: widget.fromCast,
                       ),
 
                       //recommendations slider

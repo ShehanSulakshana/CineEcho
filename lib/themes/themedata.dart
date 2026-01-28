@@ -5,6 +5,7 @@ class AppTheme {
     colorScheme: .fromSeed(seedColor: Colors.deepPurple),
     primaryColor: Color.fromARGB(255, 39, 61, 254),
     scaffoldBackgroundColor: Color.fromARGB(255, 0, 25, 42),
+    cardColor: Color.fromARGB(255, 10, 40, 60),
 
     textTheme: TextTheme(
       displayLarge: TextStyle(

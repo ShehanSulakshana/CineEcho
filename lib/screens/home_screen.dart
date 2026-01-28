@@ -35,6 +35,8 @@ class HomeScreen extends StatelessWidget {
       Icons.person_rounded,
     ];
 
+    final List<String> navText = ["Home", "Genre", "Feed", "Profile"];
+
     return Consumer<NavigationProvider>(
       builder: (context, navigationProvider, _) {
         return Scaffold(
@@ -66,14 +68,50 @@ class HomeScreen extends StatelessWidget {
                             children: List.generate(icons.length, (index) {
                               final isActive =
                                   navigationProvider.currentPage == index;
+                              final scaleValue = isActive ? 1.1 : 1.0;
                               return GestureDetector(
                                 onTap: () {
                                   navigationProvider.setCurrentPage(index);
                                 },
-                                child: Icon(
-                                  isActive ? activeIcons[index] : icons[index],
-                                  size: 40,
-                                  color: isActive ? navActive : navNonActive,
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    AnimatedContainer(
+                                      duration: Duration(microseconds: 400),
+                                      curve: Curves.easeInOut,
+                                      transform: Matrix4.translationValues(
+                                        isActive ? 0 : 0,
+                                        0,
+                                        0,
+                                      )..scale(scaleValue),
+                                      child: Icon(
+                                        isActive
+                                            ? activeIcons[index]
+                                            : icons[index],
+                                        size: 27,
+                                        color: isActive
+                                            ? navActive
+                                            : navNonActive,
+                                      ),
+                                    ),
+
+                                    SizedBox(height: 2),
+                                    Text(
+                                      navText[index],
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodyMedium
+                                          ?.copyWith(
+                                            color: isActive
+                                                ? navActive
+                                                : navNonActive,
+                                            fontSize: 12,
+                                            fontWeight: isActive
+                                                ? FontWeight.bold
+                                                : FontWeight.normal,
+                                          ),
+                                    ),
+                                  ],
                                 ),
                               );
                             }),

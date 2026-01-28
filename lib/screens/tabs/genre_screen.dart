@@ -53,38 +53,50 @@ class _GenreScreenState extends State<GenreScreen>
     }
     return Scaffold(
       appBar: CustomAppBar(),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          SizedBox(
-            height: 50,
-            child: TabBar(
-              controller: _tabController,
-              labelStyle: TextStyle(
-                color: Theme.of(context).primaryColor,
-                fontSize: 17,
-                height: 3,
+      body: Padding(
+        padding: EdgeInsets.symmetric(horizontal: 15),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(10),
+                color: Color.fromARGB(255, 10, 40, 60),
               ),
-              unselectedLabelStyle: TextStyle(
-                color: Colors.white,
-                fontSize: 17,
-                height: 3,
+              height: 50,
+              child: TabBar(
+                controller: _tabController,
+                labelStyle: TextStyle(
+                  color: Colors.white,
+                  fontSize: 17,
+                  height: 3,
+                ),
+                unselectedLabelStyle: TextStyle(
+                  color: navNonActive,
+                  fontSize: 17,
+                  height: 3,
+                ),
+                dividerColor: Colors.transparent,
+                indicatorAnimation: TabIndicatorAnimation.linear,
+                indicatorSize: TabBarIndicatorSize.tab,
+                indicator: BoxDecoration(
+                  color: Theme.of(context).primaryColor,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                tabs: [Text("Movies"), Text("Tv Series")],
+                onTap: (value) {
+                  //TODO: Implement on tap API loading
+                },
               ),
-              dividerColor: Theme.of(context).disabledColor,
-              indicatorAnimation: TabIndicatorAnimation.elastic,
-              tabs: [Text("Movies"), Text("Tv Series")],
-              onTap: (value) {
-                //TODO: Implement on tap API loading
-              },
             ),
-          ),
-          Expanded(
-            child: TabBarView(
-              controller: _tabController,
-              children: [movieGenreTab, tvGenreTab],
+            Expanded(
+              child: TabBarView(
+                controller: _tabController,
+                children: [movieGenreTab, tvGenreTab],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

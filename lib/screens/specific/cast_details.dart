@@ -262,6 +262,7 @@ class _CastDetailsState extends State<CastDetails> {
                         dataList: movieCredits,
                         totalPages: 1,
                         showmoreButton: false,
+                        fromCast: true,
                       ),
               ],
             ),

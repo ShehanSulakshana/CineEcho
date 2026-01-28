@@ -4,6 +4,8 @@ import 'package:cine_echo/services/tmdb_services.dart';
 class TmdbProvider extends ChangeNotifier {
   final TmdbServices _tmdbServices = TmdbServices();
 
+
+// Discover Screen
   List<dynamic> _trending = [];
   List<dynamic> _popularMovie = [];
   List<dynamic> _popularTv = [];
@@ -87,6 +89,10 @@ class TmdbProvider extends ChangeNotifier {
     }
   }
 
+  
+
+  // Genre Screen
+  
   Future<void> loadGenreData(
     String mediaType,
     int genreId, {

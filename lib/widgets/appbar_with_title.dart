@@ -2,7 +2,14 @@ import 'package:flutter/material.dart';
 
 class AppbarWithTitle extends StatelessWidget implements PreferredSizeWidget {
   final String title;
-  const AppbarWithTitle({super.key, required this.title});
+  final bool showIcon;
+  final IconData? icon;
+  const AppbarWithTitle({
+    super.key,
+    required this.title,
+    this.showIcon = false,
+    this.icon,
+  });
 
   @override
   Size get preferredSize => const Size.fromHeight(80.0);
@@ -23,6 +30,7 @@ class AppbarWithTitle extends StatelessWidget implements PreferredSizeWidget {
       ),
       title: Text(title, style: Theme.of(context).appBarTheme.titleTextStyle),
       centerTitle: true,
+      actions: showIcon ? [Icon(icon)] : [],
     );
   }
 }

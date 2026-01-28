@@ -5,10 +5,12 @@ import 'package:redacted/redacted.dart';
 class CastHorizontalSlider extends StatelessWidget {
   final List<dynamic> castList;
   final bool isLoading;
+  final bool fromCast;
   const CastHorizontalSlider({
     super.key,
     required this.castList,
     required this.isLoading,
+    this.fromCast = false,
   });
 
   @override
@@ -58,7 +60,9 @@ class CastHorizontalSlider extends StatelessWidget {
                         height: 80,
                         width: 80,
                         child: Hero(
-                          tag: 'profileImage_$actorId',
+                          tag: fromCast
+                              ? 'inActive$actorId'
+                              : 'profileImage_$actorId',
                           child: ClipRRect(
                             borderRadius: BorderRadiusGeometry.circular(100),
                             child: image == null
