@@ -1,4 +1,5 @@
 import 'package:cine_echo/screens/specific/cast_details.dart';
+import 'package:cine_echo/widgets/safe_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:redacted/redacted.dart';
 
@@ -48,7 +49,7 @@ class CastHorizontalSlider extends StatelessWidget {
                       MaterialPageRoute(
                         builder: (context) => CastDetails(
                           actorId: actorId.toString(),
-                          imagePath: image,
+                          imagePath: image ?? '',
                         ),
                       ),
                     );
@@ -70,14 +71,14 @@ class CastHorizontalSlider extends StatelessWidget {
                                     'assets/splash/logo.png',
                                     fit: BoxFit.cover,
                                   )
-                                : FadeInImage(
-                                    image: NetworkImage(
-                                      'https://image.tmdb.org/t/p/w342/$image',
-                                    ),
-                                    placeholder: const AssetImage(
-                                      'assets/splash/logo.png',
-                                    ),
+                                : SafeNetworkImage(
+                                    imageUrl:
+                                        'https://image.tmdb.org/t/p/w342/$image',
                                     fit: BoxFit.cover,
+                                    placeholder: Image.asset(
+                                      'assets/splash/logo.png',
+                                      fit: BoxFit.cover,
+                                    ),
                                   ),
                           ),
                         ),

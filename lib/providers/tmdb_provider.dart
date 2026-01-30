@@ -4,8 +4,7 @@ import 'package:cine_echo/services/tmdb_services.dart';
 class TmdbProvider extends ChangeNotifier {
   final TmdbServices _tmdbServices = TmdbServices();
 
-
-// Discover Screen
+  // Discover Screen
   List<dynamic> _trending = [];
   List<dynamic> _popularMovie = [];
   List<dynamic> _popularTv = [];
@@ -55,30 +54,52 @@ class TmdbProvider extends ChangeNotifier {
 
     try {
       final results = await Future.wait([
-        _tmdbServices.fetchSectionData('/trending/all/day'),
-        _tmdbServices.fetchSectionData('/movie/popular'),
-        _tmdbServices.fetchSectionData('/tv/popular'),
-        _tmdbServices.fetchSectionData('/movie/top_rated'),
-        _tmdbServices.fetchSectionData('/tv/top_rated'),
-        _tmdbServices.fetchSectionData('/movie/upcoming'),
+        _tmdbServices
+            .fetchSectionData('/trending/all/day')
+            .catchError((_) => {'results': [], 'total_pages': 1}),
+        _tmdbServices
+            .fetchSectionData('/movie/popular')
+            .catchError((_) => {'results': [], 'total_pages': 1}),
+        _tmdbServices
+            .fetchSectionData('/tv/popular')
+            .catchError((_) => {'results': [], 'total_pages': 1}),
+        _tmdbServices
+            .fetchSectionData('/movie/top_rated')
+            .catchError((_) => {'results': [], 'total_pages': 1}),
+        _tmdbServices
+            .fetchSectionData('/tv/top_rated')
+            .catchError((_) => {'results': [], 'total_pages': 1}),
+        _tmdbServices
+            .fetchSectionData('/movie/upcoming')
+            .catchError((_) => {'results': [], 'total_pages': 1}),
       ]);
 
       _trending = results[0]['results'] ?? [];
-
       _popularMovie = results[1]['results'] ?? [];
       _popularMovieTotalPages = results[1]['total_pages'] ?? 1;
-
       _popularTv = results[2]['results'] ?? [];
       _popularTvTotalPages = results[2]['total_pages'] ?? 1;
-
       _topRatedMovie = results[3]['results'] ?? [];
       _topRatedMovieTotalPages = results[3]['total_pages'] ?? 1;
-
       _topRatedTv = results[4]['results'] ?? [];
       _topRatedTvTotalPages = results[4]['total_pages'] ?? 1;
-
       _upcomingMovies = results[5]['results'] ?? [];
       _upcomingMoviesTotalPages = results[5]['total_pages'] ?? 1;
+
+      // Check if all results were empty (all failed)
+      bool hasAnyData =
+          _trending.isNotEmpty ||
+          _popularMovie.isNotEmpty ||
+          _popularTv.isNotEmpty ||
+          _topRatedMovie.isNotEmpty ||
+          _topRatedTv.isNotEmpty ||
+          _upcomingMovies.isNotEmpty;
+
+      if (!hasAnyData) {
+        throw Exception(
+          'Failed to load discover data. Please check your connection.',
+        );
+      }
 
       _isDiscoverLoading = false;
       notifyListeners();
@@ -89,10 +110,8 @@ class TmdbProvider extends ChangeNotifier {
     }
   }
 
-  
-
   // Genre Screen
-  
+
   Future<void> loadGenreData(
     String mediaType,
     int genreId, {
@@ -152,8 +171,12 @@ class TmdbProvider extends ChangeNotifier {
     return await _tmdbServices.fetchSectionData(endpoint, page: page);
   }
 
-  Future<Map<String, dynamic>> fetchDetails(String id, String type) async {
-    return await _tmdbServices.fetchDetails(id, type);
+  Future<Map<String, dynamic>> fetchDetails(
+    String id,
+    String type, {
+    bool isSeason = false,
+  }) async {
+    return await _tmdbServices.fetchDetails(id, type, isSeason: isSeason);
   }
 
   Future<Map<String, dynamic>> fetchCastDetails(String id) async {

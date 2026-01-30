@@ -5,6 +5,7 @@ import 'package:cine_echo/providers/tmdb_provider.dart';
 import 'package:cine_echo/themes/pallets.dart';
 import 'package:cine_echo/widgets/horizontal_slider.dart';
 import 'package:flutter/material.dart';
+import 'package:cine_echo/widgets/safe_network_image.dart';
 import 'package:redacted/redacted.dart';
 import 'package:provider/provider.dart';
 
@@ -95,12 +96,13 @@ class _CastDetailsState extends State<CastDetails> {
                                       context: context,
                                       redact: _isLoading,
                                     )
-                                  : FadeInImage(
-                                      image: NetworkImage(imageLink),
-                                      placeholder: const AssetImage(
-                                        'assets/splash/logo.png',
-                                      ),
+                                  : SafeNetworkImage(
+                                      imageUrl: imageLink,
                                       fit: BoxFit.cover,
+                                      placeholder: Image.asset(
+                                        'assets/splash/logo.png',
+                                        fit: BoxFit.cover,
+                                      ),
                                     ),
                             ),
                           ),
@@ -164,14 +166,17 @@ class _CastDetailsState extends State<CastDetails> {
                                           context: context,
                                           redact: _isLoading,
                                         )
-                                      : FadeInImage(
-                                          image: NetworkImage(imageLink),
-                                          placeholder: const AssetImage(
-                                            'assets/splash/logo.png',
-                                          ),
+                                      : SafeNetworkImage(
+                                          imageUrl: imageLink,
                                           fit: BoxFit.cover,
                                           width: 150,
                                           height: 150,
+                                          placeholder: Image.asset(
+                                            'assets/splash/logo.png',
+                                            fit: BoxFit.cover,
+                                            width: 150,
+                                            height: 150,
+                                          ),
                                         ),
                                 ),
                               ),

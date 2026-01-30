@@ -1,5 +1,6 @@
 import 'package:cine_echo/screens/specific/details_screen.dart';
 import 'package:cine_echo/providers/tmdb_provider.dart';
+import 'package:cine_echo/providers/error_handler.dart';
 import 'package:cine_echo/themes/pallets.dart';
 import 'package:cine_echo/widgets/carousel_banner.dart';
 import 'package:cine_echo/widgets/custom_appbar.dart';
@@ -19,10 +20,20 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
       final tmdbProvider = Provider.of<TmdbProvider>(context, listen: false);
       if (tmdbProvider.isDiscoverLoading) {
-        tmdbProvider.loadDiscoverData();
+        try {
+          await tmdbProvider.loadDiscoverData();
+        } catch (e) {
+          if (mounted) {
+            ErrorHandler.handleError(
+              context,
+              e,
+              'Failed to load discover data',
+            );
+          }
+        }
       }
     });
   }
@@ -47,72 +58,75 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const SizedBox(height: 15),
-                    Column(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        FlutterCarousel.builder(
-                          itemCount: tmdbProvider.trending.length > 10
-                              ? 10
-                              : tmdbProvider.trending.length,
-                          itemBuilder: (context, index, currentIndex) {
-                            final item = tmdbProvider.trending[index];
-                            final id = item['id'];
-                            final title =
-                                item['title'] ?? item['name'] ?? 'Unknown';
-                            final rating = (item['vote_average'] ?? 0.0)
-                                .toStringAsFixed(1);
-                            final releaseYear = DateTime.parse(
-                              item['first_air_date'] ?? item['release_date'],
-                            );
-                            final imagePath = item['backdrop_path'];
-                            final type = item['media_type'] ?? 'movie';
-                            return GestureDetector(
-                              onTap: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => DetailsScreen(
-                                      dataMap: item,
-                                      typeData: type,
-                                      id: id.toString(),
-                                      heroSource: 'carousel',
+                    if (tmdbProvider.trending.isNotEmpty)
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          FlutterCarousel.builder(
+                            itemCount: tmdbProvider.trending.length > 10
+                                ? 10
+                                : tmdbProvider.trending.length,
+                            itemBuilder: (context, index, currentIndex) {
+                              final item = tmdbProvider.trending[index];
+                              final id = item['id'];
+                              final title =
+                                  item['title'] ?? item['name'] ?? 'Unknown';
+                              final rating = (item['vote_average'] ?? 0.0)
+                                  .toStringAsFixed(1);
+                              final releaseDate =
+                                  item['first_air_date'] ??
+                                  item['release_date'] ??
+                                  '2000-01-01';
+                              final releaseYear = DateTime.parse(releaseDate);
+                              final imagePath = item['backdrop_path'];
+                              final type = item['media_type'] ?? 'movie';
+                              return GestureDetector(
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => DetailsScreen(
+                                        dataMap: item,
+                                        typeData: type,
+                                        id: id.toString(),
+                                        heroSource: 'carousel',
+                                      ),
                                     ),
-                                  ),
-                                );
-                              },
-                              child: CarouselBannerWidget(
-                                title: title,
-                                rating: rating,
-                                releaseYear: releaseYear.year.toString(),
-                                imageLink:
-                                    "https://image.tmdb.org/t/p/w780$imagePath",
+                                  );
+                                },
+                                child: CarouselBannerWidget(
+                                  title: title,
+                                  rating: rating,
+                                  releaseYear: releaseYear.year.toString(),
+                                  imageLink:
+                                      "https://image.tmdb.org/t/p/w780$imagePath",
+                                ),
+                              );
+                            },
+                            options: FlutterCarouselOptions(
+                              controller: FlutterCarouselController(),
+                              aspectRatio: 16 / 9,
+                              autoPlay: true,
+                              autoPlayCurve: Curves.fastOutSlowIn,
+                              autoPlayInterval: const Duration(seconds: 3),
+                              viewportFraction: 0.85,
+                              floatingIndicator: false,
+                              enlargeCenterPage: true,
+                              slideIndicator: CircularWaveSlideIndicator(
+                                slideIndicatorOptions: SlideIndicatorOptions(
+                                  indicatorBackgroundColor:
+                                      carouselIndicatorColor,
+                                  currentIndicatorColor: blueColor,
+                                  indicatorRadius: 3.5,
+                                  itemSpacing: 10,
+                                ),
                               ),
-                            );
-                          },
-                          options: FlutterCarouselOptions(
-                            controller: FlutterCarouselController(),
-                            aspectRatio: 16 / 9,
-                            autoPlay: true,
-                            autoPlayCurve: Curves.fastOutSlowIn,
-                            autoPlayInterval: const Duration(seconds: 3),
-                            viewportFraction: 0.85,
-                            floatingIndicator: false,
-                            enlargeCenterPage: true,
-                            slideIndicator: CircularWaveSlideIndicator(
-                              slideIndicatorOptions: SlideIndicatorOptions(
-                                indicatorBackgroundColor:
-                                    carouselIndicatorColor,
-                                currentIndicatorColor: blueColor,
-                                indicatorRadius: 3.5,
-                                itemSpacing: 10,
-                              ),
+                              enableInfiniteScroll: true,
                             ),
-                            enableInfiniteScroll: true,
                           ),
-                        ),
-                      ],
-                    ),
+                        ],
+                      ),
                     const SizedBox(height: 20),
                     HorizontalSliderWidget(
                       title: "Popular Movies",

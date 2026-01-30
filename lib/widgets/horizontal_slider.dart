@@ -1,5 +1,6 @@
 import 'package:cine_echo/screens/specific/details_screen.dart';
 import 'package:cine_echo/screens/specific/seemore_screen.dart';
+import 'package:cine_echo/widgets/safe_network_image.dart';
 import 'package:flutter/material.dart';
 
 class HorizontalSliderWidget extends StatefulWidget {
@@ -185,14 +186,15 @@ class _HorizontalSliderWidgetState extends State<HorizontalSliderWidget> {
                                         'assets/splash/logo.png',
                                         fit: BoxFit.cover,
                                       )
-                                    : FadeInImage(
-                                        image: NetworkImage(imageLink),
-                                        placeholder: const AssetImage(
-                                          'assets/splash/logo.png',
-                                        ),
+                                    : SafeNetworkImage(
+                                        imageUrl: imageLink,
                                         fit: BoxFit.cover,
-                                        height: double.infinity,
                                         width: double.infinity,
+                                        height: double.infinity,
+                                        placeholder: Image.asset(
+                                          'assets/splash/logo.png',
+                                          fit: BoxFit.cover,
+                                        ),
                                       ),
                               ),
                             ),

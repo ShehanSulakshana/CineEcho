@@ -1,50 +1,98 @@
 import 'dart:ui';
 
 import 'package:cine_echo/screens/tabs/discover_screen.dart';
-import 'package:cine_echo/screens/tabs/feed_screen.dart';
-import 'package:cine_echo/screens/tabs/genre_screen.dart';
+import 'package:cine_echo/screens/tabs/movies_screen.dart';
+import 'package:cine_echo/screens/tabs/tv_series_screen.dart';
 import 'package:cine_echo/screens/tabs/personal_screen.dart';
 import 'package:cine_echo/themes/pallets.dart';
 import 'package:cine_echo/providers/navigation_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:heroicons/heroicons.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
   @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
+  late TabController _tabController;
+
+  final icons = <dynamic>[
+    Icons.home_outlined,
+    Icons.movie_outlined,
+    HeroIcons.tv,
+    Icons.person_outline,
+  ];
+
+  final pages = <Widget>[
+    DiscoverScreen(),
+    MoviesScreen(),
+    TvSeriesScreen(),
+    PersonalScreen(),
+  ];
+
+  final List<dynamic> activeIcons = [
+    Icons.home,
+    Icons.movie,
+    HeroIcons.tv,
+    Icons.person_rounded,
+  ];
+
+  final List<String> navText = ["Home", "Movies", "Series", "Profile"];
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: pages.length, vsync: this);
+    _tabController.addListener(_handleTabChange);
+  }
+
+  @override
+  void dispose() {
+    _tabController.removeListener(_handleTabChange);
+    _tabController.dispose();
+    super.dispose();
+  }
+
+  void _handleTabChange() {
+    final navigationProvider = Provider.of<NavigationProvider>(
+      context,
+      listen: false,
+    );
+    navigationProvider.setCurrentPage(_tabController.index);
+  }
+
+  Widget _buildIcon(dynamic iconData, bool isActive) {
+    if (iconData == HeroIcons.tv) {
+      return HeroIcon(
+        iconData as HeroIcons,
+        style: isActive ? HeroIconStyle.solid : HeroIconStyle.outline,
+        color: isActive ? navActive : navNonActive,
+        size: 27,
+      );
+    }
+    return Icon(iconData, size: 27, color: isActive ? navActive : navNonActive);
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final icons = <IconData>[
-      Icons.home_outlined,
-      Icons.explore_outlined,
-      Icons.local_fire_department_outlined,
-      Icons.person_outline,
-    ];
-
-    final pages = <Widget>[
-      DiscoverScreen(),
-      GenreScreen(),
-      FeedScreen(),
-      PersonalScreen(),
-    ];
-
-    final List<IconData> activeIcons = [
-      Icons.home,
-      Icons.explore,
-      Icons.local_fire_department,
-      Icons.person_rounded,
-    ];
-
-    final List<String> navText = ["Home", "Genre", "Feed", "Profile"];
-
     return Consumer<NavigationProvider>(
       builder: (context, navigationProvider, _) {
+        // Update tab index when navigation provider changes
+        if (_tabController.index != navigationProvider.currentPage) {
+          _tabController.animateTo(navigationProvider.currentPage);
+        }
+
         return Scaffold(
           body: SafeArea(
             child: Stack(
               children: [
-                IndexedStack(
-                  index: navigationProvider.currentPage,
+                TabBarView(
+                  controller: _tabController,
+                  physics: const NeverScrollableScrollPhysics(),
                   children: pages,
                 ),
                 Align(
@@ -84,14 +132,11 @@ class HomeScreen extends StatelessWidget {
                                         0,
                                         0,
                                       )..scale(scaleValue),
-                                      child: Icon(
+                                      child: _buildIcon(
                                         isActive
                                             ? activeIcons[index]
                                             : icons[index],
-                                        size: 27,
-                                        color: isActive
-                                            ? navActive
-                                            : navNonActive,
+                                        isActive,
                                       ),
                                     ),
 

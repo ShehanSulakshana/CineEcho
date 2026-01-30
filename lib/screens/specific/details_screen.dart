@@ -1,15 +1,20 @@
 import 'dart:ui';
 
 import 'package:cine_echo/models/genre_list.dart';
+import 'package:cine_echo/models/watch_history_repository.dart';
 import 'package:cine_echo/providers/tmdb_provider.dart';
+import 'package:cine_echo/services/tmdb_services.dart';
 import 'package:cine_echo/themes/pallets.dart';
 import 'package:cine_echo/widgets/cast_horizontal_slider.dart';
 import 'package:cine_echo/widgets/horizontal_slider.dart';
+import 'package:cine_echo/widgets/safe_network_image.dart';
+import 'package:cine_echo/widgets/seasons_list.dart';
 import 'package:flutter/material.dart';
 import 'package:marquee/marquee.dart';
 import 'package:redacted/redacted.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:provider/provider.dart';
+import 'package:intl/intl.dart';
 
 class DetailsScreen extends StatefulWidget {
   const DetailsScreen({
@@ -41,6 +46,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
   List<dynamic> cast = const [];
   List<dynamic> recommendations = const [];
   int totalRecommendationPages = 1;
+  Key _seasonsListKey = UniqueKey();
 
   String getType(String typeData) {
     final String type;
@@ -50,6 +56,12 @@ class _DetailsScreenState extends State<DetailsScreen> {
       type = 'tv';
     }
     return type;
+  }
+
+  void _refreshSeasonsList() {
+    setState(() {
+      _seasonsListKey = UniqueKey();
+    });
   }
 
   @override
@@ -115,23 +127,49 @@ class _DetailsScreenState extends State<DetailsScreen> {
     ).year.toString();
     final bannerPath = widget.dataMap['backdrop_path'];
     final posterPath = widget.dataMap['poster_path'];
-    final bannerLink = "https://image.tmdb.org/t/p/w780/$bannerPath";
-    final posterLink = "https://image.tmdb.org/t/p/w342/$posterPath";
+    final bannerLink = bannerPath == null
+        ? ''
+        : "https://image.tmdb.org/t/p/w780/$bannerPath";
+    final posterLink = posterPath == null
+        ? ''
+        : "https://image.tmdb.org/t/p/w342/$posterPath";
     final overview =
         widget.dataMap['overview'] ?? 'Overview not available for this.';
 
-    final Map<int, dynamic> allGenreMap = GenreListClass.getGenreMap();
-
     String getGenre() {
       var buffer = StringBuffer();
-      final List<dynamic> genreIdList = widget.dataMap['genre_ids'];
-      for (var i = 0; i < genreIdList.length; i++) {
-        final genreId = genreIdList[i];
-        final genreName = allGenreMap[genreId];
-        if (i != genreIdList.length - 1) {
-          buffer.write("$genreName, ");
-        } else {
-          buffer.write("$genreName");
+      final Map<int, dynamic> allGenreMap = GenreListClass.getGenreMap();
+
+      // Try to get genres from either genre_ids (search results) or genres (full details)
+      List<dynamic>? genreList;
+
+      if (widget.dataMap['genre_ids'] != null) {
+        // Coming from search or list - has genre_ids
+        genreList = widget.dataMap['genre_ids'] as List<dynamic>?;
+        if (genreList != null && genreList.isNotEmpty) {
+          for (var i = 0; i < genreList.length; i++) {
+            final genreId = genreList[i];
+            final genreName = allGenreMap[genreId];
+            if (i != genreList.length - 1) {
+              buffer.write("$genreName, ");
+            } else {
+              buffer.write("$genreName");
+            }
+          }
+        }
+      } else if (widget.dataMap['genres'] != null) {
+        // Coming from full details (watched/favorites) - has genres objects
+        final genres = widget.dataMap['genres'] as List<dynamic>?;
+        if (genres != null && genres.isNotEmpty) {
+          for (var i = 0; i < genres.length; i++) {
+            final genreObj = genres[i] as Map<String, dynamic>;
+            final genreName = genreObj['name'] ?? 'Unknown';
+            if (i != genres.length - 1) {
+              buffer.write("$genreName, ");
+            } else {
+              buffer.write("$genreName");
+            }
+          }
         }
       }
 
@@ -158,12 +196,13 @@ class _DetailsScreenState extends State<DetailsScreen> {
                                 'assets/splash/logo.png',
                                 fit: BoxFit.cover,
                               ).redacted(context: context, redact: _isLoading)
-                            : FadeInImage(
-                                image: NetworkImage(bannerLink),
-                                placeholder: const AssetImage(
-                                  'assets/splash/logo.png',
-                                ),
+                            : SafeNetworkImage(
+                                imageUrl: bannerLink,
                                 fit: BoxFit.cover,
+                                placeholder: Image.asset(
+                                  'assets/splash/logo.png',
+                                  fit: BoxFit.cover,
+                                ),
                               ),
                       ),
                       Positioned.fill(
@@ -248,12 +287,13 @@ class _DetailsScreenState extends State<DetailsScreen> {
                                             context: context,
                                             redact: _isLoading,
                                           )
-                                        : FadeInImage(
-                                            image: NetworkImage(posterLink),
-                                            placeholder: const AssetImage(
-                                              'assets/splash/logo.png',
-                                            ),
+                                        : SafeNetworkImage(
+                                            imageUrl: posterLink,
                                             fit: BoxFit.cover,
+                                            placeholder: Image.asset(
+                                              'assets/splash/logo.png',
+                                              fit: BoxFit.cover,
+                                            ),
                                           ),
                                   ),
                                 ),
@@ -381,6 +421,20 @@ class _DetailsScreenState extends State<DetailsScreen> {
                             Buttons(
                               trailerKey: trailerKey,
                               isLoading: _isLoading,
+                              contentId: int.parse(widget.id),
+                              contentType: getType(widget.typeData),
+                              releaseDate: widget.dataMap['release_date'],
+                              nextEpisodeToAir:
+                                  getType(widget.typeData) == 'tv' &&
+                                      !_isLoading
+                                  ? moreDetailsMap['next_episode_to_air']
+                                  : null,
+                              seasonsData:
+                                  getType(widget.typeData) == 'tv' &&
+                                      !_isLoading
+                                  ? moreDetailsMap['seasons']
+                                  : null,
+                              onWatchedChanged: _refreshSeasonsList,
                             ),
 
                             SizedBox(height: 30),
@@ -418,7 +472,16 @@ class _DetailsScreenState extends State<DetailsScreen> {
                         fromCast: widget.fromCast,
                       ),
 
-                      //recommendations slider
+                      if (getType(widget.typeData) == 'tv' &&
+                          !_isLoading &&
+                          moreDetailsMap['seasons'] != null)
+                        SeasonsList(
+                          key: _seasonsListKey,
+                          tvId: widget.id,
+                          seasons: moreDetailsMap['seasons'] ?? [],
+                          refreshKey: _seasonsListKey,
+                        ),
+
                       SizedBox(height: 25),
 
                       // ignore: prefer_is_empty
@@ -446,15 +509,33 @@ class _DetailsScreenState extends State<DetailsScreen> {
 class Buttons extends StatefulWidget {
   final String trailerKey;
   final bool isLoading;
-  const Buttons({super.key, required this.trailerKey, required this.isLoading});
+  final int contentId;
+  final String contentType;
+  final List<dynamic>? seasonsData;
+  final String? releaseDate;
+  final Map<String, dynamic>? nextEpisodeToAir;
+  final VoidCallback? onWatchedChanged;
+
+  const Buttons({
+    super.key,
+    required this.trailerKey,
+    required this.isLoading,
+    required this.contentId,
+    required this.contentType,
+    this.seasonsData,
+    this.releaseDate,
+    this.nextEpisodeToAir,
+    this.onWatchedChanged,
+  });
 
   @override
   State<Buttons> createState() => _ButtonsState();
 }
 
 class _ButtonsState extends State<Buttons> with TickerProviderStateMixin {
+  final WatchHistoryRepository _watchRepo = WatchHistoryRepository();
   late bool isFavorite;
-  late bool markeAsWatched; //TODO : Implement marked as watchd & is favorite
+  late bool markeAsWatched;
 
   late AnimationController _favoriteController;
   late AnimationController _trailerController;
@@ -488,11 +569,76 @@ class _ButtonsState extends State<Buttons> with TickerProviderStateMixin {
       duration: const Duration(milliseconds: 200),
       vsync: this,
     );
+
+    _loadStatus();
   }
 
-  void _toggleFavorite() {
+  Future<void> _loadStatus() async {
+    if (widget.contentType == 'movie') {
+      final watched = await _watchRepo.isMovieWatched(widget.contentId);
+      final movies = await _watchRepo.getWatchedMovies();
+      final movie = movies
+          .where((m) => m.tmdbId == widget.contentId)
+          .firstOrNull;
+
+      if (mounted) {
+        setState(() {
+          markeAsWatched = watched;
+          isFavorite = movie?.isFavorite ?? false;
+          if (markeAsWatched) {
+            _watchedController.value = 1.0;
+          }
+          if (isFavorite) {
+            _favoriteController.value = 1.0;
+          }
+        });
+      }
+    } else if (widget.contentType == 'tv') {
+      // For TV series, check if all released episodes are watched
+      final episodes = await _watchRepo.getWatchedEpisodes();
+      final seriesEpisodes = episodes
+          .where((e) => e.seriesTmdbId == widget.contentId)
+          .toList();
+
+      // Calculate total released episodes (exclude unreleased ones)
+      int totalReleasedEpisodes = 0;
+      if (widget.seasonsData != null) {
+        for (var season in widget.seasonsData!) {
+          final seasonNumber = season['season_number'];
+          if (seasonNumber == null || seasonNumber == 0) continue;
+
+          final episodeCount = season['episode_count'] as int? ?? 0;
+          totalReleasedEpisodes += episodeCount;
+        }
+      }
+
+      // Check if this series is favorited
+      final isFav = await _watchRepo.isSeriesFavorited(widget.contentId);
+
+      if (mounted) {
+        setState(() {
+          // markeAsWatched should only be true if ALL released episodes are watched
+          markeAsWatched =
+              totalReleasedEpisodes > 0 &&
+              seriesEpisodes.length >= totalReleasedEpisodes;
+          isFavorite = isFav;
+          if (markeAsWatched) {
+            _watchedController.value = 1.0;
+          }
+          if (isFavorite) {
+            _favoriteController.value = 1.0;
+          }
+        });
+      }
+    }
+  }
+
+  Future<void> _toggleFavorite() async {
+    // Favorite works for both movies and TV series
+    final newFavoriteState = !isFavorite;
+
     setState(() {
-      isFavorite = !isFavorite;
+      isFavorite = newFavoriteState;
     });
 
     if (isFavorite) {
@@ -501,46 +647,65 @@ class _ButtonsState extends State<Buttons> with TickerProviderStateMixin {
       _favoriteController.reverse();
     }
 
-    ScaffoldMessenger.of(context).clearSnackBars();
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        behavior: SnackBarBehavior.floating,
-        duration: const Duration(seconds: 2),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        backgroundColor: Theme.of(context).primaryColor.withAlpha(230),
-        content: Row(
-          children: [
-            Icon(
-              isFavorite ? Icons.favorite_rounded : Icons.heart_broken_rounded,
-              color: Colors.white,
-              size: 20,
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Text(
+    // Update in repository
+    if (widget.contentType == 'movie') {
+      await _watchRepo.markMovieWatched(widget.contentId, favorite: isFavorite);
+    } else if (widget.contentType == 'tv') {
+      if (isFavorite) {
+        await _watchRepo.markSeriesFavorite(widget.contentId);
+      } else {
+        await _watchRepo.unmarkSeriesFavorite(widget.contentId);
+      }
+    }
+
+    if (mounted) {
+      ScaffoldMessenger.of(context).clearSnackBars();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          behavior: SnackBarBehavior.floating,
+          duration: const Duration(seconds: 2),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          backgroundColor: Theme.of(context).primaryColor.withAlpha(230),
+          content: Row(
+            children: [
+              Icon(
                 isFavorite
-                    ? "Added to your favorites"
-                    : "Removed from favorites",
-                style: const TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
+                    ? Icons.favorite_rounded
+                    : Icons.heart_broken_rounded,
+                color: Colors.white,
+                size: 20,
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  isFavorite
+                      ? "Added to your favorites"
+                      : "Removed from favorites",
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                  ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
-        // action: SnackBarAction(
-        //   label: "UNDO",
-        //   textColor: Colors.white,
-        //   onPressed: _toggleFavorite,
-        // ),
-      ),
-    );
+      );
+    }
   }
 
-  void _toggleWatched() {
+  Future<void> _toggleWatched() async {
+    final newWatchedState = !markeAsWatched;
+
+    if (newWatchedState && _isWatchBlocked()) {
+      _showWatchBlockedMessage();
+      return;
+    }
+
     setState(() {
-      markeAsWatched = !markeAsWatched;
+      markeAsWatched = newWatchedState;
     });
 
     if (markeAsWatched) {
@@ -549,93 +714,395 @@ class _ButtonsState extends State<Buttons> with TickerProviderStateMixin {
       _watchedController.reverse();
     }
 
-    ScaffoldMessenger.of(context).clearSnackBars();
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        behavior: SnackBarBehavior.floating,
-        duration: const Duration(seconds: 2),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        backgroundColor: Theme.of(context).primaryColor.withAlpha(230),
-        content: Row(
-          children: [
-            Icon(
-              markeAsWatched ? Icons.check_circle : Icons.remove_circle_outline,
-              color: Colors.white,
-              size: 20,
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Text(
+    if (widget.contentType == 'movie') {
+      // For movies: simply mark/unmark as watched
+      if (markeAsWatched) {
+        await _watchRepo.markMovieWatched(
+          widget.contentId,
+          favorite: isFavorite,
+        );
+      } else {
+        await _watchRepo.unmarkMovieWatched(widget.contentId);
+      }
+    } else if (widget.contentType == 'tv') {
+      // For TV series: mark/unmark all episodes
+      if (markeAsWatched) {
+        await _markAllEpisodes();
+      } else {
+        await _unmarkAllEpisodes();
+      }
+      // Notify parent to refresh seasons list
+      widget.onWatchedChanged?.call();
+    }
+
+    if (mounted) {
+      ScaffoldMessenger.of(context).clearSnackBars();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          behavior: SnackBarBehavior.floating,
+          duration: const Duration(seconds: 2),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          backgroundColor: Theme.of(context).primaryColor.withAlpha(230),
+          content: Row(
+            children: [
+              Icon(
                 markeAsWatched
-                    ? "Marked as watched"
-                    : "Removed from watched list",
-                style: const TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
+                    ? Icons.check_circle
+                    : Icons.remove_circle_outline,
+                color: Colors.white,
+                size: 20,
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  markeAsWatched
+                      ? widget.contentType == 'movie'
+                            ? "Marked as watched"
+                            : "All episodes marked as watched"
+                      : widget.contentType == 'movie'
+                      ? "Removed from watched list"
+                      : "All episodes unmarked",
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                  ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
-        // action: SnackBarAction(
-        //   label: "UNDO",
-        //   textColor: Colors.white,
-        //   onPressed: _toggleWatched,
-        // ),
-      ),
-    );
+      );
+    }
+  }
+
+  bool _isMovieUnreleased() {
+    if (widget.contentType != 'movie') return false;
+    final dateText = widget.releaseDate?.toString();
+    if (dateText == null || dateText.isEmpty) return false;
+    try {
+      final date = DateTime.parse(dateText);
+      return date.isAfter(DateTime.now());
+    } catch (_) {
+      return false;
+    }
+  }
+
+  bool _hasUnreleasedFinalSeasonEpisodes() {
+    if (widget.contentType != 'tv') return false;
+    if (widget.seasonsData == null || widget.seasonsData!.isEmpty) return false;
+    if (widget.nextEpisodeToAir == null) return false;
+
+    int? finalSeasonNumber;
+    for (final season in widget.seasonsData!) {
+      final number = season['season_number'];
+      if (number is int) {
+        finalSeasonNumber = finalSeasonNumber == null
+            ? number
+            : (number > finalSeasonNumber ? number : finalSeasonNumber);
+      }
+    }
+
+    if (finalSeasonNumber == null) return false;
+
+    final nextSeason = widget.nextEpisodeToAir!['season_number'];
+    if (nextSeason != finalSeasonNumber) return false;
+
+    final airDate = widget.nextEpisodeToAir!['air_date'];
+    if (airDate == null || airDate.toString().isEmpty) return true;
+    try {
+      final date = DateTime.parse(airDate.toString());
+      return date.isAfter(DateTime.now());
+    } catch (_) {
+      return true;
+    }
+  }
+
+  bool _hasAnyUnreleasedEpisodes() {
+    if (widget.contentType != 'tv') return false;
+
+    // If nextEpisodeToAir exists, it means there are episodes that haven't aired yet
+    if (widget.nextEpisodeToAir != null) {
+      final airDate = widget.nextEpisodeToAir!['air_date'];
+
+      // If there's no air date, assume it's unreleased
+      if (airDate == null || airDate.toString().isEmpty) {
+        return true;
+      }
+
+      // If there's an air date, check if it's in the future
+      try {
+        final date = DateTime.parse(airDate.toString());
+        if (date.isAfter(DateTime.now())) {
+          return true;
+        }
+        // If the date is in the past but nextEpisodeToAir still exists,
+        // the data might be stale, so treat as unreleased
+        return true;
+      } catch (_) {
+        // If we can't parse the date, assume unreleased to be safe
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  bool _isWatchBlocked() {
+    return _isMovieUnreleased() || _hasUnreleasedFinalSeasonEpisodes();
+  }
+
+  String _formatReleaseDate(String? dateText) {
+    if (dateText == null || dateText.isEmpty) return '';
+    try {
+      final date = DateTime.parse(dateText);
+      final formatter = DateFormat('MMM d, yyyy');
+      return formatter.format(date);
+    } catch (_) {
+      return '';
+    }
+  }
+
+  void _showWatchBlockedMessage() {
+    if (!mounted) return;
+
+    String message = 'This title isn\'t released yet.';
+
+    if (widget.contentType == 'movie') {
+      final releaseText = _formatReleaseDate(widget.releaseDate);
+      message = releaseText.isNotEmpty
+          ? 'This movie releases on $releaseText.'
+          : 'This movie isn\'t released yet.';
+    } else if (widget.contentType == 'tv') {
+      final nextAirDate = _formatReleaseDate(
+        widget.nextEpisodeToAir?['air_date']?.toString(),
+      );
+      message = nextAirDate.isNotEmpty
+          ? 'Final season episodes are still coming. Next airs on $nextAirDate.'
+          : 'Final season episodes are still coming. You can mark all after they air.';
+    }
+
+    ScaffoldMessenger.of(context)
+      ..clearSnackBars()
+      ..showSnackBar(
+        SnackBar(
+          behavior: SnackBarBehavior.floating,
+          duration: const Duration(seconds: 2),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          backgroundColor: Colors.orange.withOpacity(0.95),
+          content: Row(
+            children: [
+              const Icon(
+                Icons.lock_clock_rounded,
+                color: Colors.white,
+                size: 20,
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  message,
+                  style: const TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+  }
+
+  Future<void> _markAllEpisodes() async {
+    if (widget.seasonsData == null) return;
+
+    final tmdbServices = TmdbServices();
+    for (var season in widget.seasonsData!) {
+      final seasonNumber = season['season_number'];
+      if (seasonNumber == null) continue;
+
+      // Fetch detailed season information to check episode air dates
+      final seasonDetails = await tmdbServices
+          .fetchDetails(
+            '${widget.contentId}/season/$seasonNumber',
+            'tv',
+            isSeason: true,
+          )
+          .catchError((_) => <String, dynamic>{});
+
+      final episodes = seasonDetails['episodes'] as List<dynamic>? ?? [];
+      final episodeCount = season['episode_count'] ?? 0;
+
+      for (int i = 1; i <= episodeCount; i++) {
+        // Check if episode is unreleased
+        final episodeData = i <= episodes.length ? episodes[i - 1] : null;
+        final airDate = episodeData?['air_date']?.toString();
+
+        if (airDate != null && airDate.isNotEmpty) {
+          try {
+            final date = DateTime.parse(airDate);
+            // Skip unreleased episodes
+            if (date.isAfter(DateTime.now())) {
+              continue;
+            }
+          } catch (_) {
+            // If we can't parse the date, mark it anyway
+          }
+        }
+
+        await _watchRepo.markEpisodeWatched(widget.contentId, seasonNumber, i);
+      }
+    }
+  }
+
+  Future<void> _unmarkAllEpisodes() async {
+    final episodes = await _watchRepo.getWatchedEpisodes();
+    final seriesEpisodes = episodes
+        .where((e) => e.seriesTmdbId == widget.contentId)
+        .toList();
+
+    for (var episode in seriesEpisodes) {
+      await _watchRepo.unmarkEpisodeWatched(
+        widget.contentId,
+        episode.seasonNumber,
+        episode.episodeNumber,
+      );
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 4),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          // Favorite Button
-          _AnimatedIconButton(
-            isActive: isFavorite,
-            controller: _favoriteController,
-            activeIcon: Icons.favorite_rounded,
-            inactiveIcon: Icons.favorite_border_rounded,
-            onPressed: _toggleFavorite,
-            tooltip: isFavorite ? "Remove from favorites" : "Add to favorites",
-          ),
+    final bool isWatchBlocked = widget.contentType == 'movie'
+        ? _isWatchBlocked() && !markeAsWatched
+        : _hasAnyUnreleasedEpisodes();
+    final String blockedTooltip = widget.contentType == 'movie'
+        ? (() {
+            final releaseText = _formatReleaseDate(widget.releaseDate);
+            return releaseText.isNotEmpty
+                ? 'Available on $releaseText'
+                : 'Available after release';
+          })()
+        : (() {
+            final nextAir = _formatReleaseDate(
+              widget.nextEpisodeToAir?['air_date']?.toString(),
+            );
+            return nextAir.isNotEmpty
+                ? 'Final season continues $nextAir'
+                : 'Final season still airing';
+          })();
 
-          const SizedBox(width: 12),
+    return AnimatedOpacity(
+      duration: const Duration(milliseconds: 500),
+      opacity: widget.isLoading ? 0.0 : 1.0,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 4),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            // Favorite Button (works for both movies and TV series) - with redacted loading
+            _buildLoadingButton(
+              isLoading: widget.isLoading,
+              child: _AnimatedIconButton(
+                isActive: isFavorite,
+                controller: _favoriteController,
+                activeIcon: Icons.favorite_rounded,
+                inactiveIcon: Icons.favorite_border_rounded,
+                onPressed: widget.isLoading ? null : _toggleFavorite,
+                tooltip: isFavorite
+                    ? "Remove from favorites"
+                    : "Add to favorites",
+                isDisabled: widget.isLoading,
+              ),
+            ),
 
-          // Watched Button
-          _AnimatedIconButton(
-            isActive: markeAsWatched,
-            controller: _watchedController,
-            activeIcon: Icons.done_all_rounded,
-            inactiveIcon: Icons.done_rounded,
-            onPressed: _toggleWatched,
-            tooltip: markeAsWatched ? "Mark as unwatched" : "Mark as watched",
-          ),
+            const SizedBox(width: 12),
 
-          const SizedBox(width: 12),
+            // Watched Button - with redacted loading
+            _buildLoadingButton(
+              isLoading: widget.isLoading,
+              child: _AnimatedIconButton(
+                isActive: markeAsWatched,
+                controller: _watchedController,
+                activeIcon: Icons.done_all_rounded,
+                inactiveIcon: Icons.done_rounded,
+                onPressed: (isWatchBlocked || widget.isLoading)
+                    ? null
+                    : _toggleWatched,
+                isDisabled: isWatchBlocked || widget.isLoading,
+                tooltip: widget.isLoading
+                    ? "Loading..."
+                    : isWatchBlocked
+                    ? blockedTooltip
+                    : markeAsWatched
+                    ? widget.contentType == 'movie'
+                          ? "Mark as unwatched"
+                          : "Unmark all episodes"
+                    : widget.contentType == 'movie'
+                    ? "Mark as watched"
+                    : "Mark all episodes as watched",
+              ),
+            ),
 
-          // Watch Trailer Button
-          Expanded(
-            child: MouseRegion(
-              onEnter: (_) => _trailerController.forward(),
-              onExit: (_) => _trailerController.reverse(),
-              child: AnimatedBuilder(
-                animation: _trailerController,
-                builder: (context, child) {
-                  return Transform.scale(
-                    scale: 1.0 + (_trailerController.value * 0.02),
-                    child: Container(
+            const SizedBox(width: 12),
+
+            // Watch Trailer Button - with fade and redacted loading
+            _buildLoadingTrailerButton(),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLoadingButton({required bool isLoading, required Widget child}) {
+    return Opacity(
+      opacity: isLoading ? 0.4 : 1.0,
+      child: child.redacted(
+        context: context,
+        redact: isLoading,
+        configuration: RedactedConfiguration(
+          animationDuration: Duration(milliseconds: 800),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLoadingTrailerButton() {
+    return Expanded(
+      child: Opacity(
+        opacity: widget.isLoading ? 0.4 : 1.0,
+        child: MouseRegion(
+          onEnter: widget.isLoading
+              ? null
+              : (_) => _trailerController.forward(),
+          onExit: widget.isLoading ? null : (_) => _trailerController.reverse(),
+          child: AnimatedBuilder(
+            animation: _trailerController,
+            builder: (context, child) {
+              return Transform.scale(
+                scale: widget.isLoading
+                    ? 1.0
+                    : (1.0 + (_trailerController.value * 0.02)),
+                child:
+                    Container(
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(12),
                         boxShadow: [
                           BoxShadow(
                             color: Theme.of(context).primaryColor.withAlpha(
-                              (77 + (_trailerController.value * 51)).round(),
+                              widget.isLoading
+                                  ? 0
+                                  : (77 + (_trailerController.value * 51))
+                                        .round(),
                             ),
-                            blurRadius: 8 + (_trailerController.value * 4),
+                            blurRadius:
+                                8 +
+                                (widget.isLoading
+                                    ? 0
+                                    : (_trailerController.value * 4)),
                             offset: const Offset(0, 4),
                           ),
                         ],
@@ -643,17 +1110,25 @@ class _ButtonsState extends State<Buttons> with TickerProviderStateMixin {
                       child: ElevatedButton(
                         style: ButtonStyle(
                           elevation: WidgetStateProperty.resolveWith((states) {
+                            if (widget.isLoading) return 0.0;
                             if (states.contains(WidgetState.pressed)) {
                               return 1.0;
                             }
                             return 3.0 + (_trailerController.value * 2);
                           }),
                           shadowColor: WidgetStatePropertyAll(
-                            Theme.of(context).primaryColor.withAlpha(128),
+                            Theme.of(context).primaryColor.withAlpha(
+                              widget.isLoading ? 0 : 128,
+                            ),
                           ),
                           backgroundColor: WidgetStateProperty.resolveWith((
                             states,
                           ) {
+                            if (widget.isLoading) {
+                              return Theme.of(
+                                context,
+                              ).scaffoldBackgroundColor.withAlpha(100);
+                            }
                             if (states.contains(WidgetState.pressed)) {
                               return Theme.of(
                                 context,
@@ -661,8 +1136,10 @@ class _ButtonsState extends State<Buttons> with TickerProviderStateMixin {
                             }
                             return Theme.of(context).primaryColor;
                           }),
-                          foregroundColor: const WidgetStatePropertyAll(
-                            Colors.white,
+                          foregroundColor: WidgetStatePropertyAll(
+                            widget.isLoading
+                                ? Colors.white.withAlpha(102)
+                                : Colors.white,
                           ),
                           padding: const WidgetStatePropertyAll(
                             EdgeInsets.symmetric(horizontal: 20, vertical: 14),
@@ -705,18 +1182,24 @@ class _ButtonsState extends State<Buttons> with TickerProviderStateMixin {
                           mainAxisAlignment: MainAxisAlignment.center,
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            const Icon(
-                              Icons.play_circle_fill_rounded,
+                            Icon(
+                              widget.isLoading
+                                  ? Icons.pending
+                                  : Icons.play_circle_fill_rounded,
                               size: 24,
                             ),
                             const SizedBox(width: 10),
                             Flexible(
                               child: Text(
-                                "Watch Trailer",
+                                widget.isLoading
+                                    ? "Loading..."
+                                    : "Watch Trailer",
                                 style: Theme.of(context).textTheme.titleMedium
                                     ?.copyWith(
                                       fontWeight: FontWeight.w600,
-                                      color: Colors.white,
+                                      color: widget.isLoading
+                                          ? Colors.white.withAlpha(150)
+                                          : Colors.white,
                                     ),
                                 overflow: TextOverflow.ellipsis,
                               ),
@@ -724,13 +1207,17 @@ class _ButtonsState extends State<Buttons> with TickerProviderStateMixin {
                           ],
                         ),
                       ),
+                    ).redacted(
+                      context: context,
+                      redact: widget.isLoading,
+                      configuration: RedactedConfiguration(
+                        animationDuration: Duration(milliseconds: 800),
+                      ),
                     ),
-                  );
-                },
-              ),
-            ),
+              );
+            },
           ),
-        ],
+        ),
       ),
     );
   }
@@ -745,14 +1232,16 @@ class _AnimatedIconButton extends StatelessWidget {
     required this.inactiveIcon,
     required this.onPressed,
     required this.tooltip,
+    this.isDisabled = false,
   });
 
   final IconData activeIcon;
   final AnimationController controller;
   final IconData inactiveIcon;
   final bool isActive;
-  final VoidCallback onPressed;
+  final VoidCallback? onPressed;
   final String tooltip;
+  final bool isDisabled;
 
   @override
   Widget build(BuildContext context) {
@@ -798,11 +1287,17 @@ class _AnimatedIconButton extends StatelessWidget {
                       shape: BoxShape.circle,
                       color: isActive
                           ? Theme.of(context).primaryColor
+                          : isDisabled
+                          ? Theme.of(
+                              context,
+                            ).scaffoldBackgroundColor.withAlpha(200)
                           : Theme.of(context).scaffoldBackgroundColor,
                       border: Border.all(
                         width: isActive ? 0 : 2,
                         color: isActive
                             ? Colors.transparent
+                            : isDisabled
+                            ? Theme.of(context).primaryColor.withAlpha(80)
                             : Theme.of(context).primaryColor,
                       ),
                     ),
@@ -819,11 +1314,17 @@ class _AnimatedIconButton extends StatelessWidget {
                           );
                         },
                         child: Icon(
-                          isActive ? activeIcon : inactiveIcon,
+                          isActive
+                              ? activeIcon
+                              : isDisabled
+                              ? Icons.lock_clock_rounded
+                              : inactiveIcon,
                           key: ValueKey(isActive),
                           size: 28,
                           color: isActive
                               ? Colors.white
+                              : isDisabled
+                              ? Colors.orange
                               : Theme.of(context).primaryColor,
                         ),
                       ),

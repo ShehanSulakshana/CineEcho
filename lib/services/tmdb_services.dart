@@ -51,7 +51,7 @@ class TmdbServices {
     return data['results'];
   }
 
-  Future<Map<String, dynamic>> fetchDetails(String id, String type) async {
+  Future<Map<String, dynamic>> fetchDetails(String id, String type, {required bool isSeason}) async {
     final url =
         'https://api.themoviedb.org/3/${type.trim()}/${id.trim()}'
         '?api_key=${Env.tmdbApiKey}'
@@ -67,6 +67,40 @@ class TmdbServices {
         'https://api.themoviedb.org/3/person/$id'
         '?api_key=${Env.tmdbApiKey}'
         '&append_to_response=movie_credits';
+    final response = await http.get(Uri.parse(url));
+    return json.decode(response.body);
+  }
+
+  Future<Map<String, dynamic>> searchMulti(String query, {int page = 1}) async {
+    if (query.trim().isEmpty) {
+      return {'results': [], 'total_pages': 0, 'total_results': 0};
+    }
+
+    final url =
+        'https://api.themoviedb.org/3/search/multi'
+        '?api_key=${Env.tmdbApiKey}'
+        '&query=${Uri.encodeComponent(query)}'
+        '&page=$page'
+        '&language=en-US';
+
+    final response = await http.get(Uri.parse(url));
+    final data = json.decode(response.body);
+    return {
+      'results': data['results'] as List<dynamic>,
+      'total_pages': data['total_pages'] as int,
+      'total_results': data['total_results'] as int,
+    };
+  }
+
+  Future<Map<String, dynamic>> fetchSeasonDetails(
+    String tvId,
+    int seasonNumber,
+  ) async {
+    final url =
+        'https://api.themoviedb.org/3/tv/$tvId/season/$seasonNumber'
+        '?api_key=${Env.tmdbApiKey}'
+        '&language=en-US';
+
     final response = await http.get(Uri.parse(url));
     return json.decode(response.body);
   }

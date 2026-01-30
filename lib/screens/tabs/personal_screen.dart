@@ -1,5 +1,6 @@
-import 'package:cine_echo/screens/profile_tabs/TestItem.dart';
-import 'package:cine_echo/screens/tabs/genre_screen.dart';
+import 'package:cine_echo/models/watch_history_repository.dart';
+import 'package:cine_echo/screens/profile_tabs/favorites_tab.dart';
+import 'package:cine_echo/screens/profile_tabs/watched_tab.dart';
 import 'package:cine_echo/themes/pallets.dart';
 import 'package:cine_echo/widgets/completed_stat_card.dart';
 import 'package:flutter/material.dart';
@@ -15,15 +16,55 @@ class _PersonalScreenState extends State<PersonalScreen>
     with TickerProviderStateMixin {
   TabController? _tabController;
   late ScrollController _scrollController;
+  final WatchHistoryRepository _watchRepo = WatchHistoryRepository();
+
+  late Future<Map<String, dynamic>> _statsFuture;
+
   @override
   void initState() {
-    _tabController = TabController(length: 3, vsync: this);
-    _scrollController = ScrollController();
     super.initState();
+    _tabController = TabController(length: 2, vsync: this);
+    _scrollController = ScrollController();
+    _statsFuture = _loadStats();
+    _tabController?.addListener(_onTabChanged);
+  }
+
+  void _onTabChanged() {
+    if (mounted) {
+      setState(() {
+        _statsFuture = _loadStats();
+      });
+    }
+  }
+
+  void _refreshStats() {
+    if (mounted) {
+      setState(() {
+        _statsFuture = _loadStats();
+      });
+    }
+  }
+
+  Future<Map<String, dynamic>> _loadStats() async {
+    final stats = await _watchRepo.getWatchStats();
+
+    // Calculate watch time: 2 hours per movie + 45 mins per episode
+    int totalMinutes =
+        (stats.moviesWatchedCount * 120) + (stats.episodesWatchedCount * 45);
+    int hours = totalMinutes ~/ 60;
+    int minutes = totalMinutes % 60;
+    String watchTimeString = '${hours}h ${minutes}m';
+
+    return {
+      'watchTime': watchTimeString,
+      'movies': stats.moviesWatchedCount,
+      'episodes': stats.episodesWatchedCount,
+    };
   }
 
   @override
   void dispose() {
+    _tabController?.removeListener(_onTabChanged);
     _scrollController.dispose();
     _tabController?.dispose();
     super.dispose();
@@ -60,7 +101,6 @@ class _PersonalScreenState extends State<PersonalScreen>
                             physics: NeverScrollableScrollPhysics(),
                             child: Column(
                               children: [
-                                // Header
                                 Padding(
                                   padding: const EdgeInsets.fromLTRB(
                                     15,
@@ -73,7 +113,7 @@ class _PersonalScreenState extends State<PersonalScreen>
                                     height: 50,
                                     child: Row(
                                       children: [
-                                        Expanded(child: Spacer()),
+                                        const Spacer(),
                                         Expanded(
                                           child: Text(
                                             "Profile",
@@ -85,22 +125,11 @@ class _PersonalScreenState extends State<PersonalScreen>
                                         ),
                                         Expanded(
                                           child: Align(
-                                            alignment:
-                                                AlignmentGeometry.centerRight,
-                                            child: Container(
-                                              decoration: BoxDecoration(
-                                                color: Colors.white.withOpacity(
-                                                  0.1,
-                                                ),
-                                                borderRadius:
-                                                    BorderRadius.circular(10),
-                                              ),
-                                              padding: EdgeInsets.all(8),
-                                              child: Icon(
-                                                Icons.edit_note_rounded,
-                                                size: 24,
-                                                color: navActive,
-                                              ),
+                                            alignment: Alignment.centerRight,
+                                            child: Icon(
+                                              Icons.edit_note_rounded,
+                                              size: 24,
+                                              color: navActive,
                                             ),
                                           ),
                                         ),
@@ -110,86 +139,82 @@ class _PersonalScreenState extends State<PersonalScreen>
                                 ),
                                 SizedBox(height: 25),
 
-                                // Profile
-                                Opacity(
-                                  opacity: 1 - scrollProgress,
-                                  child: TweenAnimationBuilder<double>(
-                                    tween: Tween<double>(begin: 0, end: 1),
-                                    duration: Duration(milliseconds: 800),
-                                    curve: Curves.easeOutCubic,
-                                    builder: (context, value, child) {
-                                      return Opacity(
-                                        opacity: value,
-                                        child: Transform.translate(
-                                          offset: Offset(0, 20 * (1 - value)),
-                                          child: child,
-                                        ),
-                                      );
-                                    },
-                                    child: Column(
-                                      children: [
-                                        Container(
-                                          decoration: BoxDecoration(
-                                            shape: BoxShape.circle,
-                                            boxShadow: [
-                                              BoxShadow(
-                                                color: Theme.of(
-                                                  context,
-                                                ).primaryColor.withAlpha(150),
-                                                blurRadius: 10,
-                                                spreadRadius: 2,
-                                                offset: Offset(0, 0),
-                                              ),
-                                            ],
-                                          ),
-                                          child: CircleAvatar(
-                                            radius: 60,
-                                            backgroundImage: AssetImage(
-                                              'assets/splash/logo.png',
+                                TweenAnimationBuilder<double>(
+                                  tween: Tween<double>(begin: 0, end: 1),
+                                  duration: Duration(milliseconds: 800),
+                                  curve: Curves.easeOutCubic,
+                                  builder: (context, value, child) {
+                                    return Opacity(
+                                      opacity: value,
+                                      child: Transform.translate(
+                                        offset: Offset(0, 20 * (1 - value)),
+                                        child: child,
+                                      ),
+                                    );
+                                  },
+                                  child: Column(
+                                    children: [
+                                      Container(
+                                        decoration: BoxDecoration(
+                                          shape: BoxShape.circle,
+                                          boxShadow: [
+                                            BoxShadow(
+                                              color: Theme.of(
+                                                context,
+                                              ).primaryColor.withAlpha(150),
+                                              blurRadius: 10,
+                                              spreadRadius: 2,
+                                              offset: Offset(0, 0),
                                             ),
-                                            backgroundColor: navNonActive,
-                                          ),
+                                          ],
                                         ),
-                                        SizedBox(height: 18),
-                                        SizedBox(
-                                          width: 280,
-                                          child: Text(
-                                            "Shehan SS",
-                                            textAlign: TextAlign.center,
-                                            style: Theme.of(context)
-                                                .textTheme
-                                                .titleMedium
-                                                ?.copyWith(
-                                                  fontSize: 22,
-                                                  fontWeight: FontWeight.bold,
-                                                  letterSpacing: 0.5,
-                                                ),
+                                        child: CircleAvatar(
+                                          radius: 60,
+                                          backgroundImage: AssetImage(
+                                            'assets/splash/logo.png',
                                           ),
+                                          backgroundColor: navNonActive,
                                         ),
-                                        SizedBox(height: 8),
-                                        SizedBox(
-                                          width: 280,
-                                          child: Text(
-                                            "Movie & Series Enthusiast",
-                                            style: Theme.of(context)
-                                                .textTheme
-                                                .bodySmall
-                                                ?.copyWith(
-                                                  fontWeight: FontWeight.w500,
-                                                  color: Colors.white70,
-                                                  fontSize: 12,
-                                                  letterSpacing: 0.3,
-                                                  fontStyle: FontStyle.italic,
-                                                  height: 1.4,
-                                                ),
-                                            softWrap: true,
-                                            textAlign: TextAlign.center,
-                                            maxLines: 2,
-                                            overflow: TextOverflow.ellipsis,
-                                          ),
+                                      ),
+                                      SizedBox(height: 18),
+                                      SizedBox(
+                                        width: 280,
+                                        child: Text(
+                                          "Shehan SS",
+                                          textAlign: TextAlign.center,
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .titleMedium
+                                              ?.copyWith(
+                                                fontSize: 22,
+                                                fontWeight: FontWeight.bold,
+                                                letterSpacing: 0.5,
+                                              ),
                                         ),
-                                      ],
-                                    ),
+                                      ),
+                                      SizedBox(height: 8),
+                                      SizedBox(
+                                        width: 280,
+                                        child: Text(
+                                          "Movie & Series Enthusiast",
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .bodySmall
+                                              ?.copyWith(
+                                                fontWeight: FontWeight.w500,
+                                                color: Colors.white70,
+                                                fontSize: 12,
+                                                letterSpacing: 0.3,
+                                                fontStyle: FontStyle.italic,
+                                                height: 1.4,
+                                              ),
+                                          softWrap: true,
+                                          textAlign: TextAlign.center,
+                                          maxLines: 2,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ),
                               ],
@@ -199,26 +224,35 @@ class _PersonalScreenState extends State<PersonalScreen>
                       ),
                     ),
 
-                    // Stats Card
                     SliverToBoxAdapter(
-                      child: Opacity(
-                        opacity: 1 - scrollProgress,
-                        child: TweenAnimationBuilder<double>(
-                          tween: Tween<double>(begin: 0, end: 1),
-                          duration: Duration(milliseconds: 900),
-                          curve: Curves.easeOutQuad,
-                          builder: (context, value, child) {
-                            return Opacity(
-                              opacity: value,
-                              child: Transform.translate(
-                                offset: Offset(0, 15 * (1 - value)),
-                                child: child,
-                              ),
-                            );
-                          },
-                          child: Padding(
-                            padding: const EdgeInsets.fromLTRB(15, 20, 15, 10),
-                            child: completedStatsCard('10h 20m', 125, 25),
+                      child: TweenAnimationBuilder<double>(
+                        tween: Tween<double>(begin: 0, end: 1),
+                        duration: Duration(milliseconds: 900),
+                        curve: Curves.easeOutQuad,
+                        builder: (context, value, child) {
+                          return Opacity(
+                            opacity: value,
+                            child: Transform.translate(
+                              offset: Offset(0, 15 * (1 - value)),
+                              child: child,
+                            ),
+                          );
+                        },
+                        child: Padding(
+                          padding: const EdgeInsets.fromLTRB(15, 20, 15, 10),
+                          child: FutureBuilder<Map<String, dynamic>>(
+                            future: _statsFuture,
+                            builder: (context, snapshot) {
+                              if (snapshot.hasData) {
+                                final data = snapshot.data!;
+                                return completedStatsCard(
+                                  data['watchTime'] as String,
+                                  data['movies'] as int,
+                                  data['episodes'] as int,
+                                );
+                              }
+                              return completedStatsCard('0h 0m', 0, 0);
+                            },
                           ),
                         ),
                       ),
@@ -228,11 +262,10 @@ class _PersonalScreenState extends State<PersonalScreen>
             body: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 15),
               child: Column(
-                mainAxisSize: MainAxisSize.min,
+                mainAxisSize: MainAxisSize.max,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   SizedBox(height: 16),
-                  // Tabs
                   TweenAnimationBuilder<double>(
                     tween: Tween<double>(begin: 0, end: 1),
                     duration: Duration(milliseconds: 1000),
@@ -259,7 +292,6 @@ class _PersonalScreenState extends State<PersonalScreen>
                         ],
                       ),
                       height: 52,
-
                       child: TabBar(
                         controller: _tabController,
                         labelStyle: TextStyle(
@@ -281,7 +313,6 @@ class _PersonalScreenState extends State<PersonalScreen>
                           borderRadius: BorderRadius.circular(10),
                         ),
                         tabs: [
-                          Icon(Icons.photo_filter_rounded, size: 24),
                           Icon(Icons.favorite_border_rounded, size: 24),
                           Icon(Icons.check_circle_outlined, size: 24),
                         ],
@@ -290,14 +321,12 @@ class _PersonalScreenState extends State<PersonalScreen>
                   ),
                   SizedBox(height: 16),
 
-                  // Content
                   Expanded(
                     child: TabBarView(
                       controller: _tabController,
                       children: [
-                        Testitem(itemno: 1),
-                        Testitem(itemno: 2),
-                        Testitem(itemno: 3),
+                        FavoritesTab(onDataChanged: _refreshStats),
+                        WatchedTab(onDataChanged: _refreshStats),
                       ],
                     ),
                   ),

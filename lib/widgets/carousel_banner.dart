@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:cine_echo/widgets/safe_network_image.dart';
 
 class CarouselBannerWidget extends StatelessWidget {
   final String title;
@@ -36,10 +37,13 @@ class CarouselBannerWidget extends StatelessWidget {
             Positioned.fill(
               child: imageLink.isEmpty
                   ? Image.asset('assets/splash/logo.png', fit: BoxFit.cover)
-                  : FadeInImage(
-                      image: NetworkImage(imageLink),
-                      placeholder: const AssetImage('assets/splash/logo.png'),
+                  : SafeNetworkImage(
+                      imageUrl: imageLink,
                       fit: BoxFit.cover,
+                      placeholder: Image.asset(
+                        'assets/splash/logo.png',
+                        fit: BoxFit.cover,
+                      ),
                     ),
             ),
 
@@ -101,7 +105,6 @@ class CarouselBannerWidget extends StatelessWidget {
 
                         const SizedBox(width: 12),
 
-                        
                         Container(
                           padding: const EdgeInsets.symmetric(
                             horizontal: 8,

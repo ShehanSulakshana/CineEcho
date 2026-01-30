@@ -1,7 +1,7 @@
 import 'package:cine_echo/themes/pallets.dart';
 import 'package:flutter/material.dart';
 
-Widget completedStatsCard(String watchTime, int movies, int series) {
+Widget completedStatsCard(String watchTime, int movies, int episodes) {
   return IntrinsicHeight(
     child: Card(
       color: Color.fromARGB(255, 10, 40, 60),
@@ -31,8 +31,8 @@ Widget completedStatsCard(String watchTime, int movies, int series) {
               child: _statColumn(
                 Icons.tv,
                 Colors.lightBlue,
-                'Tv Series',
-                series.toString(),
+                'Tv Episodes',
+                episodes.toString(),
               ),
             ),
           ],

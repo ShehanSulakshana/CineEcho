@@ -3,6 +3,8 @@ import 'package:cine_echo/screens/home_screen.dart';
 import 'package:cine_echo/providers/auth_provider.dart' as auth_provider;
 import 'package:cine_echo/providers/tmdb_provider.dart';
 import 'package:cine_echo/providers/navigation_provider.dart';
+import 'package:cine_echo/providers/connectivity_provider.dart';
+import 'package:cine_echo/widgets/network_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import './themes/themedata.dart';
@@ -13,7 +15,35 @@ import 'firebase_options.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  runApp(const MyApp());
+  runApp(const RestartWidget(child: MyApp()));
+}
+
+class RestartWidget extends StatefulWidget {
+  const RestartWidget({super.key, required this.child});
+
+  final Widget child;
+
+  static void restartApp(BuildContext context) {
+    context.findAncestorStateOfType<_RestartWidgetState>()?.restartApp();
+  }
+
+  @override
+  State<RestartWidget> createState() => _RestartWidgetState();
+}
+
+class _RestartWidgetState extends State<RestartWidget> {
+  Key key = UniqueKey();
+
+  void restartApp() {
+    setState(() {
+      key = UniqueKey();
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return KeyedSubtree(key: key, child: widget.child);
+  }
 }
 
 class NoStretchBehavior extends MaterialScrollBehavior {
@@ -44,6 +74,7 @@ class MyApp extends StatelessWidget {
         ),
         ChangeNotifierProvider(create: (_) => TmdbProvider()),
         ChangeNotifierProvider(create: (_) => NavigationProvider()),
+        ChangeNotifierProvider(create: (_) => ConnectivityProvider()),
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
@@ -58,7 +89,7 @@ class MyApp extends StatelessWidget {
                   return const Center(child: CircularProgressIndicator());
                 }
                 if (asyncSnapshot.data != null) {
-                  return HomeScreen();
+                  return const _HomeScreenWithConnectivity();
                 } else {
                   return const OnboardScreen();
                 }
@@ -68,5 +99,80 @@ class MyApp extends StatelessWidget {
         ),
       ),
     );
+  }
+}
+
+class _HomeScreenWithConnectivity extends StatefulWidget {
+  const _HomeScreenWithConnectivity({Key? key}) : super(key: key);
+
+  @override
+  State<_HomeScreenWithConnectivity> createState() =>
+      _HomeScreenWithConnectivityState();
+}
+
+class _HomeScreenWithConnectivityState
+    extends State<_HomeScreenWithConnectivity> {
+  late ConnectivityProvider _connectivityProvider;
+  bool _isDialogShowing = false;
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Consumer<ConnectivityProvider>(
+      builder: (context, connectivityProvider, _) {
+        _connectivityProvider = connectivityProvider;
+
+        // Check for network issues (disconnected OR has network error)
+        final hasNetworkIssue =
+            !connectivityProvider.isConnected ||
+            connectivityProvider.hasNetworkError;
+
+        // Show dialog if there's a connectivity issue
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (hasNetworkIssue && mounted) {
+            _showNetworkDialog(context, connectivityProvider);
+          }
+        });
+
+        return HomeScreen();
+      },
+    );
+  }
+
+  void _showNetworkDialog(
+    BuildContext context,
+    ConnectivityProvider connectivityProvider,
+  ) {
+    if (!mounted || _isDialogShowing) return;
+
+    _isDialogShowing = true;
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (dialogContext) {
+        return NetworkDialog(
+          onReload: () {
+            // Close the dialog first
+            if (dialogContext.mounted) {
+              Navigator.of(dialogContext).pop();
+            }
+
+            // Clear error state
+            connectivityProvider.clearError();
+
+            // Restart the entire app
+            RestartWidget.restartApp(context);
+          },
+        );
+      },
+    ).then((_) {
+      // Reset the flag when dialog is closed
+      _isDialogShowing = false;
+    });
   }
 }

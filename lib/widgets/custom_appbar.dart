@@ -1,8 +1,8 @@
+import 'package:cine_echo/screens/search_screen.dart';
 import 'package:cine_echo/themes/pallets.dart';
 import 'package:flutter/material.dart';
 
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
-  
   const CustomAppBar({super.key});
 
   @override
@@ -41,7 +41,12 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                   alignment: Alignment.centerRight,
                   child: GestureDetector(
                     onTap: () {
-                      //TODO : navigate search
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const SearchScreen(),
+                        ),
+                      );
                     },
                     child: Icon(
                       Icons.search_rounded,
