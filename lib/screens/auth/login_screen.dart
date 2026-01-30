@@ -1,4 +1,4 @@
-import 'package:cine_echo/screens/auth/reset_password_screen.dart';
+import 'package:cine_echo/screens/auth/forgot_password_screen.dart';
 import 'package:cine_echo/screens/auth/signup_screen.dart';
 import 'package:cine_echo/screens/home_screen.dart';
 import 'package:cine_echo/themes/pallets.dart';
@@ -41,267 +41,310 @@ class _LoginScreenState extends State<LoginScreen> {
         email: _emailController.text.trim(),
         password: _passwordController.text.trim(),
       );
+
+      if (!mounted) return;
+
       _showSnackBar("Welcome back! Signed in successfully.", Colors.green);
 
       Navigator.pushAndRemoveUntil(
-        // ignore: use_build_context_synchronously
         context,
         MaterialPageRoute(builder: (_) => HomeScreen()),
         (route) => false,
       );
     } on FirebaseAuthException catch (e) {
-      _showSnackBar(e.message!, Colors.red);
+      String message = e.message ?? 'An error occurred';
+      switch (e.code) {
+        case 'user-not-found':
+          message = 'No account found with this email';
+          break;
+        case 'wrong-password':
+          message = 'Incorrect password';
+          break;
+        case 'invalid-email':
+          message = 'Invalid email address';
+          break;
+        case 'user-disabled':
+          message = 'This account has been disabled';
+          break;
+        case 'too-many-requests':
+          message = 'Too many failed attempts. Try again later';
+          break;
+        case 'invalid-credential':
+          message = 'Invalid email or password';
+          break;
+      }
+      _showSnackBar(message, Colors.red);
     } catch (e) {
-      _showSnackBar(e.toString(), Colors.red);
+      _showSnackBar('An unexpected error occurred', Colors.red);
     }
   }
 
-  void _showSnackBar(String e, Color color) {
+  void _showSnackBar(String message, Color color) {
     ScaffoldMessenger.of(
       context,
-    ).showSnackBar(SnackBar(content: Text(e), backgroundColor: color));
+    ).showSnackBar(SnackBar(content: Text(message), backgroundColor: color));
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        toolbarHeight: 120,
-        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-        leading: IconButton(
-          padding: EdgeInsets.only(left: 15),
-          iconSize: 35,
-          color: Colors.white,
-          alignment: Alignment.center,
-          onPressed: () => Navigator.pop(context),
-          icon: Icon(Icons.arrow_back_ios_new_rounded),
-        ),
-      ),
-      body: SingleChildScrollView(
-        controller: ScrollController(),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 25),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                "Welcome back!",
-                style: Theme.of(context).textTheme.displayLarge,
-              ),
-              Text(
-                "Glad to see you, Again!",
-                style: Theme.of(context).textTheme.bodyLarge,
-              ),
+      body: SafeArea(
+        child: SingleChildScrollView(
+          controller: ScrollController(),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 25),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                SizedBox(height: 70),
+                Text(
+                  "Welcome back!",
+                  style: Theme.of(context).textTheme.displayLarge,
+                ),
+                Text(
+                  "Glad to see you, Again!",
+                  style: Theme.of(context).textTheme.bodyLarge,
+                ),
 
-              SizedBox(height: 35),
+                SizedBox(height: 35),
 
-              Form(
-                key: _formKey,
-                child: Column(
-                  children: [
-                    // Inline Email Field
-                    TextFormField(
-                      controller: _emailController,
-                      keyboardType: TextInputType.emailAddress,
-                      cursorColor: Theme.of(context).primaryColor,
-                      textAlignVertical: TextAlignVertical.center,
-                      style: Theme.of(context).textTheme.bodySmall,
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Email required';
-                        }
-                        if (!value.contains('@')) return 'Invalid email';
-                        return null;
-                      },
-                      decoration: InputDecoration(
-                        labelText: 'Email',
-                        fillColor: Theme.of(
-                          context,
-                        ).inputDecorationTheme.fillColor,
-                        labelStyle: Theme.of(
-                          context,
-                        ).inputDecorationTheme.labelStyle,
-                        filled: true,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        errorStyle: TextStyle(
-                          color: Theme.of(context).colorScheme.error,
-                          fontSize: 12,
-                        ),
-                      ),
-                    ),
-                    SizedBox(height: 20),
-
-                    // Inline Password Field with Toggle
-                    TextFormField(
-                      controller: _passwordController,
-                      obscureText: _obscurePassword,
-                      keyboardType: TextInputType.visiblePassword,
-                      cursorColor: Theme.of(context).primaryColor,
-                      textAlignVertical: TextAlignVertical.center,
-                      style: Theme.of(context).textTheme.bodySmall,
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Password required';
-                        }
-                        if (value.length < 8) {
-                          return 'Password must be 8+ characters';
-                        }
-                        return null;
-                      },
-                      decoration: InputDecoration(
-                        labelText: 'Password',
-                        fillColor: Theme.of(
-                          context,
-                        ).inputDecorationTheme.fillColor,
-                        labelStyle: Theme.of(
-                          context,
-                        ).inputDecorationTheme.labelStyle,
-                        filled: true,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        errorStyle: TextStyle(
-                          color: Theme.of(context).colorScheme.error,
-                          fontSize: 12,
-                        ),
-                        suffixIcon: IconButton(
-                          icon: Icon(
-                            _obscurePassword
-                                ? Icons.visibility
-                                : Icons.visibility_off,
-                            color: ashColor,
-                          ),
-                          onPressed: () => setState(
-                            () => _obscurePassword = !_obscurePassword,
-                          ),
-                        ),
-                      ),
-                    ),
-                    SizedBox(height: 25),
-                    Align(
-                      alignment: Alignment.centerRight,
-                      child: Padding(
-                        padding: const EdgeInsets.only(right: 20),
-                        child: GestureDetector(
-                          onTap: () {
-                            // TODO: Forgot Password navigation
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => ResetPasswordScreen(),
-                              ),
-                            );
-                          },
-                          child: Text(
-                            "Forgot Password?",
-                            style: Theme.of(context).textTheme.titleSmall,
-                          ),
-                        ),
-                      ),
-                    ),
-                    SizedBox(height: 30),
-                    SizedBox(
-                      width: double.infinity,
-                      height: 65,
-                      child: ElevatedButton(
-                        onPressed: () async {
-                          if (_formKey.currentState!.validate()) {
-                            await loginUserWithEmailPassword();
+                Form(
+                  key: _formKey,
+                  child: Column(
+                    children: [
+                      // Inline Email Field
+                      TextFormField(
+                        controller: _emailController,
+                        keyboardType: TextInputType.emailAddress,
+                        cursorColor: Theme.of(context).primaryColor,
+                        textAlignVertical: TextAlignVertical.center,
+                        style: Theme.of(context).textTheme.bodySmall,
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Email required';
                           }
+                          if (!value.contains('@')) return 'Invalid email';
+                          return null;
                         },
-                        style: ButtonStyle(
-                          backgroundColor: WidgetStatePropertyAll(
-                            Theme.of(context).primaryColor,
+                        decoration: InputDecoration(
+                          labelText: 'Email',
+                          fillColor: Theme.of(
+                            context,
+                          ).inputDecorationTheme.fillColor,
+                          labelStyle: Theme.of(
+                            context,
+                          ).inputDecorationTheme.labelStyle,
+                          filled: true,
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          errorStyle: TextStyle(
+                            color: Theme.of(context).colorScheme.error,
+                            fontSize: 12,
                           ),
                         ),
-                        child: Text(
-                          "Log in",
-                          style: Theme.of(context).textTheme.titleMedium,
+                      ),
+                      SizedBox(height: 20),
+
+                      // Inline Password Field with Toggle
+                      TextFormField(
+                        controller: _passwordController,
+                        obscureText: _obscurePassword,
+                        keyboardType: TextInputType.visiblePassword,
+                        cursorColor: Theme.of(context).primaryColor,
+                        textAlignVertical: TextAlignVertical.center,
+                        style: Theme.of(context).textTheme.bodySmall,
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Password required';
+                          }
+                          if (value.length < 8) {
+                            return 'Password must be 8+ characters';
+                          }
+                          return null;
+                        },
+                        decoration: InputDecoration(
+                          labelText: 'Password',
+                          fillColor: Theme.of(
+                            context,
+                          ).inputDecorationTheme.fillColor,
+                          labelStyle: Theme.of(
+                            context,
+                          ).inputDecorationTheme.labelStyle,
+                          filled: true,
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          errorStyle: TextStyle(
+                            color: Theme.of(context).colorScheme.error,
+                            fontSize: 12,
+                          ),
+                          suffixIcon: IconButton(
+                            icon: Icon(
+                              _obscurePassword
+                                  ? Icons.visibility
+                                  : Icons.visibility_off,
+                              color: ashColor,
+                            ),
+                            onPressed: () => setState(
+                              () => _obscurePassword = !_obscurePassword,
+                            ),
+                          ),
                         ),
                       ),
+                      SizedBox(height: 25),
+                      Align(
+                        alignment: Alignment.centerRight,
+                        child: Padding(
+                          padding: const EdgeInsets.only(right: 20),
+                          child: GestureDetector(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => ForgotPasswordScreen(),
+                                ),
+                              );
+                            },
+                            child: Text(
+                              "Forgot Password?",
+                              style: Theme.of(context).textTheme.titleSmall,
+                            ),
+                          ),
+                        ),
+                      ),
+                      SizedBox(height: 30),
+                      SizedBox(
+                        width: double.infinity,
+                        height: 65,
+                        child: ElevatedButton(
+                          onPressed: () async {
+                            if (_formKey.currentState!.validate()) {
+                              await loginUserWithEmailPassword();
+                            }
+                          },
+                          style: ButtonStyle(
+                            backgroundColor: WidgetStatePropertyAll(
+                              Theme.of(context).primaryColor,
+                            ),
+                          ),
+                          child: Text(
+                            "Log in",
+                            style: Theme.of(context).textTheme.titleMedium,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                SizedBox(height: 40),
+
+                Row(
+                  children: [
+                    Expanded(child: Container(height: 1, color: ashColor)),
+                    Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 16),
+                      child: Text(
+                        'Or Login with',
+                        style: Theme.of(context).textTheme.bodySmall,
+                      ),
                     ),
+                    Expanded(child: Container(height: 1, color: ashColor)),
                   ],
                 ),
-              ),
 
-              SizedBox(height: 40),
+                SizedBox(height: 40),
 
-              Row(
-                children: [
-                  Expanded(child: Container(height: 1, color: ashColor)),
-                  Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 16),
-                    child: Text(
-                      'Or Login with',
-                      style: Theme.of(context).textTheme.bodySmall,
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton.icon(
+                    icon: Icon(Icons.g_mobiledata_rounded),
+                    label: Text(
+                      'Continue with Google',
+                      style: Theme.of(context).textTheme.bodyMedium,
                     ),
-                  ),
-                  Expanded(child: Container(height: 1, color: ashColor)),
-                ],
-              ),
-
-              SizedBox(height: 40),
-
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton.icon(
-                  icon: Icon(Icons.g_mobiledata_rounded),
-                  label: Text(
-                    'Continue with Google',
-                    style: Theme.of(context).textTheme.bodyMedium,
-                  ),
-                  style: ElevatedButton.styleFrom(
-                    iconSize: 35,
-                    backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-                    foregroundColor: Colors.white,
-                    padding: EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(
-                      side: BorderSide(width: 1, color: lightblueColor),
-                      borderRadius: BorderRadius.circular(50),
+                    style: ElevatedButton.styleFrom(
+                      iconSize: 35,
+                      backgroundColor: Theme.of(
+                        context,
+                      ).scaffoldBackgroundColor,
+                      foregroundColor: Colors.white,
+                      padding: EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        side: BorderSide(width: 1, color: lightblueColor),
+                        borderRadius: BorderRadius.circular(50),
+                      ),
                     ),
-                  ),
-                  onPressed: () {
-                    // TODO: Google Sign-In
-                  },
-                ),
-              ),
-
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.only(bottom: 50),
-                  child: Align(
-                    alignment: Alignment.bottomCenter,
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          "Don't have an account?",
-                          style: Theme.of(context).textTheme.bodySmall,
-                        ),
-                        GestureDetector(
-                          onTap: () {
-                            // TODO: Navigate to Sign Up
-                            Navigator.pushReplacement(
+                    onPressed: () async {
+                      try {
+                        final authProvider =
+                            Provider.of<auth_provider.AuthenticationProvider>(
                               context,
-                              MaterialPageRoute(
-                                builder: (context) => SignUpScreen(),
-                              ),
+                              listen: false,
                             );
-                          },
-                          child: Text(
-                            " Register Now",
-                            style: Theme.of(context).textTheme.titleSmall,
-                          ),
-                        ),
-                      ],
-                    ),
+                        final credential = await authProvider
+                            .signInWithGoogle();
+
+                        if (credential != null) {
+                          _showSnackBar(
+                            "Signed in with Google successfully!",
+                            Colors.green,
+                          );
+                          Navigator.pushAndRemoveUntil(
+                            // ignore: use_build_context_synchronously
+                            context,
+                            MaterialPageRoute(builder: (_) => HomeScreen()),
+                            (route) => false,
+                          );
+                        }
+                      } on FirebaseAuthException catch (e) {
+                        _showSnackBar(
+                          e.message ?? 'Google Sign-In failed',
+                          Colors.red,
+                        );
+                      } catch (e) {
+                        _showSnackBar(
+                          'An error occurred during Google Sign-In',
+                          Colors.red,
+                        );
+                      }
+                    },
                   ),
                 ),
-              ),
-            ],
+
+                SizedBox(height: 40),
+
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 50),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        "Don't have an account?",
+                        style: Theme.of(context).textTheme.bodySmall,
+                      ),
+                      GestureDetector(
+                        onTap: () {
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => SignUpScreen(),
+                            ),
+                          );
+                        },
+                        child: Text(
+                          " Register Now",
+                          style: Theme.of(context).textTheme.titleSmall,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),

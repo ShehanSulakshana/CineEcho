@@ -25,21 +25,19 @@ class _FavoritesTabState extends State<FavoritesTab> {
   }
 
   Future<void> _loadFavorites() async {
-    final movies = await _watchRepo.getWatchedMovies();
+    final movies = await _watchRepo.getFavoritedMovies();
     final series = await _watchRepo.getFavoritedSeries();
 
     List<Map<String, dynamic>> items = [];
 
     items.addAll(
-      movies
-          .where((movie) => movie.isFavorite)
-          .map(
-            (movie) => {
-              'type': 'movie',
-              'id': movie.tmdbId,
-              'timestamp': movie.watchedAt,
-            },
-          ),
+      movies.map(
+        (movie) => {
+          'type': 'movie',
+          'id': movie.tmdbId,
+          'timestamp': movie.favoritedAt,
+        },
+      ),
     );
 
     items.addAll(
@@ -230,7 +228,7 @@ class _FavoritesTabState extends State<FavoritesTab> {
           },
           onLongPress: () {
             _showDeleteDialog(title, () async {
-              await _watchRepo.unmarkMovieWatched(movieId);
+              await _watchRepo.unmarkMovieFavorite(movieId);
               if (mounted) {
                 _loadFavorites();
                 widget.onDataChanged?.call();

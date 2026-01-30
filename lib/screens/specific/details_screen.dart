@@ -310,8 +310,8 @@ class _DetailsScreenState extends State<DetailsScreen> {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     SizedBox(
-                                      height: 50,
-                                      child: title.length > 15
+                                      height: 60,
+                                      child: title.length > 15 && !_isLoading
                                           ? Marquee(
                                               text: title,
                                               style: Theme.of(
@@ -336,10 +336,11 @@ class _DetailsScreenState extends State<DetailsScreen> {
                                             )
                                           : Text(
                                               title,
+                                              maxLines: 1,
                                               overflow: TextOverflow.ellipsis,
                                               style: Theme.of(
                                                 context,
-                                              ).textTheme.bodyLarge,
+                                              ).textTheme.bodySmall,
                                             ).redacted(
                                               context: context,
                                               redact: _isLoading,
@@ -576,15 +577,12 @@ class _ButtonsState extends State<Buttons> with TickerProviderStateMixin {
   Future<void> _loadStatus() async {
     if (widget.contentType == 'movie') {
       final watched = await _watchRepo.isMovieWatched(widget.contentId);
-      final movies = await _watchRepo.getWatchedMovies();
-      final movie = movies
-          .where((m) => m.tmdbId == widget.contentId)
-          .firstOrNull;
+      final favorite = await _watchRepo.isMovieFavorited(widget.contentId);
 
       if (mounted) {
         setState(() {
           markeAsWatched = watched;
-          isFavorite = movie?.isFavorite ?? false;
+          isFavorite = favorite;
           if (markeAsWatched) {
             _watchedController.value = 1.0;
           }
@@ -649,7 +647,11 @@ class _ButtonsState extends State<Buttons> with TickerProviderStateMixin {
 
     // Update in repository
     if (widget.contentType == 'movie') {
-      await _watchRepo.markMovieWatched(widget.contentId, favorite: isFavorite);
+      if (isFavorite) {
+        await _watchRepo.markMovieFavorite(widget.contentId);
+      } else {
+        await _watchRepo.unmarkMovieFavorite(widget.contentId);
+      }
     } else if (widget.contentType == 'tv') {
       if (isFavorite) {
         await _watchRepo.markSeriesFavorite(widget.contentId);
@@ -717,10 +719,7 @@ class _ButtonsState extends State<Buttons> with TickerProviderStateMixin {
     if (widget.contentType == 'movie') {
       // For movies: simply mark/unmark as watched
       if (markeAsWatched) {
-        await _watchRepo.markMovieWatched(
-          widget.contentId,
-          favorite: isFavorite,
-        );
+        await _watchRepo.markMovieWatched(widget.contentId);
       } else {
         await _watchRepo.unmarkMovieWatched(widget.contentId);
       }

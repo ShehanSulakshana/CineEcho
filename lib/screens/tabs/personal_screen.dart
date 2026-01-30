@@ -1,4 +1,5 @@
 import 'package:cine_echo/models/watch_history_repository.dart';
+import 'package:cine_echo/screens/profile_editor_screen.dart';
 import 'package:cine_echo/screens/profile_tabs/favorites_tab.dart';
 import 'package:cine_echo/screens/profile_tabs/watched_tab.dart';
 import 'package:cine_echo/themes/pallets.dart';
@@ -126,10 +127,29 @@ class _PersonalScreenState extends State<PersonalScreen>
                                         Expanded(
                                           child: Align(
                                             alignment: Alignment.centerRight,
-                                            child: Icon(
-                                              Icons.edit_note_rounded,
-                                              size: 24,
-                                              color: navActive,
+                                            child: Material(
+                                              color: Colors.transparent,
+                                              child: InkWell(
+                                                onTap: () {
+                                                  Navigator.push(
+                                                    context,
+                                                    MaterialPageRoute(
+                                                      builder: (context) =>
+                                                          ProfileEditorScreen(),
+                                                    ),
+                                                  );
+                                                },
+                                                borderRadius:
+                                                    BorderRadius.circular(8),
+                                                child: Padding(
+                                                  padding: EdgeInsets.all(8),
+                                                  child: Icon(
+                                                    Icons.edit_note_rounded,
+                                                    size: 24,
+                                                    color: navActive,
+                                                  ),
+                                                ),
+                                              ),
                                             ),
                                           ),
                                         ),

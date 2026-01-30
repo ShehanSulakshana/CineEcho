@@ -28,10 +28,30 @@ class _SignUpScreenState extends State<SignUpScreen> {
         context,
         listen: false,
       );
-      await authProvider.createAccount(
+
+      // Create the account
+      final credential = await authProvider.createAccount(
         email: _emailController.text.trim(),
         password: _passwordController.text.trim(),
       );
+
+      // Update the display name with username
+      final username = _usernameController.text.trim();
+      await authProvider.updateUserName(
+        username: _usernameController.text.trim(),
+      );
+
+      final uid = credential.user?.uid;
+      final email = _emailController.text.trim();
+      if (uid != null) {
+        await authProvider.saveUserProfile(
+          uid: uid,
+          email: email,
+          displayName: username,
+        );
+      }
+
+      if (!mounted) return;
 
       _showSnackBar(
         "Account created successfully! Welcome aboard.",
@@ -39,22 +59,40 @@ class _SignUpScreenState extends State<SignUpScreen> {
       );
 
       Navigator.pushAndRemoveUntil(
-        // ignore: use_build_context_synchronously
         context,
         MaterialPageRoute(builder: (_) => HomeScreen()),
         (route) => false,
       );
     } on FirebaseAuthException catch (e) {
-      _showSnackBar(e.message!, Colors.red);
+      String message = e.message ?? 'An error occurred';
+      switch (e.code) {
+        case 'email-already-in-use':
+          message = 'This email is already registered';
+          break;
+        case 'weak-password':
+          message = 'Password is too weak. Use a stronger password';
+          break;
+        case 'invalid-email':
+          message = 'Invalid email address';
+          break;
+        case 'operation-not-allowed':
+          message = 'Email/password accounts are not enabled';
+          break;
+      }
+      _showSnackBar(message, Colors.red);
     } catch (e) {
-      _showSnackBar(e.toString(), Colors.red);
+      print('Signup error: $e');
+      _showSnackBar(
+        'An unexpected error occurred: ${e.toString()}',
+        Colors.red,
+      );
     }
   }
 
-  void _showSnackBar(String e, Color color) {
+  void _showSnackBar(String message, Color color) {
     ScaffoldMessenger.of(
       context,
-    ).showSnackBar(SnackBar(content: Text(e), backgroundColor: color));
+    ).showSnackBar(SnackBar(content: Text(message), backgroundColor: color));
   }
 
   @override
@@ -69,27 +107,15 @@ class _SignUpScreenState extends State<SignUpScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        toolbarHeight: 120,
-        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-        leading: IconButton(
-          padding: EdgeInsets.only(left: 15),
-          iconSize: 35,
-          color: Colors.white,
-          alignment: Alignment.center,
-          onPressed: () => Navigator.pop(context),
-          icon: Icon(Icons.arrow_back_ios_new_rounded),
-        ),
-      ),
-
       body: SingleChildScrollView(
         controller: ScrollController(),
-
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 25),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
             children: [
+              SizedBox(height: 120),
               Text(
                 "Create Account",
                 style: Theme.of(context).textTheme.displayLarge,
@@ -288,40 +314,118 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         ),
                       ),
                     ),
+                    SizedBox(height: 20),
+                    // Divider with "OR"
+                    Row(
+                      children: [
+                        Expanded(child: Divider(color: Colors.grey)),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          child: Text(
+                            "OR",
+                            style: Theme.of(context).textTheme.bodySmall,
+                          ),
+                        ),
+                        Expanded(child: Divider(color: Colors.grey)),
+                      ],
+                    ),
+                    SizedBox(height: 20),
+                    // Google Sign-In Button
+                    SizedBox(
+                      width: double.infinity,
+                      height: 65,
+                      child: OutlinedButton.icon(
+                        onPressed: () async {
+                          try {
+                            final authProvider =
+                                Provider.of<
+                                  auth_provider.AuthenticationProvider
+                                >(context, listen: false);
+                            await authProvider.signInWithGoogle();
+
+                            if (!mounted) return;
+
+                            _showSnackBar(
+                              "Signed in with Google successfully!",
+                              Colors.green,
+                            );
+                            Navigator.pushAndRemoveUntil(
+                              context,
+                              MaterialPageRoute(builder: (_) => HomeScreen()),
+                              (route) => false,
+                            );
+                          } on FirebaseAuthException catch (e) {
+                            String message =
+                                e.message ?? 'Google Sign-In failed';
+                            switch (e.code) {
+                              case 'account-exists-with-different-credential':
+                                message =
+                                    'An account already exists with the same email';
+                                break;
+                              case 'invalid-credential':
+                                message = 'The credential is invalid';
+                                break;
+                              case 'operation-not-allowed':
+                                message = 'Google Sign-In is not enabled';
+                                break;
+                              case 'user-disabled':
+                                message = 'This account has been disabled';
+                                break;
+                            }
+                            _showSnackBar(message, Colors.red);
+                          } catch (e) {
+                            _showSnackBar(
+                              'An unexpected error occurred with Google Sign-In',
+                              Colors.red,
+                            );
+                          }
+                        },
+                        icon: Image.asset(
+                          'assets/images/google_logo.png',
+                          height: 24,
+                          width: 24,
+                          errorBuilder: (context, error, stackTrace) {
+                            return Icon(Icons.login, size: 24);
+                          },
+                        ),
+                        label: Text(
+                          "Continue with Google",
+                          style: Theme.of(context).textTheme.titleMedium,
+                        ),
+                        style: OutlinedButton.styleFrom(
+                          side: BorderSide(color: Colors.grey),
+                        ),
+                      ),
+                    ),
                   ],
                 ),
               ),
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.only(bottom: 50),
-                  child: Align(
-                    alignment: Alignment.bottomCenter,
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          "Already have an account?",
-                          style: Theme.of(context).textTheme.bodySmall,
-                        ),
-                        GestureDetector(
-                          onTap: () {
-                            // TODO: Navigate to Login
-                            Navigator.pushReplacement(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => LoginScreen(),
-                              ),
-                            ); // Back to login
-                          },
-                          child: Text(
-                            " Login Now",
-                            style: Theme.of(context).textTheme.titleSmall,
-                          ),
-                        ),
-                      ],
+              SizedBox(height: 40),
+              Padding(
+                padding: const EdgeInsets.only(bottom: 50),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      "Already have an account?",
+                      style: Theme.of(context).textTheme.bodySmall,
                     ),
-                  ),
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => LoginScreen(),
+                          ),
+                        );
+                      },
+                      child: Text(
+                        " Login Now",
+                        style: Theme.of(context).textTheme.titleSmall,
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ],

@@ -1,63 +1,84 @@
-import 'dart:convert';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:cine_echo/models/watched_movie.dart';
-import 'package:cine_echo/models/watched_episode.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cine_echo/models/favorited_movie.dart';
 import 'package:cine_echo/models/favorited_series.dart';
+import 'package:cine_echo/models/watched_episode.dart';
+import 'package:cine_echo/models/watched_movie.dart';
 import 'package:cine_echo/models/watch_stats.dart';
 
 class WatchHistoryRepository {
-  static const String _moviesKey = 'watched_movies';
-  static const String _episodesKey = 'watched_episodes';
-  static const String _favoritedSeriesKey = 'favorited_series';
+  final FirebaseFirestore _firestore;
+  final FirebaseAuth _auth;
 
-  final FlutterSecureStorage _storage;
+  WatchHistoryRepository({FirebaseFirestore? firestore, FirebaseAuth? auth})
+    : _firestore = firestore ?? FirebaseFirestore.instance,
+      _auth = auth ?? FirebaseAuth.instance;
 
-  WatchHistoryRepository({FlutterSecureStorage? storage})
-    : _storage = storage ?? const FlutterSecureStorage();
+  String? get _uid => _auth.currentUser?.uid;
 
-  // Mark movie as watched
+  CollectionReference<Map<String, dynamic>> _watchedMoviesRef(String uid) =>
+      _firestore.collection('users').doc(uid).collection('watched_movies');
+
+  CollectionReference<Map<String, dynamic>> _watchedEpisodesRef(String uid) =>
+      _firestore.collection('users').doc(uid).collection('watched_episodes');
+
+  CollectionReference<Map<String, dynamic>> _favoriteMoviesRef(String uid) =>
+      _firestore.collection('users').doc(uid).collection('favorite_movies');
+
+  CollectionReference<Map<String, dynamic>> _favoriteSeriesRef(String uid) =>
+      _firestore.collection('users').doc(uid).collection('favorite_series');
+
+  DocumentReference<Map<String, dynamic>> _statsDocRef(String uid) => _firestore
+      .collection('users')
+      .doc(uid)
+      .collection('stats')
+      .doc('summary');
+
+  DateTime _parseDate(dynamic value) {
+    if (value is Timestamp) return value.toDate();
+    if (value is String) return DateTime.tryParse(value) ?? DateTime.now();
+    return DateTime.now();
+  }
+
   Future<void> markMovieWatched(int tmdbId, {bool favorite = false}) async {
-    // Validate tmdbId
     if (tmdbId <= 0) {
       throw ArgumentError('Invalid tmdbId: must be greater than 0');
     }
+    final uid = _uid;
+    if (uid == null) throw Exception('User not authenticated');
 
-    final movies = await getWatchedMovies();
+    try {
+      await _watchedMoviesRef(uid).doc(tmdbId.toString()).set({
+        'tmdbId': tmdbId,
+        'watchedAt': FieldValue.serverTimestamp(),
+      }, SetOptions(merge: true));
 
-    final index = movies.indexWhere((m) => m.tmdbId == tmdbId);
-    if (index >= 0) {
-      movies[index] = WatchedMovie(
-        tmdbId: tmdbId,
-        watchedAt: movies[index].watchedAt,
-        isFavorite: favorite,
-      );
-    } else {
-      movies.add(
-        WatchedMovie(
-          tmdbId: tmdbId,
-          watchedAt: DateTime.now(),
-          isFavorite: favorite,
-        ),
-      );
+      if (favorite) {
+        await markMovieFavorite(tmdbId);
+      }
+
+      await _updateStats(uid);
+    } catch (e) {
+      throw Exception('Failed to mark movie as watched: $e');
     }
-
-    await _saveMovies(movies);
   }
 
-  // Unmark movie as watched
   Future<void> unmarkMovieWatched(int tmdbId) async {
-    final movies = await getWatchedMovies();
-    movies.removeWhere((m) => m.tmdbId == tmdbId);
-    await _saveMovies(movies);
+    final uid = _uid;
+    if (uid == null) throw Exception('User not authenticated');
+    try {
+      await _watchedMoviesRef(uid).doc(tmdbId.toString()).delete();
+      await _updateStats(uid);
+    } catch (e) {
+      throw Exception('Failed to unmark movie: $e');
+    }
   }
 
-  // Mark episode as watched
   Future<void> markEpisodeWatched(
     int seriesTmdbId,
     int seasonNumber,
     int episodeNumber,
   ) async {
-    // Validate all parameters
     if (seriesTmdbId <= 0) {
       throw ArgumentError('Invalid seriesTmdbId: must be greater than 0');
     }
@@ -68,88 +89,132 @@ class WatchHistoryRepository {
       throw ArgumentError('Invalid episodeNumber: must be greater than 0');
     }
 
-    final episodes = await getWatchedEpisodes();
+    final uid = _uid;
+    if (uid == null) throw Exception('User not authenticated');
 
-    final exists = episodes.any(
-      (e) =>
-          e.seriesTmdbId == seriesTmdbId &&
-          e.seasonNumber == seasonNumber &&
-          e.episodeNumber == episodeNumber,
-    );
+    try {
+      final episodeKey =
+          '${seriesTmdbId}_S$seasonNumber'
+          'E$episodeNumber';
+      await _watchedEpisodesRef(uid).doc(episodeKey).set({
+        'seriesTmdbId': seriesTmdbId,
+        'seasonNumber': seasonNumber,
+        'episodeNumber': episodeNumber,
+        'watchedAt': FieldValue.serverTimestamp(),
+      }, SetOptions(merge: true));
 
-    if (!exists) {
-      episodes.add(
-        WatchedEpisode(
-          seriesTmdbId: seriesTmdbId,
-          seasonNumber: seasonNumber,
-          episodeNumber: episodeNumber,
-          watchedAt: DateTime.now(),
-        ),
-      );
-      await _saveEpisodes(episodes);
+      await _updateStats(uid);
+    } catch (e) {
+      throw Exception('Failed to mark episode as watched: $e');
     }
   }
 
-  // Unmark episode as watched
   Future<void> unmarkEpisodeWatched(
     int seriesTmdbId,
     int seasonNumber,
     int episodeNumber,
   ) async {
-    final episodes = await getWatchedEpisodes();
-    episodes.removeWhere(
-      (e) =>
-          e.seriesTmdbId == seriesTmdbId &&
-          e.seasonNumber == seasonNumber &&
-          e.episodeNumber == episodeNumber,
-    );
-    await _saveEpisodes(episodes);
+    final uid = _uid;
+    if (uid == null) throw Exception('User not authenticated');
+    try {
+      final episodeKey =
+          '${seriesTmdbId}_S$seasonNumber'
+          'E$episodeNumber';
+      await _watchedEpisodesRef(uid).doc(episodeKey).delete();
+      await _updateStats(uid);
+    } catch (e) {
+      throw Exception('Failed to unmark episode: $e');
+    }
   }
 
-  // Check if movie is watched
   Future<bool> isMovieWatched(int tmdbId) async {
-    final movies = await getWatchedMovies();
-    return movies.any((m) => m.tmdbId == tmdbId);
+    final uid = _uid;
+    if (uid == null) return false;
+    try {
+      final doc = await _watchedMoviesRef(uid).doc(tmdbId.toString()).get();
+      return doc.exists;
+    } catch (e) {
+      print('Error checking if movie is watched: $e');
+      return false;
+    }
   }
 
-  // Check if episode is watched
   Future<bool> isEpisodeWatched(
     int seriesTmdbId,
     int seasonNumber,
     int episodeNumber,
   ) async {
-    final episodes = await getWatchedEpisodes();
-    return episodes.any(
-      (e) =>
-          e.seriesTmdbId == seriesTmdbId &&
-          e.seasonNumber == seasonNumber &&
-          e.episodeNumber == episodeNumber,
-    );
+    final uid = _uid;
+    if (uid == null) return false;
+    try {
+      final episodeKey =
+          '${seriesTmdbId}_S$seasonNumber'
+          'E$episodeNumber';
+      final doc = await _watchedEpisodesRef(uid).doc(episodeKey).get();
+      return doc.exists;
+    } catch (e) {
+      print('Error checking if episode is watched: $e');
+      return false;
+    }
   }
 
-  // Get all watched movies
   Future<List<WatchedMovie>> getWatchedMovies() async {
-    final jsonStr = await _storage.read(key: _moviesKey);
-    if (jsonStr == null) return [];
+    final uid = _uid;
+    if (uid == null) return [];
 
-    final List<dynamic> jsonList = jsonDecode(jsonStr);
-    return jsonList
-        .map((json) => WatchedMovie.fromJson(json as Map<String, dynamic>))
-        .toList();
+    try {
+      final favorites = await getFavoritedMovies();
+      final favoriteIds = favorites.map((f) => f.tmdbId).toSet();
+
+      final snapshot = await _watchedMoviesRef(uid).get();
+      return snapshot.docs
+          .map((doc) {
+            final data = doc.data();
+            final id =
+                (data['tmdbId'] as num?)?.toInt() ?? int.tryParse(doc.id) ?? 0;
+            if (id <= 0) return null;
+            return WatchedMovie(
+              tmdbId: id,
+              watchedAt: _parseDate(data['watchedAt']),
+              isFavorite: favoriteIds.contains(id),
+            );
+          })
+          .whereType<WatchedMovie>()
+          .toList();
+    } catch (e) {
+      print('Error getting watched movies: $e');
+      return [];
+    }
   }
 
-  // Get all watched episodes
   Future<List<WatchedEpisode>> getWatchedEpisodes() async {
-    final jsonStr = await _storage.read(key: _episodesKey);
-    if (jsonStr == null) return [];
+    final uid = _uid;
+    if (uid == null) return [];
 
-    final List<dynamic> jsonList = jsonDecode(jsonStr);
-    return jsonList
-        .map((json) => WatchedEpisode.fromJson(json as Map<String, dynamic>))
-        .toList();
+    try {
+      final snapshot = await _watchedEpisodesRef(uid).get();
+      return snapshot.docs
+          .map((doc) {
+            final data = doc.data();
+            final seriesId = (data['seriesTmdbId'] as num?)?.toInt() ?? 0;
+            final seasonNumber = (data['seasonNumber'] as num?)?.toInt() ?? 0;
+            final episodeNumber = (data['episodeNumber'] as num?)?.toInt() ?? 0;
+            if (seriesId <= 0 || episodeNumber <= 0) return null;
+            return WatchedEpisode(
+              seriesTmdbId: seriesId,
+              seasonNumber: seasonNumber,
+              episodeNumber: episodeNumber,
+              watchedAt: _parseDate(data['watchedAt']),
+            );
+          })
+          .whereType<WatchedEpisode>()
+          .toList();
+    } catch (e) {
+      print('Error getting watched episodes: $e');
+      return [];
+    }
   }
 
-  // Get watch stats
   Future<WatchStats> getWatchStats() async {
     final movies = await getWatchedMovies();
     final episodes = await getWatchedEpisodes();
@@ -157,70 +222,174 @@ class WatchHistoryRepository {
     return WatchStats(movies: movies, episodes: episodes);
   }
 
-  // Clear all watch history
   Future<void> clearWatchHistory() async {
-    await _storage.delete(key: _moviesKey);
-    await _storage.delete(key: _episodesKey);
-    await _storage.delete(key: _favoritedSeriesKey);
+    final uid = _uid;
+    if (uid == null) return;
+    await _deleteCollection(_watchedMoviesRef(uid));
+    await _deleteCollection(_watchedEpisodesRef(uid));
+    await _deleteCollection(_favoriteMoviesRef(uid));
+    await _deleteCollection(_favoriteSeriesRef(uid));
   }
 
-  // Mark series as favorite
   Future<void> markSeriesFavorite(int seriesTmdbId) async {
-    // Validate seriesTmdbId
     if (seriesTmdbId <= 0) {
       throw ArgumentError('Invalid seriesTmdbId: must be greater than 0');
     }
-
-    final favoritedSeries = await getFavoritedSeries();
-
-    final exists = favoritedSeries.any((s) => s.seriesTmdbId == seriesTmdbId);
-    if (!exists) {
-      favoritedSeries.add(
-        FavoritedSeries(
-          seriesTmdbId: seriesTmdbId,
-          favoritedAt: DateTime.now(),
-        ),
-      );
-      await _saveFavoritedSeries(favoritedSeries);
+    final uid = _uid;
+    if (uid == null) throw Exception('User not authenticated');
+    try {
+      await _favoriteSeriesRef(uid).doc(seriesTmdbId.toString()).set({
+        'seriesTmdbId': seriesTmdbId,
+        'favoritedAt': FieldValue.serverTimestamp(),
+      }, SetOptions(merge: true));
+    } catch (e) {
+      throw Exception('Failed to mark series as favorite: $e');
     }
   }
 
-  // Unmark series from favorite
   Future<void> unmarkSeriesFavorite(int seriesTmdbId) async {
-    final favoritedSeries = await getFavoritedSeries();
-    favoritedSeries.removeWhere((s) => s.seriesTmdbId == seriesTmdbId);
-    await _saveFavoritedSeries(favoritedSeries);
+    final uid = _uid;
+    if (uid == null) throw Exception('User not authenticated');
+    try {
+      await _favoriteSeriesRef(uid).doc(seriesTmdbId.toString()).delete();
+    } catch (e) {
+      throw Exception('Failed to unmark series favorite: $e');
+    }
   }
 
-  // Check if series is favorited
   Future<bool> isSeriesFavorited(int seriesTmdbId) async {
-    final favoritedSeries = await getFavoritedSeries();
-    return favoritedSeries.any((s) => s.seriesTmdbId == seriesTmdbId);
+    final uid = _uid;
+    if (uid == null) return false;
+    try {
+      final doc = await _favoriteSeriesRef(
+        uid,
+      ).doc(seriesTmdbId.toString()).get();
+      return doc.exists;
+    } catch (e) {
+      print('Error checking if series is favorited: $e');
+      return false;
+    }
   }
 
-  // Get all favorited series
+  Future<void> markMovieFavorite(int tmdbId) async {
+    if (tmdbId <= 0) {
+      throw ArgumentError('Invalid tmdbId: must be greater than 0');
+    }
+    final uid = _uid;
+    if (uid == null) throw Exception('User not authenticated');
+    try {
+      await _favoriteMoviesRef(uid).doc(tmdbId.toString()).set({
+        'tmdbId': tmdbId,
+        'favoritedAt': FieldValue.serverTimestamp(),
+      }, SetOptions(merge: true));
+    } catch (e) {
+      throw Exception('Failed to mark movie as favorite: $e');
+    }
+  }
+
+  Future<void> unmarkMovieFavorite(int tmdbId) async {
+    final uid = _uid;
+    if (uid == null) throw Exception('User not authenticated');
+    try {
+      await _favoriteMoviesRef(uid).doc(tmdbId.toString()).delete();
+    } catch (e) {
+      throw Exception('Failed to unmark movie favorite: $e');
+    }
+  }
+
+  Future<bool> isMovieFavorited(int tmdbId) async {
+    final uid = _uid;
+    if (uid == null) return false;
+    try {
+      final doc = await _favoriteMoviesRef(uid).doc(tmdbId.toString()).get();
+      return doc.exists;
+    } catch (e) {
+      print('Error checking if movie is favorited: $e');
+      return false;
+    }
+  }
+
+  Future<List<FavoritedMovie>> getFavoritedMovies() async {
+    final uid = _uid;
+    if (uid == null) return [];
+    try {
+      final snapshot = await _favoriteMoviesRef(uid).get();
+      return snapshot.docs
+          .map((doc) {
+            final data = doc.data();
+            final id =
+                (data['tmdbId'] as num?)?.toInt() ?? int.tryParse(doc.id) ?? 0;
+            if (id <= 0) return null;
+            return FavoritedMovie(
+              tmdbId: id,
+              favoritedAt: _parseDate(data['favoritedAt']),
+            );
+          })
+          .whereType<FavoritedMovie>()
+          .toList();
+    } catch (e) {
+      print('Error getting favorited movies: $e');
+      return [];
+    }
+  }
+
   Future<List<FavoritedSeries>> getFavoritedSeries() async {
-    final jsonStr = await _storage.read(key: _favoritedSeriesKey);
-    if (jsonStr == null) return [];
-
-    final List<dynamic> jsonList = jsonDecode(jsonStr);
-    return jsonList
-        .map((json) => FavoritedSeries.fromJson(json as Map<String, dynamic>))
-        .toList();
+    final uid = _uid;
+    if (uid == null) return [];
+    try {
+      final snapshot = await _favoriteSeriesRef(uid).get();
+      return snapshot.docs
+          .map((doc) {
+            final data = doc.data();
+            final id =
+                (data['seriesTmdbId'] as num?)?.toInt() ??
+                int.tryParse(doc.id) ??
+                0;
+            if (id <= 0) return null;
+            return FavoritedSeries(
+              seriesTmdbId: id,
+              favoritedAt: _parseDate(data['favoritedAt']),
+            );
+          })
+          .whereType<FavoritedSeries>()
+          .toList();
+    } catch (e) {
+      print('Error getting favorited series: $e');
+      return [];
+    }
   }
 
-  Future<void> _saveFavoritedSeries(List<FavoritedSeries> series) async {
-    final jsonStr = jsonEncode(series.map((s) => s.toJson()).toList());
-    await _storage.write(key: _favoritedSeriesKey, value: jsonStr);
+  Future<void> _deleteCollection(
+    CollectionReference<Map<String, dynamic>> collection,
+  ) async {
+    final snapshot = await collection.get();
+    for (final doc in snapshot.docs) {
+      await doc.reference.delete();
+    }
   }
 
-  Future<void> _saveMovies(List<WatchedMovie> movies) async {
-    final jsonStr = jsonEncode(movies.map((m) => m.toJson()).toList());
-    await _storage.write(key: _moviesKey, value: jsonStr);
-  }
+  Future<void> _updateStats(String uid) async {
+    try {
+      final movies = await getWatchedMovies();
+      final episodes = await getWatchedEpisodes();
+      final seriesIds = episodes.map((e) => e.seriesTmdbId).toSet();
 
-  Future<void> _saveEpisodes(List<WatchedEpisode> episodes) async {
-    final jsonStr = jsonEncode(episodes.map((e) => e.toJson()).toList());
-    await _storage.write(key: _episodesKey, value: jsonStr);
+      final moviesWatchedCount = movies.length;
+      final episodesWatchedCount = episodes.length;
+      final seriesWatchedCount = seriesIds.length;
+      final movieWatchMinutes = moviesWatchedCount * 120;
+      final seriesWatchMinutes = episodesWatchedCount * 45;
+
+      await _statsDocRef(uid).set({
+        'moviesWatchedCount': moviesWatchedCount,
+        'episodesWatchedCount': episodesWatchedCount,
+        'seriesWatchedCount': seriesWatchedCount,
+        'movieWatchMinutes': movieWatchMinutes,
+        'seriesWatchMinutes': seriesWatchMinutes,
+        'updatedAt': FieldValue.serverTimestamp(),
+      }, SetOptions(merge: true));
+    } catch (e) {
+      print('Error updating stats: $e');
+    }
   }
 }

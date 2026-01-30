@@ -1,0 +1,77 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+    
+    match /users/{userId} {
+      allow read: if isOwner(userId);
+      allow create, update: if isOwner(userId) 
+        && request.resource.data.keys().hasAll(['displayName', 'email'])
+        && request.resource.data.displayName is string
+        && request.resource.data.email is string
+        && (!('about' in request.resource.data) || request.resource.data.about is string);
+      allow delete: if isOwner(userId);
+      
+      match /watched_movies/{movieId} {
+        allow read: if isOwner(userId);
+        allow create, update: if isOwner(userId)
+          && request.resource.data.keys().hasAll(['tmdbId', 'watchedAt'])
+          && request.resource.data.tmdbId is int
+          && request.resource.data.tmdbId > 0;
+        allow delete: if isOwner(userId);
+      }
+      
+      match /watched_episodes/{episodeKey} {
+        allow read: if isOwner(userId);
+        allow create, update: if isOwner(userId)
+          && request.resource.data.keys().hasAll(['seriesTmdbId', 'seasonNumber', 'episodeNumber', 'watchedAt'])
+          && request.resource.data.seriesTmdbId is int
+          && request.resource.data.seriesTmdbId > 0
+          && request.resource.data.seasonNumber is int
+          && request.resource.data.seasonNumber >= 0
+          && request.resource.data.episodeNumber is int
+          && request.resource.data.episodeNumber > 0;
+        allow delete: if isOwner(userId);
+      }
+      
+      match /favorite_movies/{movieId} {
+        allow read: if isOwner(userId);
+        allow create, update: if isOwner(userId)
+          && request.resource.data.keys().hasAll(['tmdbId', 'favoritedAt'])
+          && request.resource.data.tmdbId is int
+          && request.resource.data.tmdbId > 0;
+        allow delete: if isOwner(userId);
+      }
+      
+      match /favorite_series/{seriesId} {
+        allow read: if isOwner(userId);
+        allow create, update: if isOwner(userId)
+          && request.resource.data.keys().hasAll(['seriesTmdbId', 'favoritedAt'])
+          && request.resource.data.seriesTmdbId is int
+          && request.resource.data.seriesTmdbId > 0;
+        allow delete: if isOwner(userId);
+      }
+      
+      match /stats/{statDoc} {
+        allow read: if isOwner(userId);
+        allow write: if isOwner(userId)
+          && request.resource.data.moviesWatchedCount is int
+          && request.resource.data.episodesWatchedCount is int
+          && request.resource.data.seriesWatchedCount is int
+          && request.resource.data.movieWatchMinutes is int
+          && request.resource.data.seriesWatchMinutes is int;
+      }
+    }
+    
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

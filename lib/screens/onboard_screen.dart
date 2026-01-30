@@ -9,45 +9,111 @@ class OnboardScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        decoration: BoxDecoration(color: Color.fromARGB(255, 0, 25, 42)),
+        decoration: const BoxDecoration(color: Color.fromARGB(255, 0, 25, 42)),
         child: SafeArea(
-          child: SingleChildScrollView(
-            controller: ScrollController(),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
-            
-              children: [
-                Expanded(
-                  flex: 2,
-                  child: Image.asset(
-                    "assets/images/onboard.jpg",
-                    fit: BoxFit.cover,
-                  ),
-                ),
-                Expanded(
-                  flex: 1,
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(20, 30, 20, 0),
-                    child: Column(
-                      children: [
-                        Text(
-                          "Discover. React. Connect",
-                          style: Theme.of(context).textTheme.displayLarge,
-                          textAlign: TextAlign.center,
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              return SingleChildScrollView(
+                padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      const SizedBox(height: 12),
+                      Container(
+                        height: 300,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(24),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Theme.of(context).primaryColor,
+                              blurRadius: 12,
+                              offset: const Offset(0, 0),
+                            ),
+                          ],
                         ),
-                        SizedBox(height: 10),
-                        Text(
-                          "Track your favorites, share quick reactions, and explore films with a passionate community.",
-                          style: Theme.of(context).textTheme.bodyMedium,
-                          textAlign: TextAlign.center,
+                        clipBehavior: Clip.antiAlias,
+                        child: Stack(
+                          fit: StackFit.expand,
+                          children: [
+                            Image.asset(
+                              "assets/images/onboard.jpg",
+                              fit: BoxFit.cover,
+                            ),
+                            DecoratedBox(
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  begin: Alignment.topCenter,
+                                  end: Alignment.bottomCenter,
+                                  colors: [
+                                    Colors.black.withAlpha(20),
+                                    Colors.black.withAlpha(160),
+                                  ],
+                                ),
+                              ),
+                            ),
+                            Positioned(
+                              left: 16,
+                              right: 16,
+                              bottom: 16,
+                              child: Text(
+                                "Your movie world,\nall in one place",
+                                style: Theme.of(context).textTheme.headlineSmall
+                                    ?.copyWith(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.w700,
+                                      height: 1.2,
+                                    ),
+                              ),
+                            ),
+                          ],
                         ),
-            
-                        SizedBox(height: 30),
-            
-                        GestureDetector(
-                          //TODO : Implement navigation and styles when OnClick the button pressed
-                          onTap: () {
+                      ),
+                      const SizedBox(height: 28),
+                      Text(
+                        "Discover. React. Connect.",
+                        style: Theme.of(context).textTheme.displaySmall
+                            ?.copyWith(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w700,
+                            ),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        "Track your favorites, share quick reactions, and explore films with a passionate community.",
+                        style: Theme.of(
+                          context,
+                        ).textTheme.bodyMedium?.copyWith(color: Colors.white70),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 20),
+                      Wrap(
+                        alignment: WrapAlignment.center,
+                        spacing: 10,
+                        runSpacing: 10,
+                        children: [
+                          _FeaturePill(
+                            label: "Smart watchlist",
+                            icon: Icons.bookmark_add_outlined,
+                          ),
+                          _FeaturePill(
+                            label: "Movie & cast search",
+                            icon: Icons.search,
+                          ),
+                          _FeaturePill(
+                            label: "Favorites tracker",
+                            icon: Icons.favorite_border,
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 28),
+                      SizedBox(
+                        height: 54,
+                        child: ElevatedButton(
+                          onPressed: () {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
@@ -55,35 +121,28 @@ class OnboardScreen extends StatelessWidget {
                               ),
                             );
                           },
-            
-                          child: Container(
-                            padding: EdgeInsets.all(10),
-                            width: 250,
-                            decoration: BoxDecoration(
-                              border: Border.all(
-                                width: 2,
-                                color: Theme.of(context).primaryColor,
-                              ),
-                              color: Theme.of(context).primaryColor,
-                              borderRadius: BorderRadius.circular(50),
-                            ),
-            
-                            child: Text(
-                              "Login",
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
-                              ),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Theme.of(context).primaryColor,
+                            foregroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16),
                             ),
                           ),
+                          child: Text(
+                            "Login",
+                            style: Theme.of(context).textTheme.titleMedium
+                                ?.copyWith(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                          ),
                         ),
-            
-                        SizedBox(height: 10),
-            
-                        GestureDetector(
-                          //TODO : Implement navigation and styles when OnClick the button pressed
-                          onTap: () {
+                      ),
+                      const SizedBox(height: 12),
+                      SizedBox(
+                        height: 54,
+                        child: OutlinedButton(
+                          onPressed: () {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
@@ -91,36 +150,74 @@ class OnboardScreen extends StatelessWidget {
                               ),
                             );
                           },
-            
-                          child: Container(
-                            padding: EdgeInsets.all(10),
-                            width: 250,
-                            decoration: BoxDecoration(
-                              border: Border.all(
-                                width: 2,
-                                color: Theme.of(context).primaryColor,
-                              ),
-                              borderRadius: BorderRadius.circular(50),
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: Colors.white,
+                            side: BorderSide(
+                              color: Theme.of(context).primaryColor,
+                              width: 1.5,
                             ),
-            
-                            child: Text(
-                              "Register",
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
-                              ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16),
                             ),
                           ),
+                          child: Text(
+                            "Create account",
+                            style: Theme.of(context).textTheme.titleMedium
+                                ?.copyWith(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                          ),
                         ),
-                      ],
-                    ),
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        "By continuing, you agree to CineEcho's Terms & Privacy.",
+                        style: Theme.of(
+                          context,
+                        ).textTheme.bodySmall?.copyWith(color: Colors.white54),
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
                   ),
                 ),
-              ],
-            ),
+              );
+            },
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _FeaturePill extends StatelessWidget {
+  const _FeaturePill({required this.label, required this.icon});
+
+  final String label;
+  final IconData icon;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+      decoration: BoxDecoration(
+        color: Colors.white.withAlpha(16),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: Colors.white.withAlpha(30)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 18, color: Colors.white),
+          const SizedBox(width: 8),
+          Text(
+            label,
+            style: Theme.of(context).textTheme.labelMedium?.copyWith(
+              color: Colors.white,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
       ),
     );
   }
