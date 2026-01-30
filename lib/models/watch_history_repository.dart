@@ -10,6 +10,8 @@ class WatchHistoryRepository {
   final FirebaseFirestore _firestore;
   final FirebaseAuth _auth;
 
+  static const int _batchSizeLimit = 400;
+
   WatchHistoryRepository({FirebaseFirestore? firestore, FirebaseAuth? auth})
     : _firestore = firestore ?? FirebaseFirestore.instance,
       _auth = auth ?? FirebaseAuth.instance;
@@ -38,6 +40,13 @@ class WatchHistoryRepository {
     if (value is Timestamp) return value.toDate();
     if (value is String) return DateTime.tryParse(value) ?? DateTime.now();
     return DateTime.now();
+  }
+
+  Iterable<List<T>> _chunk<T>(List<T> items, int chunkSize) sync* {
+    for (var i = 0; i < items.length; i += chunkSize) {
+      final end = (i + chunkSize < items.length) ? i + chunkSize : items.length;
+      yield items.sublist(i, end);
+    }
   }
 
   Future<void> markMovieWatched(int tmdbId, {bool favorite = false}) async {
@@ -124,6 +133,81 @@ class WatchHistoryRepository {
       await _updateStats(uid);
     } catch (e) {
       throw Exception('Failed to unmark episode: $e');
+    }
+  }
+
+  Future<void> markEpisodesWatchedBatch(
+    int seriesTmdbId,
+    List<Map<String, int>> episodes,
+  ) async {
+    if (seriesTmdbId <= 0) {
+      throw ArgumentError('Invalid seriesTmdbId: must be greater than 0');
+    }
+    if (episodes.isEmpty) return;
+
+    final uid = _uid;
+    if (uid == null) throw Exception('User not authenticated');
+
+    try {
+      for (final chunk in _chunk(episodes, _batchSizeLimit)) {
+        final batch = _firestore.batch();
+        for (final episode in chunk) {
+          final seasonNumber = episode['seasonNumber'] ?? -1;
+          final episodeNumber = episode['episodeNumber'] ?? -1;
+          if (seasonNumber < 0 || episodeNumber <= 0) continue;
+
+          final episodeKey =
+              '${seriesTmdbId}_S$seasonNumber'
+              'E$episodeNumber';
+          final docRef = _watchedEpisodesRef(uid).doc(episodeKey);
+          batch.set(docRef, {
+            'seriesTmdbId': seriesTmdbId,
+            'seasonNumber': seasonNumber,
+            'episodeNumber': episodeNumber,
+            'watchedAt': FieldValue.serverTimestamp(),
+          }, SetOptions(merge: true));
+        }
+        await batch.commit();
+      }
+
+      await _updateStats(uid);
+    } catch (e) {
+      throw Exception('Failed to mark episodes as watched: $e');
+    }
+  }
+
+  Future<void> unmarkEpisodesWatchedBatch(
+    int seriesTmdbId,
+    List<Map<String, int>> episodes,
+  ) async {
+    if (seriesTmdbId <= 0) {
+      throw ArgumentError('Invalid seriesTmdbId: must be greater than 0');
+    }
+    if (episodes.isEmpty) return;
+
+    final uid = _uid;
+    if (uid == null) throw Exception('User not authenticated');
+
+    try {
+      for (final chunk in _chunk(episodes, _batchSizeLimit)) {
+        final batch = _firestore.batch();
+        for (final episode in chunk) {
+          final seasonNumber = episode['seasonNumber'] ?? -1;
+          final episodeNumber = episode['episodeNumber'] ?? -1;
+          if (seasonNumber < 0 || episodeNumber <= 0) continue;
+
+          final episodeKey =
+              '${seriesTmdbId}_S$seasonNumber'
+              'E$episodeNumber';
+          final docRef = _watchedEpisodesRef(uid).doc(episodeKey);
+          batch.delete(docRef);
+        }
+        await batch.commit();
+      }
+
+      await _updateStats(uid);
+    } catch (e) {
+      throw Exception('Failed to unmark episodes: $e');
     }
   }
 

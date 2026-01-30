@@ -8,12 +8,14 @@ class SeasonsList extends StatefulWidget {
   final String tvId;
   final List<dynamic> seasons;
   final Key? refreshKey;
+  final VoidCallback? onEpisodesChanged;
 
   const SeasonsList({
     super.key,
     required this.tvId,
     required this.seasons,
     this.refreshKey,
+    this.onEpisodesChanged,
   });
 
   @override
@@ -88,6 +90,7 @@ class _SeasonsListState extends State<SeasonsList> {
       setState(() {
         _watchedEpisodes[key] = false;
       });
+      widget.onEpisodesChanged?.call();
     } else {
       await _watchRepo.markEpisodeWatched(
         seriesId,
@@ -97,6 +100,7 @@ class _SeasonsListState extends State<SeasonsList> {
       setState(() {
         _watchedEpisodes[key] = true;
       });
+      widget.onEpisodesChanged?.call();
     }
   }
 
@@ -648,7 +652,7 @@ class _SeasonsListState extends State<SeasonsList> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 15),
           child: Text(
             'Seasons',
             style: Theme.of(context).textTheme.titleMedium?.copyWith(

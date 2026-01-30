@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:convert';
 
 import 'package:cine_echo/providers/auth_provider.dart';
 import 'package:cine_echo/screens/onboard_screen.dart';
@@ -97,11 +98,22 @@ class _ProfileEditorScreenState extends State<ProfileEditorScreen> {
 
       final user = authProvider.currentUser;
       if (user != null) {
+        String? imageBase64;
+        if (_selectedImage != null) {
+          try {
+            final bytes = await _selectedImage!.readAsBytes();
+            imageBase64 = base64Encode(bytes);
+          } catch (e) {
+            print('Error encoding image: $e');
+          }
+        }
+
         await authProvider.saveUserProfile(
           uid: user.uid,
           email: user.email ?? '',
           displayName: username,
           about: _aboutController.text.trim(),
+          imageBase64: imageBase64,
         );
       }
 
@@ -110,11 +122,11 @@ class _ProfileEditorScreenState extends State<ProfileEditorScreen> {
       if (mounted) {
         await Future.delayed(const Duration(milliseconds: 500));
         if (mounted) {
-          Navigator.pop(context);
+          Navigator.pop(context, true);
         }
       }
     } catch (e) {
-      _showSnackBar('Failed to save changes', Colors.red);
+      _showSnackBar('Failed to save changes: ${e.toString()}', Colors.red);
     } finally {
       if (mounted) {
         setState(() => _isLoading = false);

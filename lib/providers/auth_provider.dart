@@ -62,13 +62,19 @@ class AuthenticationProvider extends ChangeNotifier {
     required String email,
     required String displayName,
     String? about,
+    String? imageBase64,
   }) async {
     try {
-      await _firestore.collection('users').doc(uid).set({
+      final data = {
         'displayName': displayName,
         'email': email,
         if (about != null) 'about': about,
-      }, SetOptions(merge: true));
+        if (imageBase64 != null) 'profileImage': imageBase64,
+      };
+      await _firestore
+          .collection('users')
+          .doc(uid)
+          .set(data, SetOptions(merge: true));
     } catch (e) {
       debugPrint('Error saving user profile: $e');
       rethrow;

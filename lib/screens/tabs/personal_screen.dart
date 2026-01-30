@@ -4,7 +4,9 @@ import 'package:cine_echo/screens/profile_tabs/favorites_tab.dart';
 import 'package:cine_echo/screens/profile_tabs/watched_tab.dart';
 import 'package:cine_echo/themes/pallets.dart';
 import 'package:cine_echo/widgets/completed_stat_card.dart';
+import 'package:cine_echo/providers/auth_provider.dart' as auth_provider;
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class PersonalScreen extends StatefulWidget {
   const PersonalScreen({super.key});
@@ -20,6 +22,7 @@ class _PersonalScreenState extends State<PersonalScreen>
   final WatchHistoryRepository _watchRepo = WatchHistoryRepository();
 
   late Future<Map<String, dynamic>> _statsFuture;
+  Future<Map<String, dynamic>?>? _profileFuture;
 
   @override
   void initState() {
@@ -27,6 +30,7 @@ class _PersonalScreenState extends State<PersonalScreen>
     _tabController = TabController(length: 2, vsync: this);
     _scrollController = ScrollController();
     _statsFuture = _loadStats();
+    _profileFuture = _loadProfile();
     _tabController?.addListener(_onTabChanged);
   }
 
@@ -61,6 +65,16 @@ class _PersonalScreenState extends State<PersonalScreen>
       'movies': stats.moviesWatchedCount,
       'episodes': stats.episodesWatchedCount,
     };
+  }
+
+  Future<Map<String, dynamic>?> _loadProfile() async {
+    final authProvider = Provider.of<auth_provider.AuthenticationProvider>(
+      context,
+      listen: false,
+    );
+    final user = authProvider.currentUser;
+    if (user == null) return null;
+    return authProvider.fetchUserProfile(user.uid);
   }
 
   @override
@@ -172,69 +186,112 @@ class _PersonalScreenState extends State<PersonalScreen>
                                       ),
                                     );
                                   },
-                                  child: Column(
-                                    children: [
-                                      Container(
-                                        decoration: BoxDecoration(
-                                          shape: BoxShape.circle,
-                                          boxShadow: [
-                                            BoxShadow(
-                                              color: Theme.of(
-                                                context,
-                                              ).primaryColor.withAlpha(150),
-                                              blurRadius: 10,
-                                              spreadRadius: 2,
-                                              offset: Offset(0, 0),
+                                  child: FutureBuilder<Map<String, dynamic>?>(
+                                    future: _profileFuture,
+                                    builder: (context, snapshot) {
+                                      final authProvider =
+                                          Provider.of<
+                                            auth_provider.AuthenticationProvider
+                                          >(context, listen: false);
+                                      final user = authProvider.currentUser;
+                                      final profile = snapshot.data;
+
+                                      final displayName =
+                                          (profile?['displayName'] as String?)
+                                                  ?.trim()
+                                                  .isNotEmpty ==
+                                              true
+                                          ? profile!['displayName'] as String
+                                          : (user?.displayName ?? 'User');
+
+                                      final about =
+                                          (profile?['about'] as String?)
+                                                  ?.trim()
+                                                  .isNotEmpty ==
+                                              true
+                                          ? profile!['about'] as String
+                                          : 'No bio added yet.';
+
+                                      final photoUrl =
+                                          (profile?['photoUrl'] as String?)
+                                                  ?.trim()
+                                                  .isNotEmpty ==
+                                              true
+                                          ? profile!['photoUrl'] as String
+                                          : user?.photoURL;
+
+                                      return Column(
+                                        children: [
+                                          Container(
+                                            decoration: BoxDecoration(
+                                              shape: BoxShape.circle,
+                                              boxShadow: [
+                                                BoxShadow(
+                                                  color: Theme.of(
+                                                    context,
+                                                  ).primaryColor.withAlpha(150),
+                                                  blurRadius: 10,
+                                                  spreadRadius: 2,
+                                                  offset: Offset(0, 0),
+                                                ),
+                                              ],
                                             ),
-                                          ],
-                                        ),
-                                        child: CircleAvatar(
-                                          radius: 60,
-                                          backgroundImage: AssetImage(
-                                            'assets/splash/logo.png',
+                                            child: CircleAvatar(
+                                              radius: 60,
+                                              backgroundColor: navNonActive,
+                                              backgroundImage: photoUrl != null
+                                                  ? NetworkImage(photoUrl)
+                                                  : null,
+                                              child: photoUrl == null
+                                                  ? Icon(
+                                                      Icons.person_rounded,
+                                                      size: 64,
+                                                      color: Colors.white70,
+                                                    )
+                                                  : null,
+                                            ),
                                           ),
-                                          backgroundColor: navNonActive,
-                                        ),
-                                      ),
-                                      SizedBox(height: 18),
-                                      SizedBox(
-                                        width: 280,
-                                        child: Text(
-                                          "Shehan SS",
-                                          textAlign: TextAlign.center,
-                                          style: Theme.of(context)
-                                              .textTheme
-                                              .titleMedium
-                                              ?.copyWith(
-                                                fontSize: 22,
-                                                fontWeight: FontWeight.bold,
-                                                letterSpacing: 0.5,
-                                              ),
-                                        ),
-                                      ),
-                                      SizedBox(height: 8),
-                                      SizedBox(
-                                        width: 280,
-                                        child: Text(
-                                          "Movie & Series Enthusiast",
-                                          style: Theme.of(context)
-                                              .textTheme
-                                              .bodySmall
-                                              ?.copyWith(
-                                                fontWeight: FontWeight.w500,
-                                                color: Colors.white70,
-                                                fontSize: 12,
-                                                letterSpacing: 0.3,
-                                                fontStyle: FontStyle.italic,
-                                                height: 1.4,
-                                              ),
-                                          softWrap: true,
-                                          textAlign: TextAlign.center,
-                                          maxLines: 2,
-                                          overflow: TextOverflow.ellipsis,
-                                        ),
-                                      ),
-                                    ],
+                                          SizedBox(height: 18),
+                                          SizedBox(
+                                            width: 280,
+                                            child: Text(
+                                              displayName,
+                                              textAlign: TextAlign.center,
+                                              style: Theme.of(context)
+                                                  .textTheme
+                                                  .titleMedium
+                                                  ?.copyWith(
+                                                    fontSize: 22,
+                                                    fontWeight: FontWeight.bold,
+                                                    letterSpacing: 0.5,
+                                                  ),
+                                            ),
+                                          ),
+                                          SizedBox(height: 8),
+                                          SizedBox(
+                                            width: 280,
+                                            child: Text(
+                                              about,
+                                              style: Theme.of(context)
+                                                  .textTheme
+                                                  .bodySmall
+                                                  ?.copyWith(
+                                                    fontWeight: FontWeight.w500,
+                                                    color: Colors.white70,
+                                                    fontSize: 12,
+                                                    letterSpacing: 0.3,
+                                                    fontStyle: FontStyle.italic,
+                                                    height: 1.4,
+                                                  ),
+                                              softWrap: true,
+                                              textAlign: TextAlign.center,
+                                              maxLines: 2,
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
+                                          ),
+                                        ],
+                                      );
+                                    },
                                   ),
                                 ),
                               ],

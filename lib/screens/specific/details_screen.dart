@@ -47,6 +47,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
   List<dynamic> recommendations = const [];
   int totalRecommendationPages = 1;
   Key _seasonsListKey = UniqueKey();
+  Key _watchStatusKey = UniqueKey();
 
   String getType(String typeData) {
     final String type;
@@ -61,6 +62,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
   void _refreshSeasonsList() {
     setState(() {
       _seasonsListKey = UniqueKey();
+      _watchStatusKey = UniqueKey();
     });
   }
 
@@ -340,7 +342,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
                                               overflow: TextOverflow.ellipsis,
                                               style: Theme.of(
                                                 context,
-                                              ).textTheme.bodySmall,
+                                              ).textTheme.bodyLarge,
                                             ).redacted(
                                               context: context,
                                               redact: _isLoading,
@@ -420,6 +422,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Buttons(
+                              key: _watchStatusKey,
                               trailerKey: trailerKey,
                               isLoading: _isLoading,
                               contentId: int.parse(widget.id),
@@ -481,6 +484,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
                           tvId: widget.id,
                           seasons: moreDetailsMap['seasons'] ?? [],
                           refreshKey: _seasonsListKey,
+                          onEpisodesChanged: _refreshSeasonsList,
                         ),
 
                       SizedBox(height: 25),
@@ -920,6 +924,7 @@ class _ButtonsState extends State<Buttons> with TickerProviderStateMixin {
     if (widget.seasonsData == null) return;
 
     final tmdbServices = TmdbServices();
+    final episodesToMark = <Map<String, int>>[];
     for (var season in widget.seasonsData!) {
       final seasonNumber = season['season_number'];
       if (seasonNumber == null) continue;
@@ -953,9 +958,15 @@ class _ButtonsState extends State<Buttons> with TickerProviderStateMixin {
           }
         }
 
-        await _watchRepo.markEpisodeWatched(widget.contentId, seasonNumber, i);
+        episodesToMark.add({
+          'seasonNumber': seasonNumber as int,
+          'episodeNumber': i,
+        });
       }
     }
+
+    if (episodesToMark.isEmpty) return;
+    await _watchRepo.markEpisodesWatchedBatch(widget.contentId, episodesToMark);
   }
 
   Future<void> _unmarkAllEpisodes() async {
@@ -964,13 +975,20 @@ class _ButtonsState extends State<Buttons> with TickerProviderStateMixin {
         .where((e) => e.seriesTmdbId == widget.contentId)
         .toList();
 
-    for (var episode in seriesEpisodes) {
-      await _watchRepo.unmarkEpisodeWatched(
-        widget.contentId,
-        episode.seasonNumber,
-        episode.episodeNumber,
-      );
-    }
+    final episodesToUnmark = seriesEpisodes
+        .map(
+          (episode) => {
+            'seasonNumber': episode.seasonNumber,
+            'episodeNumber': episode.episodeNumber,
+          },
+        )
+        .toList();
+
+    if (episodesToUnmark.isEmpty) return;
+    await _watchRepo.unmarkEpisodesWatchedBatch(
+      widget.contentId,
+      episodesToUnmark,
+    );
   }
 
   @override
