@@ -259,6 +259,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
                     ],
                   ),
                   Column(
+                    mainAxisSize: MainAxisSize.min,
                     children: [
                       SizedBox(height: bgHeight - overlap),
                       Padding(
@@ -305,44 +306,59 @@ class _DetailsScreenState extends State<DetailsScreen> {
                                   bottom: 10,
                                 ),
                                 child: Column(
+                                  mainAxisSize: MainAxisSize.min,
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    SizedBox(
-                                      height: 60,
-                                      child: title.length > 15 && !_isLoading
-                                          ? Marquee(
-                                              text: title,
-                                              style: Theme.of(
-                                                context,
-                                              ).textTheme.bodyLarge,
-                                              scrollAxis: Axis.horizontal,
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.center,
-                                              blankSpace: 20.0,
-                                              velocity: 30.0,
-                                              pauseAfterRound: const Duration(
-                                                seconds: 1,
+                                    ClipRect(
+                                      child: ConstrainedBox(
+                                        constraints: BoxConstraints(
+                                          minHeight: 30,
+                                          maxHeight: 60,
+                                        ),
+                                        child: !_isLoading && title.length > 15
+                                            ? Marquee(
+                                                text: title,
+                                                style: Theme.of(
+                                                  context,
+                                                ).textTheme.bodyLarge,
+                                                scrollAxis: Axis.horizontal,
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.center,
+                                                blankSpace: 20.0,
+                                                velocity: 30.0,
+                                                pauseAfterRound: const Duration(
+                                                  seconds: 1,
+                                                ),
+                                                accelerationDuration:
+                                                    const Duration(seconds: 2),
+                                                accelerationCurve:
+                                                    Curves.linear,
+                                                decelerationDuration:
+                                                    const Duration(
+                                                      milliseconds: 500,
+                                                    ),
+                                                decelerationCurve:
+                                                    Curves.easeOut,
+                                              )
+                                            : Align(
+                                                alignment: Alignment.centerLeft,
+                                                child:
+                                                    Text(
+                                                      _isLoading
+                                                          ? "Movie Name"
+                                                          : title,
+                                                      maxLines: 2,
+                                                      overflow:
+                                                          TextOverflow.ellipsis,
+                                                      style: Theme.of(
+                                                        context,
+                                                      ).textTheme.bodyLarge,
+                                                    ).redacted(
+                                                      context: context,
+                                                      redact: _isLoading,
+                                                    ),
                                               ),
-                                              accelerationDuration:
-                                                  const Duration(seconds: 2),
-                                              accelerationCurve: Curves.linear,
-                                              decelerationDuration:
-                                                  const Duration(
-                                                    milliseconds: 500,
-                                                  ),
-                                              decelerationCurve: Curves.easeOut,
-                                            )
-                                          : Text(
-                                              title,
-                                              maxLines: 1,
-                                              overflow: TextOverflow.ellipsis,
-                                              style: Theme.of(
-                                                context,
-                                              ).textTheme.bodyLarge,
-                                            ).redacted(
-                                              context: context,
-                                              redact: _isLoading,
-                                            ),
+                                      ),
                                     ),
                                     Container(
                                       decoration: BoxDecoration(
@@ -357,20 +373,24 @@ class _DetailsScreenState extends State<DetailsScreen> {
                                         vertical: 2,
                                       ),
                                       width: 65,
-                                      child: Row(
-                                        children: [
-                                          Icon(
-                                            Icons.star,
-                                            color: Colors.yellow,
-                                            size: 15,
-                                          ),
-                                          SizedBox(width: 5),
-                                          Text(
-                                            rating,
-                                            style: TextStyle(fontSize: 12),
-                                          ),
-                                        ],
-                                      ),
+                                      child: _isLoading
+                                          ? SizedBox(height: 10)
+                                          : Row(
+                                              children: [
+                                                Icon(
+                                                  Icons.star,
+                                                  color: Colors.yellow,
+                                                  size: 15,
+                                                ),
+                                                SizedBox(width: 5),
+                                                Text(
+                                                  rating,
+                                                  style: TextStyle(
+                                                    fontSize: 12,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
                                     ).redacted(
                                       context: context,
                                       redact: _isLoading,
@@ -409,11 +429,12 @@ class _DetailsScreenState extends State<DetailsScreen> {
                       ),
                       SizedBox(height: 20),
                       Padding(
-                        padding: EdgeInsetsGeometry.symmetric(
+                        padding: const EdgeInsets.symmetric(
                           horizontal: 15,
                           vertical: 15,
                         ),
                         child: Column(
+                          mainAxisSize: MainAxisSize.min,
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Buttons(

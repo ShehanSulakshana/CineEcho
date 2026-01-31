@@ -52,6 +52,7 @@ class _FavoritesTabState extends State<FavoritesTab> {
 
     items.sort(_compareByMostRecent);
 
+    if (!mounted) return;
     setState(() {
       _favoriteItems = items;
       _isLoading = false;

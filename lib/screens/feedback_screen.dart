@@ -53,6 +53,7 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
           _startRateLimitTimer(remaining);
         }
       }
+    // ignore: empty_catches
     } catch (e) {}
   }
 

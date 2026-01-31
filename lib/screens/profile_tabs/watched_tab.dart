@@ -305,6 +305,7 @@ class _WatchedTabState extends State<WatchedTab> {
                 await _watchRepo.unmarkMovieWatched(movie.tmdbId);
               } finally {
                 if (mounted) {
+                  // ignore: use_build_context_synchronously
                   Navigator.of(context, rootNavigator: true).pop();
                 }
               }
@@ -532,7 +533,6 @@ class _WatchedTabState extends State<WatchedTab> {
             ),
           );
         }
-
         final data = snapshot.data!;
         final posterPath = data['poster_path'];
         final name = data['name'] ?? 'Unknown';
@@ -594,6 +594,7 @@ class _WatchedTabState extends State<WatchedTab> {
                     );
                   } finally {
                     if (mounted) {
+                      // ignore: use_build_context_synchronously
                       Navigator.of(context, rootNavigator: true).pop();
                     }
                   }

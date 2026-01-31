@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'package:cine_echo/models/watch_history_repository.dart';
 import 'package:cine_echo/screens/profile_editor_screen.dart';
 import 'package:cine_echo/screens/profile_tabs/favorites_tab.dart';
@@ -235,7 +236,14 @@ class _PersonalScreenState extends State<PersonalScreen>
                                                     builder: (context) =>
                                                         ProfileEditorScreen(),
                                                   ),
-                                                );
+                                                ).then((_) {
+                                                  if (mounted) {
+                                                    setState(() {
+                                                      _profileFuture =
+                                                          _loadProfile();
+                                                    });
+                                                  }
+                                                });
                                               } else if (value == 'feedback') {
                                                 Navigator.push(
                                                   context,
@@ -399,6 +407,29 @@ class _PersonalScreenState extends State<PersonalScreen>
                                         ? profile!['photoUrl'] as String
                                         : user?.photoURL;
 
+                                    final profileImageBase64 =
+                                        (profile?['profileImage'] as String?)
+                                                ?.trim()
+                                                .isNotEmpty ==
+                                            true
+                                        ? profile!['profileImage'] as String
+                                        : null;
+
+                                    ImageProvider? profileImageProvider;
+                                    if (profileImageBase64 != null) {
+                                      try {
+                                        profileImageProvider = MemoryImage(
+                                          base64Decode(profileImageBase64),
+                                        );
+                                      } catch (_) {
+                                        profileImageProvider = null;
+                                      }
+                                    }
+
+                                    profileImageProvider ??= photoUrl != null
+                                        ? NetworkImage(photoUrl)
+                                        : null;
+
                                     return Column(
                                       children: [
                                         Container(
@@ -418,10 +449,9 @@ class _PersonalScreenState extends State<PersonalScreen>
                                           child: CircleAvatar(
                                             radius: 60,
                                             backgroundColor: navNonActive,
-                                            backgroundImage: photoUrl != null
-                                                ? NetworkImage(photoUrl)
-                                                : null,
-                                            child: photoUrl == null
+                                            backgroundImage:
+                                                profileImageProvider,
+                                            child: profileImageProvider == null
                                                 ? Icon(
                                                     Icons.person_rounded,
                                                     size: 64,

@@ -357,6 +357,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       height: 65,
                       child: OutlinedButton.icon(
                         onPressed: () async {
+                          _showLoadingDialog('Signing up with Google...');
                           try {
                             final authProvider =
                                 Provider.of<
@@ -365,6 +366,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                             await authProvider.signInWithGoogle();
 
                             if (!mounted) return;
+                            Navigator.of(context).pop(); // Close loading dialog
 
                             _showSnackBar(
                               "Signed in with Google successfully!",
@@ -377,6 +379,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                               (route) => false,
                             );
                           } on FirebaseAuthException catch (e) {
+                            if (mounted) Navigator.of(context).pop();
                             String message =
                                 e.message ?? 'Google Sign-In failed';
                             switch (e.code) {
@@ -396,6 +399,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                             }
                             _showSnackBar(message, Colors.red);
                           } catch (e) {
+                            if (mounted) Navigator.of(context).pop();
                             _showSnackBar(
                               'An unexpected error occurred with Google Sign-In',
                               Colors.red,

@@ -21,6 +21,7 @@ class _ProfileEditorScreenState extends State<ProfileEditorScreen> {
   late TextEditingController _aboutController;
   final ImagePicker _imagePicker = ImagePicker();
   File? _selectedImage;
+  String? _profileImageBase64;
   bool _isLoading = false;
 
   @override
@@ -45,6 +46,13 @@ class _ProfileEditorScreenState extends State<ProfileEditorScreen> {
       final profile = await authProvider.fetchUserProfile(user.uid);
       if (profile != null) {
         _aboutController.text = profile['about'] ?? '';
+        final imageBase64 =
+            (profile['profileImage'] as String?)?.trim().isNotEmpty == true
+            ? profile['profileImage'] as String
+            : null;
+        setState(() {
+          _profileImageBase64 = imageBase64;
+        });
       }
     }
   }
@@ -279,6 +287,10 @@ class _ProfileEditorScreenState extends State<ProfileEditorScreen> {
                               backgroundColor: navNonActive,
                               backgroundImage: _selectedImage != null
                                   ? FileImage(_selectedImage!)
+                                  : _profileImageBase64 != null
+                                  ? MemoryImage(
+                                      base64Decode(_profileImageBase64!),
+                                    )
                                   : const AssetImage('assets/splash/logo.png')
                                         as ImageProvider,
                             ),

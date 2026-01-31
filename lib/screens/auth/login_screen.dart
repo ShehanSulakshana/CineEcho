@@ -286,25 +286,10 @@ class _LoginScreenState extends State<LoginScreen> {
 
                 SizedBox(
                   width: double.infinity,
-                  child: ElevatedButton.icon(
-                    icon: Icon(Icons.g_mobiledata_rounded),
-                    label: Text(
-                      'Continue with Google',
-                      style: Theme.of(context).textTheme.bodyMedium,
-                    ),
-                    style: ElevatedButton.styleFrom(
-                      iconSize: 35,
-                      backgroundColor: Theme.of(
-                        context,
-                      ).scaffoldBackgroundColor,
-                      foregroundColor: Colors.white,
-                      padding: EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(
-                        side: BorderSide(width: 1, color: lightblueColor),
-                        borderRadius: BorderRadius.circular(50),
-                      ),
-                    ),
+                  height: 65,
+                  child: OutlinedButton.icon(
                     onPressed: () async {
+                      _showLoadingDialog('Signing in with Google...');
                       try {
                         final authProvider =
                             Provider.of<auth_provider.AuthenticationProvider>(
@@ -314,6 +299,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         final credential = await authProvider
                             .signInWithGoogle();
 
+                        if (mounted) Navigator.of(context).pop();
                         if (credential != null) {
                           _showSnackBar(
                             "Signed in with Google successfully!",
@@ -327,17 +313,34 @@ class _LoginScreenState extends State<LoginScreen> {
                           );
                         }
                       } on FirebaseAuthException catch (e) {
+                        if (mounted) Navigator.of(context).pop();
                         _showSnackBar(
                           e.message ?? 'Google Sign-In failed',
                           Colors.red,
                         );
                       } catch (e) {
+                        if (mounted) Navigator.of(context).pop();
                         _showSnackBar(
                           'An error occurred during Google Sign-In',
                           Colors.red,
                         );
                       }
                     },
+                    icon: Image.asset(
+                      'assets/images/google_logo.png',
+                      height: 24,
+                      width: 24,
+                      errorBuilder: (context, error, stackTrace) {
+                        return Icon(Icons.login, size: 24);
+                      },
+                    ),
+                    label: Text(
+                      "Continue with Google",
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
+                    style: OutlinedButton.styleFrom(
+                      side: BorderSide(color: Colors.grey),
+                    ),
                   ),
                 ),
 
