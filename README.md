@@ -2,7 +2,7 @@
 
 <div align="center">
 
-![CineEcho Poster](https://via.placeholder.com/1200x600?text=CineEcho+App+Poster) <!-- Add your poster link here -->
+![CineEcho Poster](https://github.com/ShehanSulakshana/ShehanSulakshana/blob/main/ProjectAssets/CineEcho_App_Screen_PSD.jpg)
 
 **Your Ultimate Movie & TV Show Discovery Platform**
 
