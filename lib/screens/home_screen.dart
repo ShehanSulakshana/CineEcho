@@ -81,7 +81,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   Widget build(BuildContext context) {
     return Consumer<NavigationProvider>(
       builder: (context, navigationProvider, _) {
-        // Update tab index when navigation provider changes
         if (_tabController.index != navigationProvider.currentPage) {
           _tabController.animateTo(navigationProvider.currentPage);
         }

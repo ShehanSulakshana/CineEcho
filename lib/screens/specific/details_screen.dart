@@ -60,6 +60,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
   }
 
   void _refreshSeasonsList() {
+    if (!mounted) return;
     setState(() {
       _seasonsListKey = UniqueKey();
       _watchStatusKey = UniqueKey();
@@ -142,11 +143,9 @@ class _DetailsScreenState extends State<DetailsScreen> {
       var buffer = StringBuffer();
       final Map<int, dynamic> allGenreMap = GenreListClass.getGenreMap();
 
-      // Try to get genres from either genre_ids (search results) or genres (full details)
       List<dynamic>? genreList;
 
       if (widget.dataMap['genre_ids'] != null) {
-        // Coming from search or list - has genre_ids
         genreList = widget.dataMap['genre_ids'] as List<dynamic>?;
         if (genreList != null && genreList.isNotEmpty) {
           for (var i = 0; i < genreList.length; i++) {
@@ -160,7 +159,6 @@ class _DetailsScreenState extends State<DetailsScreen> {
           }
         }
       } else if (widget.dataMap['genres'] != null) {
-        // Coming from full details (watched/favorites) - has genres objects
         final genres = widget.dataMap['genres'] as List<dynamic>?;
         if (genres != null && genres.isNotEmpty) {
           for (var i = 0; i < genres.length; i++) {
@@ -260,8 +258,6 @@ class _DetailsScreenState extends State<DetailsScreen> {
                       ),
                     ],
                   ),
-
-                  //poster + details
                   Column(
                     children: [
                       SizedBox(height: bgHeight - overlap),
@@ -348,7 +344,6 @@ class _DetailsScreenState extends State<DetailsScreen> {
                                               redact: _isLoading,
                                             ),
                                     ),
-                                    //SizedBox(height: 5),
                                     Container(
                                       decoration: BoxDecoration(
                                         color: Theme.of(
@@ -488,8 +483,6 @@ class _DetailsScreenState extends State<DetailsScreen> {
                         ),
 
                       SizedBox(height: 25),
-
-                      // ignore: prefer_is_empty
                       !_isLoading && recommendations.isNotEmpty
                           ? HorizontalSliderWidget(
                               title: "Recommendations",
@@ -541,6 +534,7 @@ class _ButtonsState extends State<Buttons> with TickerProviderStateMixin {
   final WatchHistoryRepository _watchRepo = WatchHistoryRepository();
   late bool isFavorite;
   late bool markeAsWatched;
+  bool _statusLoading = true;
 
   late AnimationController _favoriteController;
   late AnimationController _trailerController;
@@ -578,7 +572,18 @@ class _ButtonsState extends State<Buttons> with TickerProviderStateMixin {
     _loadStatus();
   }
 
+  @override
+  void didUpdateWidget(Buttons oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    _loadStatus();
+  }
+
   Future<void> _loadStatus() async {
+    if (mounted) {
+      setState(() {
+        _statusLoading = true;
+      });
+    }
     if (widget.contentType == 'movie') {
       final watched = await _watchRepo.isMovieWatched(widget.contentId);
       final favorite = await _watchRepo.isMovieFavorited(widget.contentId);
@@ -587,6 +592,7 @@ class _ButtonsState extends State<Buttons> with TickerProviderStateMixin {
         setState(() {
           markeAsWatched = watched;
           isFavorite = favorite;
+          _statusLoading = false;
           if (markeAsWatched) {
             _watchedController.value = 1.0;
           }
@@ -596,34 +602,46 @@ class _ButtonsState extends State<Buttons> with TickerProviderStateMixin {
         });
       }
     } else if (widget.contentType == 'tv') {
-      // For TV series, check if all released episodes are watched
       final episodes = await _watchRepo.getWatchedEpisodes();
       final seriesEpisodes = episodes
           .where((e) => e.seriesTmdbId == widget.contentId)
           .toList();
 
-      // Calculate total released episodes (exclude unreleased ones)
-      int totalReleasedEpisodes = 0;
-      if (widget.seasonsData != null) {
-        for (var season in widget.seasonsData!) {
-          final seasonNumber = season['season_number'];
-          if (seasonNumber == null || seasonNumber == 0) continue;
+      final watchedKeys = seriesEpisodes
+          .map((episode) => episode.episodeKey)
+          .toSet();
+      bool allSeasonsCompleted = false;
 
-          final episodeCount = season['episode_count'] as int? ?? 0;
-          totalReleasedEpisodes += episodeCount;
+      if (widget.seasonsData != null) {
+        final seasons = widget.seasonsData!
+            .where((season) => season['season_number'] != null)
+            .where((season) => season['season_number'] != 0)
+            .toList();
+
+        if (seasons.isNotEmpty) {
+          allSeasonsCompleted = seasons.every((season) {
+            final seasonNumber = season['season_number'] as int;
+            final episodeCount = season['episode_count'] as int? ?? 0;
+            if (episodeCount <= 0) return false;
+
+            for (int i = 1; i <= episodeCount; i++) {
+              final key = '${widget.contentId}_S${seasonNumber}E$i';
+              if (!watchedKeys.contains(key)) {
+                return false;
+              }
+            }
+            return true;
+          });
         }
       }
 
-      // Check if this series is favorited
       final isFav = await _watchRepo.isSeriesFavorited(widget.contentId);
 
       if (mounted) {
         setState(() {
-          // markeAsWatched should only be true if ALL released episodes are watched
-          markeAsWatched =
-              totalReleasedEpisodes > 0 &&
-              seriesEpisodes.length >= totalReleasedEpisodes;
+          markeAsWatched = allSeasonsCompleted;
           isFavorite = isFav;
+          _statusLoading = false;
           if (markeAsWatched) {
             _watchedController.value = 1.0;
           }
@@ -636,7 +654,6 @@ class _ButtonsState extends State<Buttons> with TickerProviderStateMixin {
   }
 
   Future<void> _toggleFavorite() async {
-    // Favorite works for both movies and TV series
     final newFavoriteState = !isFavorite;
 
     setState(() {
@@ -649,7 +666,6 @@ class _ButtonsState extends State<Buttons> with TickerProviderStateMixin {
       _favoriteController.reverse();
     }
 
-    // Update in repository
     if (widget.contentType == 'movie') {
       if (isFavorite) {
         await _watchRepo.markMovieFavorite(widget.contentId);
@@ -714,28 +730,33 @@ class _ButtonsState extends State<Buttons> with TickerProviderStateMixin {
       markeAsWatched = newWatchedState;
     });
 
-    if (markeAsWatched) {
+    final shouldShowLoading = markeAsWatched;
+    if (shouldShowLoading) {
+      _showWatchLoadingDialog(markeAsWatched);
       _watchedController.forward();
     } else {
       _watchedController.reverse();
     }
 
-    if (widget.contentType == 'movie') {
-      // For movies: simply mark/unmark as watched
-      if (markeAsWatched) {
-        await _watchRepo.markMovieWatched(widget.contentId);
-      } else {
-        await _watchRepo.unmarkMovieWatched(widget.contentId);
+    try {
+      if (widget.contentType == 'movie') {
+        if (markeAsWatched) {
+          await _watchRepo.markMovieWatched(widget.contentId);
+        } else {
+          await _watchRepo.unmarkMovieWatched(widget.contentId);
+        }
+      } else if (widget.contentType == 'tv') {
+        if (markeAsWatched) {
+          await _markAllEpisodes();
+        } else {
+          await _unmarkAllEpisodes();
+        }
+        widget.onWatchedChanged?.call();
       }
-    } else if (widget.contentType == 'tv') {
-      // For TV series: mark/unmark all episodes
-      if (markeAsWatched) {
-        await _markAllEpisodes();
-      } else {
-        await _unmarkAllEpisodes();
+    } finally {
+      if (shouldShowLoading && mounted) {
+        Navigator.of(context, rootNavigator: true).pop();
       }
-      // Notify parent to refresh seasons list
-      widget.onWatchedChanged?.call();
     }
 
     if (mounted) {
@@ -778,6 +799,70 @@ class _ButtonsState extends State<Buttons> with TickerProviderStateMixin {
         ),
       );
     }
+  }
+
+  void _showWatchLoadingDialog(bool isMarking) {
+    showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) {
+        return AlertDialog(
+          backgroundColor: const Color.fromARGB(255, 16, 26, 34),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          content: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              SizedBox(
+                width: 26,
+                height: 26,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2.5,
+                  valueColor: AlwaysStoppedAnimation<Color>(
+                    Theme.of(context).primaryColor,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      isMarking
+                          ? (widget.contentType == 'movie'
+                                ? 'Marking as watched'
+                                : 'Marking all episodes')
+                          : (widget.contentType == 'movie'
+                                ? 'Removing from watched'
+                                : 'Clearing watched episodes'),
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 15,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      isMarking
+                          ? 'Updating your progress…'
+                          : 'Syncing your progress…',
+                      style: TextStyle(
+                        color: Colors.white.withAlpha(178),
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
   }
 
   bool _isMovieUnreleased() {
@@ -825,26 +910,20 @@ class _ButtonsState extends State<Buttons> with TickerProviderStateMixin {
   bool _hasAnyUnreleasedEpisodes() {
     if (widget.contentType != 'tv') return false;
 
-    // If nextEpisodeToAir exists, it means there are episodes that haven't aired yet
     if (widget.nextEpisodeToAir != null) {
       final airDate = widget.nextEpisodeToAir!['air_date'];
 
-      // If there's no air date, assume it's unreleased
       if (airDate == null || airDate.toString().isEmpty) {
         return true;
       }
 
-      // If there's an air date, check if it's in the future
       try {
         final date = DateTime.parse(airDate.toString());
         if (date.isAfter(DateTime.now())) {
           return true;
         }
-        // If the date is in the past but nextEpisodeToAir still exists,
-        // the data might be stale, so treat as unreleased
         return true;
       } catch (_) {
-        // If we can't parse the date, assume unreleased to be safe
         return true;
       }
     }
@@ -929,7 +1008,6 @@ class _ButtonsState extends State<Buttons> with TickerProviderStateMixin {
       final seasonNumber = season['season_number'];
       if (seasonNumber == null) continue;
 
-      // Fetch detailed season information to check episode air dates
       final seasonDetails = await tmdbServices
           .fetchDetails(
             '${widget.contentId}/season/$seasonNumber',
@@ -942,20 +1020,16 @@ class _ButtonsState extends State<Buttons> with TickerProviderStateMixin {
       final episodeCount = season['episode_count'] ?? 0;
 
       for (int i = 1; i <= episodeCount; i++) {
-        // Check if episode is unreleased
         final episodeData = i <= episodes.length ? episodes[i - 1] : null;
         final airDate = episodeData?['air_date']?.toString();
 
         if (airDate != null && airDate.isNotEmpty) {
           try {
             final date = DateTime.parse(airDate);
-            // Skip unreleased episodes
             if (date.isAfter(DateTime.now())) {
               continue;
             }
-          } catch (_) {
-            // If we can't parse the date, mark it anyway
-          }
+          } catch (_) {}
         }
 
         episodesToMark.add({
@@ -993,9 +1067,10 @@ class _ButtonsState extends State<Buttons> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
+    final bool isStatusLoading = widget.isLoading || _statusLoading;
     final bool isWatchBlocked = widget.contentType == 'movie'
         ? _isWatchBlocked() && !markeAsWatched
-        : _hasAnyUnreleasedEpisodes();
+        : _hasAnyUnreleasedEpisodes() && !markeAsWatched;
     final String blockedTooltip = widget.contentType == 'movie'
         ? (() {
             final releaseText = _formatReleaseDate(widget.releaseDate);
@@ -1020,37 +1095,35 @@ class _ButtonsState extends State<Buttons> with TickerProviderStateMixin {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // Favorite Button (works for both movies and TV series) - with redacted loading
             _buildLoadingButton(
-              isLoading: widget.isLoading,
+              isLoading: isStatusLoading,
               child: _AnimatedIconButton(
                 isActive: isFavorite,
                 controller: _favoriteController,
                 activeIcon: Icons.favorite_rounded,
                 inactiveIcon: Icons.favorite_border_rounded,
-                onPressed: widget.isLoading ? null : _toggleFavorite,
+                onPressed: isStatusLoading ? null : _toggleFavorite,
                 tooltip: isFavorite
                     ? "Remove from favorites"
                     : "Add to favorites",
-                isDisabled: widget.isLoading,
+                isDisabled: isStatusLoading,
               ),
             ),
 
             const SizedBox(width: 12),
 
-            // Watched Button - with redacted loading
             _buildLoadingButton(
-              isLoading: widget.isLoading,
+              isLoading: isStatusLoading,
               child: _AnimatedIconButton(
                 isActive: markeAsWatched,
                 controller: _watchedController,
                 activeIcon: Icons.done_all_rounded,
                 inactiveIcon: Icons.done_rounded,
-                onPressed: (isWatchBlocked || widget.isLoading)
+                onPressed: (isWatchBlocked || isStatusLoading)
                     ? null
                     : _toggleWatched,
-                isDisabled: isWatchBlocked || widget.isLoading,
-                tooltip: widget.isLoading
+                isDisabled: isWatchBlocked || isStatusLoading,
+                tooltip: isStatusLoading
                     ? "Loading..."
                     : isWatchBlocked
                     ? blockedTooltip
@@ -1066,7 +1139,6 @@ class _ButtonsState extends State<Buttons> with TickerProviderStateMixin {
 
             const SizedBox(width: 12),
 
-            // Watch Trailer Button - with fade and redacted loading
             _buildLoadingTrailerButton(),
           ],
         ),
@@ -1241,7 +1313,6 @@ class _ButtonsState extends State<Buttons> with TickerProviderStateMixin {
   }
 }
 
-// Custom animated icon button widget for better reusability
 class _AnimatedIconButton extends StatelessWidget {
   const _AnimatedIconButton({
     required this.isActive,
@@ -1357,4 +1428,3 @@ class _AnimatedIconButton extends StatelessWidget {
     );
   }
 }
-

@@ -84,7 +84,6 @@ class CastHorizontalSlider extends StatelessWidget {
                         ),
                       ),
                       SizedBox(height: 10),
-                      // Actor Name
                       Text(
                         name,
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
@@ -99,7 +98,6 @@ class CastHorizontalSlider extends StatelessWidget {
                         overflow: TextOverflow.ellipsis,
                       ),
                       SizedBox(height: 4),
-                      // Character Name
                       Text(
                         character,
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(

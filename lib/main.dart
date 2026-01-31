@@ -123,13 +123,10 @@ class _HomeScreenWithConnectivityState
   Widget build(BuildContext context) {
     return Consumer<ConnectivityProvider>(
       builder: (context, connectivityProvider, _) {
-
-        // Check for network issues (disconnected OR has network error)
         final hasNetworkIssue =
             !connectivityProvider.isConnected ||
             connectivityProvider.hasNetworkError;
 
-        // Show dialog if there's a connectivity issue
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (hasNetworkIssue && mounted) {
             _showNetworkDialog(context, connectivityProvider);
@@ -155,21 +152,17 @@ class _HomeScreenWithConnectivityState
       builder: (dialogContext) {
         return NetworkDialog(
           onReload: () {
-            // Close the dialog first
             if (dialogContext.mounted) {
               Navigator.of(dialogContext).pop();
             }
 
-            // Clear error state
             connectivityProvider.clearError();
 
-            // Restart the entire app
             RestartWidget.restartApp(context);
           },
         );
       },
     ).then((_) {
-      // Reset the flag when dialog is closed
       _isDialogShowing = false;
     });
   }

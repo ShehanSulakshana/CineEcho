@@ -26,9 +26,8 @@ class _PersonalScreenState extends State<PersonalScreen>
 
   late Future<Map<String, dynamic>> _statsFuture;
   Future<Map<String, dynamic>?>? _profileFuture;
-  int _statsUpdateKey = 0; // Key to force FutureBuilder rebuild
-  late Timer? _statsRefreshTimer;
-
+  int _statsUpdateKey = 0;
+  Timer? _statsRefreshTimer;
   @override
   void initState() {
     super.initState();
@@ -38,52 +37,33 @@ class _PersonalScreenState extends State<PersonalScreen>
     _profileFuture = _loadProfile();
     _tabController?.addListener(_onTabChanged);
 
-    // Listen to visibility changes to refresh stats when returning to this screen
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _setupStatsRefreshListener();
     });
   }
 
   void _setupStatsRefreshListener() {
-    // Refresh stats every time the personal screen is visible
-    if (mounted) {
-      _refreshStats();
-    }
+    WidgetsBinding.instance.addObserver(this);
   }
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed && mounted) {
-      _refreshStats();
-    }
-  }
-
-  void _onTabChanged() {
-    if (mounted) {
       setState(() {
         _statsFuture = _loadStats();
       });
     }
   }
+
+  void _onTabChanged() {}
 
   void _refreshStats() {
     if (mounted) {
-      // Increment the key to force FutureBuilder to rebuild
+      _statsRefreshTimer?.cancel();
+
       setState(() {
         _statsUpdateKey++;
         _statsFuture = _loadStats();
-      });
-
-      // Set up periodic refresh while user is on this screen
-      _statsRefreshTimer?.cancel();
-      _statsRefreshTimer = Timer.periodic(Duration(seconds: 2), (_) {
-        if (mounted && _tabController?.index == 0) {
-          // Only refresh when on profile tab
-          setState(() {
-            _statsUpdateKey++;
-            _statsFuture = _loadStats();
-          });
-        }
       });
     }
   }
@@ -91,7 +71,6 @@ class _PersonalScreenState extends State<PersonalScreen>
   Future<Map<String, dynamic>> _loadStats() async {
     final stats = await _watchRepo.getWatchStats();
 
-    // Calculate watch time: 2 hours per movie + 45 mins per episode
     int totalMinutes =
         (stats.moviesWatchedCount * 120) + (stats.episodesWatchedCount * 45);
     int hours = totalMinutes ~/ 60;
@@ -132,7 +111,6 @@ class _PersonalScreenState extends State<PersonalScreen>
       body: RefreshIndicator(
         onRefresh: () async {
           _refreshStats();
-          // Add a slight delay for visual feedback
           await Future.delayed(Duration(milliseconds: 800));
         },
         color: Theme.of(context).primaryColor,
@@ -179,8 +157,44 @@ class _PersonalScreenState extends State<PersonalScreen>
                                               context,
                                             ).showSnackBar(
                                               SnackBar(
-                                                content: Text('Refreshing...'),
-                                                duration: Duration(seconds: 1),
+                                                behavior:
+                                                    SnackBarBehavior.floating,
+                                                duration: Duration(
+                                                  milliseconds: 1200,
+                                                ),
+                                                backgroundColor: Theme.of(
+                                                  context,
+                                                ).primaryColor.withAlpha(230),
+                                                shape: RoundedRectangleBorder(
+                                                  borderRadius:
+                                                      BorderRadius.circular(12),
+                                                ),
+                                                content: Row(
+                                                  children: [
+                                                    SizedBox(
+                                                      width: 18,
+                                                      height: 18,
+                                                      child: CircularProgressIndicator(
+                                                        strokeWidth: 2,
+                                                        valueColor:
+                                                            AlwaysStoppedAnimation<
+                                                              Color
+                                                            >(Colors.white),
+                                                      ),
+                                                    ),
+                                                    const SizedBox(width: 12),
+                                                    const Expanded(
+                                                      child: Text(
+                                                        'Refreshing profile stats...',
+                                                        style: TextStyle(
+                                                          fontSize: 13,
+                                                          fontWeight:
+                                                              FontWeight.w600,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
                                               ),
                                             );
                                           },

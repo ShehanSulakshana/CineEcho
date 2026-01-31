@@ -74,7 +74,6 @@ class AppTheme {
     ),
 
     appBarTheme: AppBarTheme(
-      //foregroundColor: Color.fromARGB(255, 39, 61, 254),
       backgroundColor: Color.fromARGB(255, 0, 25, 42),
       elevation: 2.5,
       shadowColor: const Color.fromARGB(36, 0, 0, 0),
@@ -89,9 +88,5 @@ class AppTheme {
         color: Color.fromARGB(255, 39, 61, 254),
       ),
     ),
-
-    // snackBarTheme: SnackBarThemeData(
-    //   backgroundColor: Color.fromARGB(255, 39, 61, 254),
-    // )
   );
 }

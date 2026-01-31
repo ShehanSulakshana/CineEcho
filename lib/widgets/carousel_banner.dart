@@ -18,7 +18,7 @@ class CarouselBannerWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 220, // Fixed height for consistency
+      height: 220,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(25),
         boxShadow: [
@@ -33,7 +33,6 @@ class CarouselBannerWidget extends StatelessWidget {
         borderRadius: BorderRadius.circular(20),
         child: Stack(
           children: [
-            // Banner Image
             Positioned.fill(
               child: imageLink.isEmpty
                   ? Image.asset('assets/splash/logo.png', fit: BoxFit.cover)
@@ -92,7 +91,6 @@ class CarouselBannerWidget extends StatelessWidget {
 
                     Row(
                       children: [
-                        // Year
                         Text(
                           releaseYear,
                           style: Theme.of(context).textTheme.bodyMedium

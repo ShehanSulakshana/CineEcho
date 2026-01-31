@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:cine_echo/providers/connectivity_provider.dart';
 
-/// A wrapper widget for Image.network that automatically handles errors
 class SafeNetworkImage extends StatelessWidget {
   final String imageUrl;
   final BoxFit fit;
@@ -39,7 +38,6 @@ class SafeNetworkImage extends StatelessWidget {
       errorBuilder: (context, error, stackTrace) {
         debugPrint('Image loading error for $imageUrl: $error');
 
-        // Report to connectivity provider
         if (context.mounted && error.toString().contains('SocketException')) {
           try {
             context.read<ConnectivityProvider>().setNetworkError(

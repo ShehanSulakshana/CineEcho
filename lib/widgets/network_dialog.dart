@@ -75,7 +75,6 @@ class _NetworkDialogState extends State<NetworkDialog>
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  // Animated Icon
                   Container(
                     width: 80,
                     height: 80,
@@ -93,7 +92,6 @@ class _NetworkDialogState extends State<NetworkDialog>
                   ),
                   const SizedBox(height: 24),
 
-                  // Title
                   Text(
                     'No Internet Connection',
                     style: Theme.of(context).textTheme.titleLarge?.copyWith(
@@ -106,7 +104,6 @@ class _NetworkDialogState extends State<NetworkDialog>
                   ),
                   const SizedBox(height: 12),
 
-                  // Subtitle
                   Text(
                     'Please check your internet connection and try again',
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
@@ -118,7 +115,6 @@ class _NetworkDialogState extends State<NetworkDialog>
                   ),
                   const SizedBox(height: 32),
 
-                  // Reload Button
                   SizedBox(
                     width: double.infinity,
                     height: 54,
@@ -155,7 +151,6 @@ class _NetworkDialogState extends State<NetworkDialog>
                   ),
                   const SizedBox(height: 12),
 
-                  // Exit Button
                   SizedBox(
                     width: double.infinity,
                     height: 54,

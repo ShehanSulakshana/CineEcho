@@ -53,9 +53,7 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
           _startRateLimitTimer(remaining);
         }
       }
-    } catch (e) {
-      // Silently handle rate limit check errors
-    }
+    } catch (e) {}
   }
 
   void _startRateLimitTimer(Duration duration) {

@@ -29,13 +29,11 @@ class _SignUpScreenState extends State<SignUpScreen> {
         listen: false,
       );
 
-      // Create the account
       final credential = await authProvider.createAccount(
         email: _emailController.text.trim(),
         password: _passwordController.text.trim(),
       );
 
-      // Update the display name with username
       final username = _usernameController.text.trim();
       await authProvider.updateUserName(
         username: _usernameController.text.trim(),
@@ -155,7 +153,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 key: _formKey,
                 child: Column(
                   children: [
-                    // Username
                     TextFormField(
                       controller: _usernameController,
                       cursorColor: Theme.of(context).primaryColor,
@@ -190,7 +187,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     ),
                     SizedBox(height: 20),
 
-                    // Email
                     TextFormField(
                       controller: _emailController,
                       keyboardType: TextInputType.emailAddress,
@@ -224,7 +220,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     ),
                     SizedBox(height: 20),
 
-                    // Password
                     TextFormField(
                       controller: _passwordController,
                       obscureText: _obscurePassword,
@@ -271,7 +266,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     ),
                     SizedBox(height: 20),
 
-                    // Confirm Password
                     TextFormField(
                       controller: _confirmPasswordController,
                       obscureText: _obscureConfirmPassword,
@@ -344,7 +338,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       ),
                     ),
                     SizedBox(height: 20),
-                    // Divider with "OR"
                     Row(
                       children: [
                         Expanded(child: Divider(color: Colors.grey)),
@@ -359,7 +352,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       ],
                     ),
                     SizedBox(height: 20),
-                    // Google Sign-In Button
                     SizedBox(
                       width: double.infinity,
                       height: 65,

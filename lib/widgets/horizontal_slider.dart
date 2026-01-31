@@ -64,7 +64,6 @@ class _HorizontalSliderWidgetState extends State<HorizontalSliderWidget> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Section Header
           SizedBox(
             height: 50,
             child: Row(
@@ -108,7 +107,6 @@ class _HorizontalSliderWidgetState extends State<HorizontalSliderWidget> {
           ),
           const SizedBox(height: 12),
 
-          // Horizontal Scroll
           SizedBox(
             height: 200,
             child: ListView.builder(
@@ -161,7 +159,6 @@ class _HorizontalSliderWidgetState extends State<HorizontalSliderWidget> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          // Poster (smaller)
                           Container(
                             width: 90,
                             height: 135,
@@ -218,7 +215,6 @@ class _HorizontalSliderWidgetState extends State<HorizontalSliderWidget> {
 
                           const SizedBox(height: 2),
 
-                          // Year + Rating (smaller)
                           Text(
                             releaseYear,
                             style: Theme.of(context).textTheme.bodySmall
@@ -237,4 +233,3 @@ class _HorizontalSliderWidgetState extends State<HorizontalSliderWidget> {
     );
   }
 }
-

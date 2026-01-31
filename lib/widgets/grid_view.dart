@@ -10,7 +10,7 @@ class GridViewWidget extends StatefulWidget {
   final bool isLoadingMore;
   final bool hasMorePages;
   final String typeData;
-  final Duration fadeDuration; // add
+  final Duration fadeDuration;
 
   const GridViewWidget({
     super.key,
@@ -19,7 +19,7 @@ class GridViewWidget extends StatefulWidget {
     required this.isLoadingMore,
     required this.hasMorePages,
     required this.typeData,
-    this.fadeDuration = const Duration(milliseconds: 600), // add
+    this.fadeDuration = const Duration(milliseconds: 600),
   });
 
   @override
@@ -28,7 +28,7 @@ class GridViewWidget extends StatefulWidget {
 
 class _GridViewWidgetState extends State<GridViewWidget> {
   late ScrollController _scrollController;
-  double _opacity = 0; // add
+  double _opacity = 0;
 
   @override
   void initState() {
@@ -36,7 +36,6 @@ class _GridViewWidgetState extends State<GridViewWidget> {
     _scrollController = ScrollController();
     _scrollController.addListener(_onScroll);
 
-    // trigger fade-in after first frame
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       setState(() => _opacity = 1);
@@ -139,7 +138,6 @@ class _GridViewWidgetState extends State<GridViewWidget> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            // Poster (responsive)
                             Container(
                               width: itemWidth,
                               height: itemHeight,
@@ -190,7 +188,6 @@ class _GridViewWidgetState extends State<GridViewWidget> {
                               ),
                             ),
                             const SizedBox(height: 2),
-                            // Year + Rating (smaller)
                             Text(
                               releaseYear,
                               style: Theme.of(context).textTheme.bodySmall

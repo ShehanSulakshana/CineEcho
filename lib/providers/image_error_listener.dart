@@ -1,14 +1,9 @@
 import 'package:cine_echo/widgets/safe_network_image.dart';
 import 'package:flutter/material.dart';
 
-/// Global image error listener to catch image loading failures
 class ImageErrorListener {
-  static void setupGlobalImageErrorListener(BuildContext context) {
-    // This is a workaround since Flutter doesn't provide direct image cache error listening
-    // We'll handle image errors in individual Image.network widgets instead
-  }
+  static void setupGlobalImageErrorListener(BuildContext context) {}
 
-  /// Wrap Image.network with error handling
   static Widget buildNetworkImage({
     required String imageUrl,
     required BuildContext context,

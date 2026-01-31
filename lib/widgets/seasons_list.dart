@@ -28,7 +28,7 @@ class _SeasonsListState extends State<SeasonsList> {
   final Map<int, bool> _expandedSeasons = {};
   final Map<int, List<dynamic>> _episodesCache = {};
   final Map<int, bool> _loadingSeasons = {};
-  final Map<String, bool> _watchedEpisodes = {}; // Track watched status
+  final Map<String, bool> _watchedEpisodes = {};
 
   @override
   void initState() {
@@ -59,7 +59,6 @@ class _SeasonsListState extends State<SeasonsList> {
   }
 
   bool _isSeasonCompleted(int seasonNumber, int episodeCount) {
-    // Check completion based on watched episodes count vs total episode count
     final seriesId = int.parse(widget.tvId);
     int watchedCount = 0;
 
@@ -409,9 +408,7 @@ class _SeasonsListState extends State<SeasonsList> {
       margin: const EdgeInsets.only(left: 24, right: 16, bottom: 8, top: 4),
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
-        color: isWatched
-            ? blueColor.withAlpha(20)
-            : Colors.white.withAlpha(8),
+        color: isWatched ? blueColor.withAlpha(20) : Colors.white.withAlpha(8),
         borderRadius: BorderRadius.circular(10),
         border: Border.all(
           color: isWatched
@@ -423,7 +420,6 @@ class _SeasonsListState extends State<SeasonsList> {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Checkbox for watched status
           GestureDetector(
             onTap: () {
               if (isUnreleased) {
@@ -466,7 +462,6 @@ class _SeasonsListState extends State<SeasonsList> {
               ),
             ),
           ),
-          // Episode thumbnail
           if (stillPath != null)
             ClipRRect(
               borderRadius: BorderRadius.circular(6),
@@ -697,4 +692,3 @@ class _SeasonsListState extends State<SeasonsList> {
     );
   }
 }
-

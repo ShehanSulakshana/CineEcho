@@ -11,7 +11,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: Colors.transparent, // or your app background
+      color: Colors.transparent,
       child: SafeArea(
         child: Padding(
           padding: const EdgeInsets.fromLTRB(5, 5, 10, 5),
@@ -19,14 +19,12 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              // Logo (Left)
               SizedBox(
                 height: 60,
                 width: 60,
                 child: Image.asset("assets/splash/logo.png", fit: BoxFit.cover),
               ),
 
-              // Branding (Center)
               SizedBox(
                 height: 60,
                 child: Image.asset(
@@ -35,7 +33,6 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                 ),
               ),
 
-              // Search Icon (Right)
               Expanded(
                 child: Align(
                   alignment: Alignment.centerRight,

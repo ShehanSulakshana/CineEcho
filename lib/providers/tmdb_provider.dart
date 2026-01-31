@@ -4,7 +4,6 @@ import 'package:cine_echo/services/tmdb_services.dart';
 class TmdbProvider extends ChangeNotifier {
   final TmdbServices _tmdbServices = TmdbServices();
 
-  // Discover Screen
   List<dynamic> _trending = [];
   List<dynamic> _popularMovie = [];
   List<dynamic> _popularTv = [];
@@ -86,7 +85,6 @@ class TmdbProvider extends ChangeNotifier {
       _upcomingMovies = results[5]['results'] ?? [];
       _upcomingMoviesTotalPages = results[5]['total_pages'] ?? 1;
 
-      // Check if all results were empty (all failed)
       bool hasAnyData =
           _trending.isNotEmpty ||
           _popularMovie.isNotEmpty ||
@@ -109,8 +107,6 @@ class TmdbProvider extends ChangeNotifier {
       rethrow;
     }
   }
-
-  // Genre Screen
 
   Future<void> loadGenreData(
     String mediaType,

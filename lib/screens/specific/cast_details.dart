@@ -142,7 +142,7 @@ class _CastDetailsState extends State<CastDetails> {
                                 decoration: BoxDecoration(
                                   shape: BoxShape.circle,
                                   border: Border.all(
-                                    color: Colors.blueAccent, // Border color
+                                    color: Colors.blueAccent,
                                     width: 4,
                                   ),
                                   boxShadow: [
@@ -214,8 +214,6 @@ class _CastDetailsState extends State<CastDetails> {
                     );
                   },
                 ),
-
-                //DETAILS
                 Padding(
                   padding: const EdgeInsets.fromLTRB(25, 5, 25, 25),
                   child: Column(
@@ -277,4 +275,3 @@ class _CastDetailsState extends State<CastDetails> {
     );
   }
 }
-

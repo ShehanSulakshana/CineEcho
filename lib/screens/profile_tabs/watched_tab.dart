@@ -132,6 +132,64 @@ class _WatchedTabState extends State<WatchedTab> {
     );
   }
 
+  void _showRemovalLoadingDialog({required bool isSeries}) {
+    showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) {
+        return AlertDialog(
+          backgroundColor: const Color.fromARGB(255, 16, 26, 34),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          content: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              SizedBox(
+                width: 26,
+                height: 26,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2.5,
+                  valueColor: AlwaysStoppedAnimation<Color>(
+                    Theme.of(context).primaryColor,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      isSeries
+                          ? 'Clearing watched episodes'
+                          : 'Removing from watched',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 15,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'Syncing your progress…',
+                      style: TextStyle(
+                        color: Colors.white.withAlpha(178),
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
@@ -242,13 +300,14 @@ class _WatchedTabState extends State<WatchedTab> {
           },
           onLongPress: () {
             _showDeleteDialog(title, () async {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text('Removing...'),
-                  duration: Duration(seconds: 2),
-                ),
-              );
-              await _watchRepo.unmarkMovieWatched(movie.tmdbId);
+              _showRemovalLoadingDialog(isSeries: false);
+              try {
+                await _watchRepo.unmarkMovieWatched(movie.tmdbId);
+              } finally {
+                if (mounted) {
+                  Navigator.of(context, rootNavigator: true).pop();
+                }
+              }
               if (mounted) {
                 _loadContent();
                 widget.onDataChanged?.call();
@@ -521,22 +580,23 @@ class _WatchedTabState extends State<WatchedTab> {
               },
               onLongPress: () {
                 _showDeleteDialog(name, () async {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('Removing series episodes...'),
-                      duration: Duration(seconds: 3),
-                    ),
-                  );
-                  // Use Future.wait for parallel deletion instead of sequential
-                  await Future.wait(
-                    episodes.map(
-                      (episode) => _watchRepo.unmarkEpisodeWatched(
-                        seriesId,
-                        episode.seasonNumber,
-                        episode.episodeNumber,
+                  _showRemovalLoadingDialog(isSeries: true);
+                  try {
+                    // Use Future.wait for parallel deletion instead of sequential
+                    await Future.wait(
+                      episodes.map(
+                        (episode) => _watchRepo.unmarkEpisodeWatched(
+                          seriesId,
+                          episode.seasonNumber,
+                          episode.episodeNumber,
+                        ),
                       ),
-                    ),
-                  );
+                    );
+                  } finally {
+                    if (mounted) {
+                      Navigator.of(context, rootNavigator: true).pop();
+                    }
+                  }
                   if (mounted) {
                     _loadContent();
                     widget.onDataChanged?.call();
