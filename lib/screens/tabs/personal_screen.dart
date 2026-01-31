@@ -149,72 +149,81 @@ class _PersonalScreenState extends State<PersonalScreen>
                                   height: 50,
                                   child: Row(
                                     children: [
-                                      Material(
-                                        color: Colors.transparent,
-                                        child: InkWell(
-                                          onTap: () {
-                                            _refreshStats();
-                                            ScaffoldMessenger.of(
-                                              context,
-                                            ).showSnackBar(
-                                              SnackBar(
-                                                behavior:
-                                                    SnackBarBehavior.floating,
-                                                duration: Duration(
-                                                  milliseconds: 1200,
-                                                ),
-                                                backgroundColor: Theme.of(
+                                      Expanded(
+                                        child: Align(
+                                          alignment: Alignment.centerLeft,
+                                          child: Material(
+                                            color: Colors.transparent,
+                                            child: InkWell(
+                                              onTap: () {
+                                                _refreshStats();
+                                                ScaffoldMessenger.of(
                                                   context,
-                                                ).primaryColor.withAlpha(230),
-                                                shape: RoundedRectangleBorder(
-                                                  borderRadius:
-                                                      BorderRadius.circular(12),
-                                                ),
-                                                content: Row(
-                                                  children: [
-                                                    SizedBox(
-                                                      width: 18,
-                                                      height: 18,
-                                                      child: CircularProgressIndicator(
-                                                        strokeWidth: 2,
-                                                        valueColor:
-                                                            AlwaysStoppedAnimation<
-                                                              Color
-                                                            >(Colors.white),
-                                                      ),
+                                                ).showSnackBar(
+                                                  SnackBar(
+                                                    behavior: SnackBarBehavior
+                                                        .floating,
+                                                    duration: Duration(
+                                                      milliseconds: 1200,
                                                     ),
-                                                    const SizedBox(width: 12),
-                                                    const Expanded(
-                                                      child: Text(
-                                                        'Refreshing profile stats...',
-                                                        style: TextStyle(
-                                                          fontSize: 13,
-                                                          fontWeight:
-                                                              FontWeight.w600,
+                                                    backgroundColor:
+                                                        Theme.of(context)
+                                                            .primaryColor
+                                                            .withAlpha(230),
+                                                    shape: RoundedRectangleBorder(
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                            12,
+                                                          ),
+                                                    ),
+                                                    content: Row(
+                                                      children: [
+                                                        SizedBox(
+                                                          width: 18,
+                                                          height: 18,
+                                                          child: CircularProgressIndicator(
+                                                            strokeWidth: 2,
+                                                            valueColor:
+                                                                AlwaysStoppedAnimation<
+                                                                  Color
+                                                                >(Colors.white),
+                                                          ),
                                                         ),
-                                                      ),
+                                                        const SizedBox(
+                                                          width: 12,
+                                                        ),
+                                                        const Expanded(
+                                                          child: Text(
+                                                            'Refreshing profile stats...',
+                                                            style: TextStyle(
+                                                              fontSize: 13,
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .w600,
+                                                            ),
+                                                          ),
+                                                        ),
+                                                      ],
                                                     ),
-                                                  ],
+                                                  ),
+                                                );
+                                              },
+                                              borderRadius:
+                                                  BorderRadius.circular(8),
+                                              child: Padding(
+                                                padding: EdgeInsets.all(8),
+                                                child: Icon(
+                                                  Icons.refresh_rounded,
+                                                  size: 24,
+                                                  color: Theme.of(
+                                                    context,
+                                                  ).primaryColor,
                                                 ),
                                               ),
-                                            );
-                                          },
-                                          borderRadius: BorderRadius.circular(
-                                            8,
-                                          ),
-                                          child: Padding(
-                                            padding: EdgeInsets.all(8),
-                                            child: Icon(
-                                              Icons.refresh_rounded,
-                                              size: 24,
-                                              color: Theme.of(
-                                                context,
-                                              ).primaryColor,
                                             ),
                                           ),
                                         ),
                                       ),
-                                      const Spacer(),
                                       Expanded(
                                         child: Text(
                                           "Profile",

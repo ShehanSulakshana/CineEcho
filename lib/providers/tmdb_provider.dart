@@ -120,6 +120,7 @@ class TmdbProvider extends ChangeNotifier {
       _genreCurrentPage[key] = 1;
     } else {
       _genreLoadingMore[key] = true;
+      _genreCurrentPage[key] = (_genreCurrentPage[key] ?? 1) + 1;
     }
     notifyListeners();
 

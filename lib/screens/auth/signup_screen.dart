@@ -323,7 +323,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
                             _showLoadingDialog('Creating account...');
                             await createUserWithEmailAndPassword();
                             // ignore: use_build_context_synchronously
-                            if (mounted) Navigator.of(context).pop();
+                            if (mounted && Navigator.canPop(context)) {
+                              Navigator.of(context).pop();
+                            }
                           }
                         },
                         style: ButtonStyle(
@@ -366,7 +368,11 @@ class _SignUpScreenState extends State<SignUpScreen> {
                             await authProvider.signInWithGoogle();
 
                             if (!mounted) return;
-                            Navigator.of(context).pop(); // Close loading dialog
+                            if (Navigator.canPop(context)) {
+                              Navigator.of(
+                                context,
+                              ).pop(); // Close loading dialog
+                            }
 
                             _showSnackBar(
                               "Signed in with Google successfully!",
@@ -379,7 +385,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
                               (route) => false,
                             );
                           } on FirebaseAuthException catch (e) {
-                            if (mounted) Navigator.of(context).pop();
+                            if (mounted && Navigator.canPop(context)) {
+                              Navigator.of(context).pop();
+                            }
                             String message =
                                 e.message ?? 'Google Sign-In failed';
                             switch (e.code) {
@@ -399,7 +407,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
                             }
                             _showSnackBar(message, Colors.red);
                           } catch (e) {
-                            if (mounted) Navigator.of(context).pop();
+                            if (mounted && Navigator.canPop(context)) {
+                              Navigator.of(context).pop();
+                            }
                             _showSnackBar(
                               'An unexpected error occurred with Google Sign-In',
                               Colors.red,

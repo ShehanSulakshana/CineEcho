@@ -248,7 +248,9 @@ class _LoginScreenState extends State<LoginScreen> {
                               _showLoadingDialog('Signing in...');
                               await loginUserWithEmailPassword();
                               // ignore: use_build_context_synchronously
-                              if (mounted) Navigator.of(context).pop();
+                              if (mounted && Navigator.canPop(context)) {
+                                Navigator.of(context).pop();
+                              }
                             }
                           },
                           style: ButtonStyle(
@@ -299,7 +301,9 @@ class _LoginScreenState extends State<LoginScreen> {
                         final credential = await authProvider
                             .signInWithGoogle();
 
-                        if (mounted) Navigator.of(context).pop();
+                        if (mounted && Navigator.canPop(context)) {
+                          Navigator.of(context).pop();
+                        }
                         if (credential != null) {
                           _showSnackBar(
                             "Signed in with Google successfully!",
@@ -313,13 +317,17 @@ class _LoginScreenState extends State<LoginScreen> {
                           );
                         }
                       } on FirebaseAuthException catch (e) {
-                        if (mounted) Navigator.of(context).pop();
+                        if (mounted && Navigator.canPop(context)) {
+                          Navigator.of(context).pop();
+                        }
                         _showSnackBar(
                           e.message ?? 'Google Sign-In failed',
                           Colors.red,
                         );
                       } catch (e) {
-                        if (mounted) Navigator.of(context).pop();
+                        if (mounted && Navigator.canPop(context)) {
+                          Navigator.of(context).pop();
+                        }
                         _showSnackBar(
                           'An error occurred during Google Sign-In',
                           Colors.red,
