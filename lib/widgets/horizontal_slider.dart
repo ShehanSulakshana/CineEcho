@@ -169,7 +169,7 @@ class _HorizontalSliderWidgetState extends State<HorizontalSliderWidget> {
                               borderRadius: BorderRadius.circular(12),
                               boxShadow: [
                                 BoxShadow(
-                                  color: Colors.black.withOpacity(0.3),
+                                  color: Colors.black.withAlpha(77),
                                   blurRadius: 2,
                                   offset: const Offset(1, 1),
                                 ),
@@ -237,3 +237,4 @@ class _HorizontalSliderWidgetState extends State<HorizontalSliderWidget> {
     );
   }
 }
+

@@ -127,11 +127,11 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                     AnimatedContainer(
                                       duration: Duration(microseconds: 400),
                                       curve: Curves.easeInOut,
-                                      transform: Matrix4.translationValues(
-                                        isActive ? 0 : 0,
-                                        0,
-                                        0,
-                                      )..scale(scaleValue),
+                                      transform: Matrix4.diagonal3Values(
+                                        scaleValue,
+                                        scaleValue,
+                                        1,
+                                      ),
                                       child: _buildIcon(
                                         isActive
                                             ? activeIcons[index]

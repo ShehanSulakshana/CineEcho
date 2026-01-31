@@ -23,7 +23,7 @@ class CarouselBannerWidget extends StatelessWidget {
         borderRadius: BorderRadius.circular(25),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.4),
+            color: Colors.black.withAlpha(102),
             blurRadius: 4,
             offset: const Offset(0, 2),
           ),
@@ -54,7 +54,7 @@ class CarouselBannerWidget extends StatelessWidget {
                     begin: Alignment.bottomCenter,
                     end: Alignment.topCenter,
                     colors: [
-                      Colors.black.withOpacity(0.95),
+                      Colors.black.withAlpha(242),
                       Colors.transparent,
                     ],
                     stops: const [0.0, 0.8],
@@ -111,7 +111,7 @@ class CarouselBannerWidget extends StatelessWidget {
                             vertical: 4,
                           ),
                           decoration: BoxDecoration(
-                            color: Colors.black.withOpacity(0.6),
+                            color: Colors.black.withAlpha(153),
                             borderRadius: BorderRadius.circular(20),
                             border: Border.all(
                               color: Colors.white.withAlpha(30),
@@ -150,3 +150,4 @@ class CarouselBannerWidget extends StatelessWidget {
     );
   }
 }
+

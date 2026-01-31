@@ -1,14 +1,9 @@
 import 'package:cine_echo/widgets/safe_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'connectivity_provider.dart';
 
 /// Global image error listener to catch image loading failures
 class ImageErrorListener {
   static void setupGlobalImageErrorListener(BuildContext context) {
-    // Listen to image cache errors globally
-    final imageCache = ImageCache();
-
     // This is a workaround since Flutter doesn't provide direct image cache error listening
     // We'll handle image errors in individual Image.network widgets instead
   }

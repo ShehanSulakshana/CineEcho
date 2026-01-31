@@ -81,7 +81,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
       }
       _showSnackBar(message, Colors.red);
     } catch (e) {
-      print('Signup error: $e');
       _showSnackBar(
         'An unexpected error occurred: ${e.toString()}',
         Colors.red,
@@ -350,6 +349,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                               Colors.green,
                             );
                             Navigator.pushAndRemoveUntil(
+                              // ignore: use_build_context_synchronously
                               context,
                               MaterialPageRoute(builder: (_) => HomeScreen()),
                               (route) => false,

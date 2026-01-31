@@ -99,7 +99,7 @@ class _WatchedTabState extends State<WatchedTab> {
         ),
         content: Text(
           'Remove "$title" from your watched list?',
-          style: TextStyle(color: Colors.white.withOpacity(0.8), fontSize: 15),
+          style: TextStyle(color: Colors.white.withAlpha(204), fontSize: 15),
         ),
         actions: [
           TextButton(
@@ -153,14 +153,14 @@ class _WatchedTabState extends State<WatchedTab> {
               Icon(
                 Icons.check_circle_outlined,
                 size: 64,
-                color: Colors.white.withOpacity(0.3),
+                color: Colors.white.withAlpha(77),
               ),
               const SizedBox(height: 16),
               Text(
                 'Nothing watched yet',
                 style: TextStyle(
                   fontSize: 16,
-                  color: Colors.white.withOpacity(0.6),
+                  color: Colors.white.withAlpha(153),
                 ),
               ),
               const SizedBox(height: 8),
@@ -168,7 +168,7 @@ class _WatchedTabState extends State<WatchedTab> {
                 'Start watching movies and series!',
                 style: TextStyle(
                   fontSize: 14,
-                  color: Colors.white.withOpacity(0.4),
+                  color: Colors.white.withAlpha(102),
                 ),
               ),
             ],
@@ -207,7 +207,7 @@ class _WatchedTabState extends State<WatchedTab> {
             margin: const EdgeInsets.only(bottom: 12),
             height: 120,
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.05),
+              color: Colors.white.withAlpha(13),
               borderRadius: BorderRadius.circular(12),
             ),
             child: const Center(
@@ -253,12 +253,12 @@ class _WatchedTabState extends State<WatchedTab> {
             margin: const EdgeInsets.only(bottom: 12),
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.05),
+              color: Colors.white.withAlpha(13),
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
                 color: movie.isFavorite
-                    ? Colors.red.withOpacity(0.5)
-                    : blueColor.withOpacity(0.3),
+                    ? Colors.red.withAlpha(128)
+                    : blueColor.withAlpha(77),
                 width: 1,
               ),
             ),
@@ -277,12 +277,12 @@ class _WatchedTabState extends State<WatchedTab> {
                           width: 60,
                           height: 90,
                           decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.1),
+                            color: Colors.white.withAlpha(26),
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: Icon(
                             Icons.movie_outlined,
-                            color: Colors.white.withOpacity(0.3),
+                            color: Colors.white.withAlpha(77),
                           ),
                         );
                       },
@@ -293,12 +293,12 @@ class _WatchedTabState extends State<WatchedTab> {
                     width: 60,
                     height: 90,
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.1),
+                      color: Colors.white.withAlpha(26),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Icon(
                       Icons.movie_outlined,
-                      color: Colors.white.withOpacity(0.3),
+                      color: Colors.white.withAlpha(77),
                     ),
                   ),
                 const SizedBox(width: 12),
@@ -314,7 +314,7 @@ class _WatchedTabState extends State<WatchedTab> {
                               vertical: 2,
                             ),
                             decoration: BoxDecoration(
-                              color: blueColor.withOpacity(0.2),
+                              color: blueColor.withAlpha(51),
                               borderRadius: BorderRadius.circular(4),
                             ),
                             child: Text(
@@ -355,7 +355,7 @@ class _WatchedTabState extends State<WatchedTab> {
                               releaseDate.substring(0, 4),
                               style: TextStyle(
                                 fontSize: 13,
-                                color: Colors.white.withOpacity(0.6),
+                                color: Colors.white.withAlpha(153),
                               ),
                             ),
                             if (runtime > 0) ...[
@@ -363,7 +363,7 @@ class _WatchedTabState extends State<WatchedTab> {
                               Text(
                                 '•',
                                 style: TextStyle(
-                                  color: Colors.white.withOpacity(0.6),
+                                  color: Colors.white.withAlpha(153),
                                 ),
                               ),
                             ],
@@ -373,14 +373,14 @@ class _WatchedTabState extends State<WatchedTab> {
                             Icon(
                               Icons.schedule,
                               size: 14,
-                              color: Colors.white.withOpacity(0.6),
+                              color: Colors.white.withAlpha(153),
                             ),
                             const SizedBox(width: 4),
                             Text(
                               '${runtime}min',
                               style: TextStyle(
                                 fontSize: 13,
-                                color: Colors.white.withOpacity(0.6),
+                                color: Colors.white.withAlpha(153),
                               ),
                             ),
                           ],
@@ -396,7 +396,7 @@ class _WatchedTabState extends State<WatchedTab> {
                             style: TextStyle(
                               fontSize: 13,
                               fontWeight: FontWeight.w600,
-                              color: Colors.white.withOpacity(0.8),
+                              color: Colors.white.withAlpha(204),
                             ),
                           ),
                           const Spacer(),
@@ -406,10 +406,10 @@ class _WatchedTabState extends State<WatchedTab> {
                               vertical: 4,
                             ),
                             decoration: BoxDecoration(
-                              color: Colors.green.withOpacity(0.2),
+                              color: Colors.green.withAlpha(51),
                               borderRadius: BorderRadius.circular(4),
                               border: Border.all(
-                                color: Colors.green.withOpacity(0.5),
+                                color: Colors.green.withAlpha(128),
                                 width: 1,
                               ),
                             ),
@@ -459,7 +459,7 @@ class _WatchedTabState extends State<WatchedTab> {
             margin: const EdgeInsets.only(bottom: 12),
             height: 120,
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.05),
+              color: Colors.white.withAlpha(13),
               borderRadius: BorderRadius.circular(12),
             ),
             child: const Center(
@@ -532,14 +532,14 @@ class _WatchedTabState extends State<WatchedTab> {
                 margin: const EdgeInsets.only(bottom: 12),
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.05),
+                  color: Colors.white.withAlpha(13),
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
                     color: isFavorite
-                        ? Colors.red.withOpacity(0.5)
+                        ? Colors.red.withAlpha(128)
                         : isCompleted
-                        ? Colors.green.withOpacity(0.5)
-                        : blueColor.withOpacity(0.3),
+                        ? Colors.green.withAlpha(128)
+                        : blueColor.withAlpha(77),
                     width: 1,
                   ),
                 ),
@@ -558,12 +558,12 @@ class _WatchedTabState extends State<WatchedTab> {
                               width: 60,
                               height: 90,
                               decoration: BoxDecoration(
-                                color: Colors.white.withOpacity(0.1),
+                                color: Colors.white.withAlpha(26),
                                 borderRadius: BorderRadius.circular(8),
                               ),
                               child: Icon(
                                 Icons.tv_outlined,
-                                color: Colors.white.withOpacity(0.3),
+                                color: Colors.white.withAlpha(77),
                               ),
                             );
                           },
@@ -574,12 +574,12 @@ class _WatchedTabState extends State<WatchedTab> {
                         width: 60,
                         height: 90,
                         decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.1),
+                          color: Colors.white.withAlpha(26),
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: Icon(
                           Icons.tv_outlined,
-                          color: Colors.white.withOpacity(0.3),
+                          color: Colors.white.withAlpha(77),
                         ),
                       ),
                     const SizedBox(width: 12),
@@ -595,7 +595,7 @@ class _WatchedTabState extends State<WatchedTab> {
                                   vertical: 2,
                                 ),
                                 decoration: BoxDecoration(
-                                  color: blueColor.withOpacity(0.2),
+                                  color: blueColor.withAlpha(51),
                                   borderRadius: BorderRadius.circular(4),
                                 ),
                                 child: Text(
@@ -634,7 +634,7 @@ class _WatchedTabState extends State<WatchedTab> {
                               firstAirDate.substring(0, 4),
                               style: TextStyle(
                                 fontSize: 13,
-                                color: Colors.white.withOpacity(0.6),
+                                color: Colors.white.withAlpha(153),
                               ),
                             ),
                           const SizedBox(height: 6),
@@ -644,7 +644,7 @@ class _WatchedTabState extends State<WatchedTab> {
                                 Icon(
                                   Icons.schedule,
                                   size: 14,
-                                  color: Colors.white.withOpacity(0.6),
+                                  color: Colors.white.withAlpha(153),
                                 ),
                                 const SizedBox(width: 4),
                                 Text(
@@ -652,7 +652,7 @@ class _WatchedTabState extends State<WatchedTab> {
                                   style: TextStyle(
                                     fontSize: 13,
                                     fontWeight: FontWeight.w600,
-                                    color: Colors.white.withOpacity(0.8),
+                                    color: Colors.white.withAlpha(204),
                                   ),
                                 ),
                                 const Spacer(),
@@ -662,10 +662,10 @@ class _WatchedTabState extends State<WatchedTab> {
                                     vertical: 4,
                                   ),
                                   decoration: BoxDecoration(
-                                    color: Colors.green.withOpacity(0.2),
+                                    color: Colors.green.withAlpha(51),
                                     borderRadius: BorderRadius.circular(4),
                                     border: Border.all(
-                                      color: Colors.green.withOpacity(0.5),
+                                      color: Colors.green.withAlpha(128),
                                       width: 1,
                                     ),
                                   ),
@@ -698,7 +698,7 @@ class _WatchedTabState extends State<WatchedTab> {
                                   '$watchedCount of $totalEpisodes episodes',
                                   style: TextStyle(
                                     fontSize: 13,
-                                    color: Colors.white.withOpacity(0.6),
+                                    color: Colors.white.withAlpha(153),
                                   ),
                                 ),
                                 const Spacer(),
@@ -708,10 +708,10 @@ class _WatchedTabState extends State<WatchedTab> {
                                     vertical: 4,
                                   ),
                                   decoration: BoxDecoration(
-                                    color: blueColor.withOpacity(0.2),
+                                    color: blueColor.withAlpha(51),
                                     borderRadius: BorderRadius.circular(4),
                                     border: Border.all(
-                                      color: blueColor.withOpacity(0.5),
+                                      color: blueColor.withAlpha(128),
                                       width: 1,
                                     ),
                                   ),
@@ -751,3 +751,4 @@ class _WatchedTabState extends State<WatchedTab> {
     );
   }
 }
+

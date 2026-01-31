@@ -895,7 +895,7 @@ class _ButtonsState extends State<Buttons> with TickerProviderStateMixin {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
-          backgroundColor: Colors.orange.withOpacity(0.95),
+          backgroundColor: Colors.orange.withAlpha(242),
           content: Row(
             children: [
               const Icon(
@@ -1181,6 +1181,7 @@ class _ButtonsState extends State<Buttons> with TickerProviderStateMixin {
                                   mode: LaunchMode.externalApplication,
                                 );
                                 if (!launched && mounted) {
+                                  // ignore: use_build_context_synchronously
                                   ScaffoldMessenger.of(context)
                                     ..clearSnackBars()
                                     ..showSnackBar(
@@ -1356,3 +1357,4 @@ class _AnimatedIconButton extends StatelessWidget {
     );
   }
 }
+

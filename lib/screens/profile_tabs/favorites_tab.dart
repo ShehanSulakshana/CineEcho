@@ -88,7 +88,7 @@ class _FavoritesTabState extends State<FavoritesTab> {
         ),
         content: Text(
           'Remove "$title" from your favorites?',
-          style: TextStyle(color: Colors.white.withOpacity(0.8), fontSize: 15),
+          style: TextStyle(color: Colors.white.withAlpha(204), fontSize: 15),
         ),
         actions: [
           TextButton(
@@ -142,14 +142,14 @@ class _FavoritesTabState extends State<FavoritesTab> {
               Icon(
                 Icons.favorite_border_rounded,
                 size: 64,
-                color: Colors.white.withOpacity(0.3),
+                color: Colors.white.withAlpha(77),
               ),
               const SizedBox(height: 16),
               Text(
                 'No favorites yet',
                 style: TextStyle(
                   fontSize: 16,
-                  color: Colors.white.withOpacity(0.6),
+                  color: Colors.white.withAlpha(153),
                 ),
               ),
               const SizedBox(height: 8),
@@ -157,7 +157,7 @@ class _FavoritesTabState extends State<FavoritesTab> {
                 'Start adding your favorite movies and TV series!',
                 style: TextStyle(
                   fontSize: 14,
-                  color: Colors.white.withOpacity(0.4),
+                  color: Colors.white.withAlpha(102),
                 ),
               ),
             ],
@@ -193,7 +193,7 @@ class _FavoritesTabState extends State<FavoritesTab> {
             margin: const EdgeInsets.only(bottom: 12),
             height: 120,
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.05),
+              color: Colors.white.withAlpha(13),
               borderRadius: BorderRadius.circular(12),
             ),
             child: const Center(
@@ -239,9 +239,9 @@ class _FavoritesTabState extends State<FavoritesTab> {
             margin: const EdgeInsets.only(bottom: 12),
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.05),
+              color: Colors.white.withAlpha(13),
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: Colors.red.withOpacity(0.5), width: 1),
+              border: Border.all(color: Colors.red.withAlpha(128), width: 1),
             ),
             child: Row(
               children: [
@@ -258,12 +258,12 @@ class _FavoritesTabState extends State<FavoritesTab> {
                           width: 60,
                           height: 90,
                           decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.1),
+                            color: Colors.white.withAlpha(26),
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: Icon(
                             Icons.movie_outlined,
-                            color: Colors.white.withOpacity(0.3),
+                            color: Colors.white.withAlpha(77),
                           ),
                         );
                       },
@@ -274,12 +274,12 @@ class _FavoritesTabState extends State<FavoritesTab> {
                     width: 60,
                     height: 90,
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.1),
+                      color: Colors.white.withAlpha(26),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Icon(
                       Icons.movie_outlined,
-                      color: Colors.white.withOpacity(0.3),
+                      color: Colors.white.withAlpha(77),
                     ),
                   ),
                 const SizedBox(width: 12),
@@ -315,7 +315,7 @@ class _FavoritesTabState extends State<FavoritesTab> {
                           releaseDate.substring(0, 4),
                           style: TextStyle(
                             fontSize: 14,
-                            color: Colors.white.withOpacity(0.6),
+                            color: Colors.white.withAlpha(153),
                           ),
                         ),
                       const SizedBox(height: 4),
@@ -328,7 +328,7 @@ class _FavoritesTabState extends State<FavoritesTab> {
                             style: TextStyle(
                               fontSize: 14,
                               fontWeight: FontWeight.w600,
-                              color: Colors.white.withOpacity(0.8),
+                              color: Colors.white.withAlpha(204),
                             ),
                           ),
                         ],
@@ -339,7 +339,7 @@ class _FavoritesTabState extends State<FavoritesTab> {
                           overview,
                           style: TextStyle(
                             fontSize: 12,
-                            color: Colors.white.withOpacity(0.5),
+                            color: Colors.white.withAlpha(128),
                             height: 1.3,
                           ),
                           maxLines: 2,
@@ -370,7 +370,7 @@ class _FavoritesTabState extends State<FavoritesTab> {
             margin: const EdgeInsets.only(bottom: 12),
             height: 120,
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.05),
+              color: Colors.white.withAlpha(13),
               borderRadius: BorderRadius.circular(12),
             ),
             child: const Center(
@@ -416,9 +416,9 @@ class _FavoritesTabState extends State<FavoritesTab> {
             margin: const EdgeInsets.only(bottom: 12),
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.05),
+              color: Colors.white.withAlpha(13),
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: Colors.red.withOpacity(0.5), width: 1),
+              border: Border.all(color: Colors.red.withAlpha(128), width: 1),
             ),
             child: Row(
               children: [
@@ -435,12 +435,12 @@ class _FavoritesTabState extends State<FavoritesTab> {
                           width: 60,
                           height: 90,
                           decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.1),
+                            color: Colors.white.withAlpha(26),
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: Icon(
                             Icons.tv_outlined,
-                            color: Colors.white.withOpacity(0.3),
+                            color: Colors.white.withAlpha(77),
                           ),
                         );
                       },
@@ -451,12 +451,12 @@ class _FavoritesTabState extends State<FavoritesTab> {
                     width: 60,
                     height: 90,
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.1),
+                      color: Colors.white.withAlpha(26),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Icon(
                       Icons.tv_outlined,
-                      color: Colors.white.withOpacity(0.3),
+                      color: Colors.white.withAlpha(77),
                     ),
                   ),
                 const SizedBox(width: 12),
@@ -492,7 +492,7 @@ class _FavoritesTabState extends State<FavoritesTab> {
                           firstAirDate.substring(0, 4),
                           style: TextStyle(
                             fontSize: 14,
-                            color: Colors.white.withOpacity(0.6),
+                            color: Colors.white.withAlpha(153),
                           ),
                         ),
                       const SizedBox(height: 4),
@@ -505,7 +505,7 @@ class _FavoritesTabState extends State<FavoritesTab> {
                             style: TextStyle(
                               fontSize: 14,
                               fontWeight: FontWeight.w600,
-                              color: Colors.white.withOpacity(0.8),
+                              color: Colors.white.withAlpha(204),
                             ),
                           ),
                         ],
@@ -516,7 +516,7 @@ class _FavoritesTabState extends State<FavoritesTab> {
                           overview,
                           style: TextStyle(
                             fontSize: 12,
-                            color: Colors.white.withOpacity(0.5),
+                            color: Colors.white.withAlpha(128),
                             height: 1.3,
                           ),
                           maxLines: 2,
@@ -534,3 +534,4 @@ class _FavoritesTabState extends State<FavoritesTab> {
     );
   }
 }
+

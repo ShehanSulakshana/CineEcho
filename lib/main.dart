@@ -103,7 +103,7 @@ class MyApp extends StatelessWidget {
 }
 
 class _HomeScreenWithConnectivity extends StatefulWidget {
-  const _HomeScreenWithConnectivity({Key? key}) : super(key: key);
+  const _HomeScreenWithConnectivity();
 
   @override
   State<_HomeScreenWithConnectivity> createState() =>
@@ -112,7 +112,6 @@ class _HomeScreenWithConnectivity extends StatefulWidget {
 
 class _HomeScreenWithConnectivityState
     extends State<_HomeScreenWithConnectivity> {
-  late ConnectivityProvider _connectivityProvider;
   bool _isDialogShowing = false;
 
   @override
@@ -124,7 +123,6 @@ class _HomeScreenWithConnectivityState
   Widget build(BuildContext context) {
     return Consumer<ConnectivityProvider>(
       builder: (context, connectivityProvider, _) {
-        _connectivityProvider = connectivityProvider;
 
         // Check for network issues (disconnected OR has network error)
         final hasNetworkIssue =

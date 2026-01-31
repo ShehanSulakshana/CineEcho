@@ -1,4 +1,3 @@
-import 'package:cine_echo/themes/pallets.dart';
 import 'package:flutter/material.dart';
 
 Widget completedStatsCard(String watchTime, int movies, int episodes) {

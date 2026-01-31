@@ -104,7 +104,7 @@ class _ProfileEditorScreenState extends State<ProfileEditorScreen> {
             final bytes = await _selectedImage!.readAsBytes();
             imageBase64 = base64Encode(bytes);
           } catch (e) {
-            print('Error encoding image: $e');
+            debugPrint('Error encoding image: $e');
           }
         }
 

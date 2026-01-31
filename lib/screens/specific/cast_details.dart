@@ -147,7 +147,7 @@ class _CastDetailsState extends State<CastDetails> {
                                   ),
                                   boxShadow: [
                                     BoxShadow(
-                                      color: Colors.black.withOpacity(0.2),
+                                      color: Colors.black.withAlpha(51),
                                       blurRadius: 8,
                                       spreadRadius: 2,
                                     ),
@@ -230,7 +230,7 @@ class _CastDetailsState extends State<CastDetails> {
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Container(
+                          SizedBox(
                             width: double.infinity,
                             child: Text(
                               "Biography",
@@ -277,3 +277,4 @@ class _CastDetailsState extends State<CastDetails> {
     );
   }
 }
+

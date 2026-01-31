@@ -99,9 +99,9 @@ class _SearchScreenState extends State<SearchScreen> {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.1),
+        color: Colors.white.withAlpha(26),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: blueColor.withOpacity(0.3), width: 1),
+        border: Border.all(color: blueColor.withAlpha(77), width: 1),
       ),
       child: TextField(
         controller: _searchController,
@@ -111,7 +111,7 @@ class _SearchScreenState extends State<SearchScreen> {
         decoration: InputDecoration(
           hintText: 'Search movies, TV shows, people...',
           hintStyle: TextStyle(
-            color: Colors.white.withOpacity(0.5),
+            color: Colors.white.withAlpha(128),
             fontSize: 16,
           ),
           prefixIcon: Icon(Icons.search_rounded, color: blueColor, size: 24),
@@ -140,7 +140,7 @@ class _SearchScreenState extends State<SearchScreen> {
             Icon(
               Icons.search_rounded,
               size: 100,
-              color: Colors.white.withOpacity(0.3),
+              color: Colors.white.withAlpha(77),
             ),
             const SizedBox(height: 24),
             Text(
@@ -148,7 +148,7 @@ class _SearchScreenState extends State<SearchScreen> {
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.w600,
-                color: Colors.white.withOpacity(0.7),
+                color: Colors.white.withAlpha(179),
               ),
             ),
             const SizedBox(height: 12),
@@ -156,7 +156,7 @@ class _SearchScreenState extends State<SearchScreen> {
               'Start typing to discover amazing content',
               style: TextStyle(
                 fontSize: 14,
-                color: Colors.white.withOpacity(0.5),
+                color: Colors.white.withAlpha(128),
               ),
             ),
           ],
@@ -170,7 +170,7 @@ class _SearchScreenState extends State<SearchScreen> {
             Icon(
               Icons.sentiment_dissatisfied_rounded,
               size: 100,
-              color: Colors.white.withOpacity(0.3),
+              color: Colors.white.withAlpha(77),
             ),
             const SizedBox(height: 24),
             Text(
@@ -178,7 +178,7 @@ class _SearchScreenState extends State<SearchScreen> {
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
-                color: Colors.white.withOpacity(0.8),
+                color: Colors.white.withAlpha(204),
               ),
             ),
             const SizedBox(height: 12),
@@ -189,14 +189,14 @@ class _SearchScreenState extends State<SearchScreen> {
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 14,
-                  color: Colors.white.withOpacity(0.5),
+                  color: Colors.white.withAlpha(128),
                 ),
               ),
             ),
             const SizedBox(height: 24),
             Text(
               'Try different keywords',
-              style: TextStyle(fontSize: 13, color: blueColor.withOpacity(0.8)),
+              style: TextStyle(fontSize: 13, color: blueColor.withAlpha(204)),
             ),
           ],
         ),
@@ -275,9 +275,9 @@ class _SearchScreenState extends State<SearchScreen> {
       child: Container(
         margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.05),
+          color: Colors.white.withAlpha(13),
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: Colors.white.withOpacity(0.1), width: 1),
+          border: Border.all(color: Colors.white.withAlpha(26), width: 1),
         ),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -324,10 +324,10 @@ class _SearchScreenState extends State<SearchScreen> {
                             vertical: 4,
                           ),
                           decoration: BoxDecoration(
-                            color: mediaColor.withOpacity(0.2),
+                            color: mediaColor.withAlpha(51),
                             borderRadius: BorderRadius.circular(6),
                             border: Border.all(
-                              color: mediaColor.withOpacity(0.5),
+                              color: mediaColor.withAlpha(128),
                               width: 1,
                             ),
                           ),
@@ -353,7 +353,7 @@ class _SearchScreenState extends State<SearchScreen> {
                             year,
                             style: TextStyle(
                               fontSize: 12,
-                              color: Colors.white.withOpacity(0.6),
+                              color: Colors.white.withAlpha(153),
                             ),
                           ),
                         ],
@@ -365,7 +365,7 @@ class _SearchScreenState extends State<SearchScreen> {
                             rating,
                             style: TextStyle(
                               fontSize: 12,
-                              color: Colors.white.withOpacity(0.7),
+                              color: Colors.white.withAlpha(179),
                               fontWeight: FontWeight.w600,
                             ),
                           ),
@@ -381,7 +381,7 @@ class _SearchScreenState extends State<SearchScreen> {
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
                           fontSize: 13,
-                          color: Colors.white.withOpacity(0.6),
+                          color: Colors.white.withAlpha(153),
                           height: 1.4,
                         ),
                       ),
@@ -394,7 +394,7 @@ class _SearchScreenState extends State<SearchScreen> {
                         'Known for: ${item['known_for_department']}',
                         style: TextStyle(
                           fontSize: 13,
-                          color: Colors.white.withOpacity(0.6),
+                          color: Colors.white.withAlpha(153),
                         ),
                       ),
                     ],
@@ -408,7 +408,7 @@ class _SearchScreenState extends State<SearchScreen> {
               child: Icon(
                 Icons.arrow_forward_ios_rounded,
                 size: 16,
-                color: Colors.white.withOpacity(0.3),
+                color: Colors.white.withAlpha(77),
               ),
             ),
           ],
@@ -421,12 +421,12 @@ class _SearchScreenState extends State<SearchScreen> {
     return Container(
       width: 100,
       height: 150,
-      color: Colors.white.withOpacity(0.1),
+      color: Colors.white.withAlpha(26),
       child: Center(
         child: Icon(
           Icons.image_not_supported_outlined,
           size: 40,
-          color: Colors.white.withOpacity(0.3),
+          color: Colors.white.withAlpha(77),
         ),
       ),
     );
@@ -469,7 +469,7 @@ class _SearchScreenState extends State<SearchScreen> {
                         Text(
                           'Searching...',
                           style: TextStyle(
-                            color: Colors.white.withOpacity(0.7),
+                            color: Colors.white.withAlpha(179),
                             fontSize: 14,
                           ),
                         ),
@@ -491,3 +491,4 @@ class _SearchScreenState extends State<SearchScreen> {
     );
   }
 }
+

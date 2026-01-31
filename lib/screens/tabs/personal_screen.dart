@@ -92,10 +92,6 @@ class _PersonalScreenState extends State<PersonalScreen>
       body: AnimatedBuilder(
         animation: _scrollController,
         builder: (context, child) {
-          double scrollOffset = _scrollController.hasClients
-              ? _scrollController.offset
-              : 0;
-          double scrollProgress = (scrollOffset / 390).clamp(0.0, 1.0);
 
           return NestedScrollView(
             controller: _scrollController,
@@ -362,7 +358,7 @@ class _PersonalScreenState extends State<PersonalScreen>
                         color: Color.fromARGB(255, 10, 40, 60),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.15),
+                            color: Colors.black.withAlpha(38),
                             blurRadius: 3,
                             offset: Offset(0, 2),
                           ),
@@ -416,3 +412,4 @@ class _PersonalScreenState extends State<PersonalScreen>
     );
   }
 }
+

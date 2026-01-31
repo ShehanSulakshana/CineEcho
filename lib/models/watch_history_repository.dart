@@ -218,7 +218,6 @@ class WatchHistoryRepository {
       final doc = await _watchedMoviesRef(uid).doc(tmdbId.toString()).get();
       return doc.exists;
     } catch (e) {
-      print('Error checking if movie is watched: $e');
       return false;
     }
   }
@@ -237,7 +236,6 @@ class WatchHistoryRepository {
       final doc = await _watchedEpisodesRef(uid).doc(episodeKey).get();
       return doc.exists;
     } catch (e) {
-      print('Error checking if episode is watched: $e');
       return false;
     }
   }
@@ -266,7 +264,6 @@ class WatchHistoryRepository {
           .whereType<WatchedMovie>()
           .toList();
     } catch (e) {
-      print('Error getting watched movies: $e');
       return [];
     }
   }
@@ -294,7 +291,6 @@ class WatchHistoryRepository {
           .whereType<WatchedEpisode>()
           .toList();
     } catch (e) {
-      print('Error getting watched episodes: $e');
       return [];
     }
   }
@@ -350,7 +346,6 @@ class WatchHistoryRepository {
       ).doc(seriesTmdbId.toString()).get();
       return doc.exists;
     } catch (e) {
-      print('Error checking if series is favorited: $e');
       return false;
     }
   }
@@ -388,7 +383,6 @@ class WatchHistoryRepository {
       final doc = await _favoriteMoviesRef(uid).doc(tmdbId.toString()).get();
       return doc.exists;
     } catch (e) {
-      print('Error checking if movie is favorited: $e');
       return false;
     }
   }
@@ -412,7 +406,6 @@ class WatchHistoryRepository {
           .whereType<FavoritedMovie>()
           .toList();
     } catch (e) {
-      print('Error getting favorited movies: $e');
       return [];
     }
   }
@@ -438,7 +431,6 @@ class WatchHistoryRepository {
           .whereType<FavoritedSeries>()
           .toList();
     } catch (e) {
-      print('Error getting favorited series: $e');
       return [];
     }
   }
@@ -472,8 +464,8 @@ class WatchHistoryRepository {
         'seriesWatchMinutes': seriesWatchMinutes,
         'updatedAt': FieldValue.serverTimestamp(),
       }, SetOptions(merge: true));
+    // ignore: empty_catches
     } catch (e) {
-      print('Error updating stats: $e');
     }
   }
 }

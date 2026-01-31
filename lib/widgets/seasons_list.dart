@@ -115,7 +115,7 @@ class _SeasonsListState extends State<SeasonsList> {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
-          backgroundColor: Colors.orange.withOpacity(0.95),
+          backgroundColor: Colors.orange.withAlpha(242),
           content: Row(
             children: [
               const Icon(
@@ -213,7 +213,7 @@ class _SeasonsListState extends State<SeasonsList> {
     return Padding(
       padding: EdgeInsets.fromLTRB(16, 0, 16, 12),
       child: Material(
-        color: Colors.white.withOpacity(0.05),
+        color: Colors.white.withAlpha(13),
         borderRadius: borderRadius,
         child: InkWell(
           borderRadius: borderRadius,
@@ -224,8 +224,8 @@ class _SeasonsListState extends State<SeasonsList> {
               borderRadius: borderRadius,
               border: Border.all(
                 color: isExpanded
-                    ? blueColor.withOpacity(0.5)
-                    : Colors.white.withOpacity(0.1),
+                    ? blueColor.withAlpha(128)
+                    : Colors.white.withAlpha(26),
                 width: 1,
               ),
             ),
@@ -243,10 +243,10 @@ class _SeasonsListState extends State<SeasonsList> {
                         return Container(
                           width: 50,
                           height: 75,
-                          color: Colors.white.withOpacity(0.1),
+                          color: Colors.white.withAlpha(26),
                           child: Icon(
                             Icons.movie_outlined,
-                            color: Colors.white.withOpacity(0.3),
+                            color: Colors.white.withAlpha(77),
                           ),
                         );
                       },
@@ -257,12 +257,12 @@ class _SeasonsListState extends State<SeasonsList> {
                     width: 50,
                     height: 75,
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.1),
+                      color: Colors.white.withAlpha(26),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Icon(
                       Icons.movie_outlined,
-                      color: Colors.white.withOpacity(0.3),
+                      color: Colors.white.withAlpha(77),
                     ),
                   ),
                 const SizedBox(width: 12),
@@ -290,10 +290,10 @@ class _SeasonsListState extends State<SeasonsList> {
                                 vertical: 4,
                               ),
                               decoration: BoxDecoration(
-                                color: Colors.green.withOpacity(0.2),
+                                color: Colors.green.withAlpha(51),
                                 borderRadius: BorderRadius.circular(12),
                                 border: Border.all(
-                                  color: Colors.green.withOpacity(0.5),
+                                  color: Colors.green.withAlpha(128),
                                   width: 1,
                                 ),
                               ),
@@ -324,7 +324,7 @@ class _SeasonsListState extends State<SeasonsList> {
                         '$episodeCount episode${episodeCount != 1 ? 's' : ''}',
                         style: TextStyle(
                           fontSize: 13,
-                          color: Colors.white.withOpacity(0.6),
+                          color: Colors.white.withAlpha(153),
                         ),
                       ),
                       if (airDate != null && airDate.isNotEmpty) ...[
@@ -333,7 +333,7 @@ class _SeasonsListState extends State<SeasonsList> {
                           _formatDate(airDate),
                           style: TextStyle(
                             fontSize: 12,
-                            color: Colors.white.withOpacity(0.5),
+                            color: Colors.white.withAlpha(128),
                           ),
                         ),
                       ],
@@ -355,7 +355,7 @@ class _SeasonsListState extends State<SeasonsList> {
                     isExpanded
                         ? Icons.keyboard_arrow_up_rounded
                         : Icons.keyboard_arrow_down_rounded,
-                    color: Colors.white.withOpacity(0.6),
+                    color: Colors.white.withAlpha(153),
                     size: 24,
                   ),
               ],
@@ -393,6 +393,7 @@ class _SeasonsListState extends State<SeasonsList> {
       }
     }
 
+    // ignore: no_leading_underscores_for_local_identifiers
     String _blockedMessage() {
       if (dateText.isNotEmpty) {
         if (dateText.startsWith('Coming ')) {
@@ -409,13 +410,13 @@ class _SeasonsListState extends State<SeasonsList> {
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
         color: isWatched
-            ? blueColor.withOpacity(0.08)
-            : Colors.white.withOpacity(0.03),
+            ? blueColor.withAlpha(20)
+            : Colors.white.withAlpha(8),
         borderRadius: BorderRadius.circular(10),
         border: Border.all(
           color: isWatched
-              ? blueColor.withOpacity(0.3)
-              : Colors.white.withOpacity(0.05),
+              ? blueColor.withAlpha(77)
+              : Colors.white.withAlpha(13),
           width: 1,
         ),
       ),
@@ -441,15 +442,15 @@ class _SeasonsListState extends State<SeasonsList> {
                   color: isWatched
                       ? blueColor
                       : isUnreleased
-                      ? Colors.white.withOpacity(0.08)
+                      ? Colors.white.withAlpha(20)
                       : Colors.transparent,
                   borderRadius: BorderRadius.circular(6),
                   border: Border.all(
                     color: isWatched
                         ? blueColor
                         : isUnreleased
-                        ? Colors.orange.withOpacity(0.5)
-                        : Colors.white.withOpacity(0.3),
+                        ? Colors.orange.withAlpha(128)
+                        : Colors.white.withAlpha(77),
                     width: 2,
                   ),
                 ),
@@ -478,11 +479,11 @@ class _SeasonsListState extends State<SeasonsList> {
                   return Container(
                     width: 100,
                     height: 60,
-                    color: Colors.white.withOpacity(0.05),
+                    color: Colors.white.withAlpha(13),
                     child: Center(
                       child: Icon(
                         Icons.image_not_supported_outlined,
-                        color: Colors.white.withOpacity(0.2),
+                        color: Colors.white.withAlpha(51),
                         size: 24,
                       ),
                     ),
@@ -495,13 +496,13 @@ class _SeasonsListState extends State<SeasonsList> {
               width: 100,
               height: 60,
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.05),
+                color: Colors.white.withAlpha(13),
                 borderRadius: BorderRadius.circular(6),
               ),
               child: Center(
                 child: Icon(
                   Icons.image_not_supported_outlined,
-                  color: Colors.white.withOpacity(0.2),
+                  color: Colors.white.withAlpha(51),
                   size: 24,
                 ),
               ),
@@ -519,7 +520,7 @@ class _SeasonsListState extends State<SeasonsList> {
                         vertical: 2,
                       ),
                       decoration: BoxDecoration(
-                        color: blueColor.withOpacity(0.2),
+                        color: blueColor.withAlpha(51),
                         borderRadius: BorderRadius.circular(4),
                       ),
                       child: Text(
@@ -544,7 +545,7 @@ class _SeasonsListState extends State<SeasonsList> {
                           decoration: isWatched
                               ? TextDecoration.lineThrough
                               : null,
-                          decorationColor: Colors.white.withOpacity(0.5),
+                          decorationColor: Colors.white.withAlpha(128),
                         ),
                       ),
                     ),
@@ -563,10 +564,10 @@ class _SeasonsListState extends State<SeasonsList> {
                           vertical: 2,
                         ),
                         decoration: BoxDecoration(
-                          color: Colors.orange.withOpacity(0.2),
+                          color: Colors.orange.withAlpha(51),
                           borderRadius: BorderRadius.circular(4),
                           border: Border.all(
-                            color: Colors.orange.withOpacity(0.5),
+                            color: Colors.orange.withAlpha(128),
                             width: 1,
                           ),
                         ),
@@ -584,7 +585,7 @@ class _SeasonsListState extends State<SeasonsList> {
                         dateText,
                         style: TextStyle(
                           fontSize: 11,
-                          color: Colors.white.withOpacity(0.5),
+                          color: Colors.white.withAlpha(128),
                         ),
                       ),
                     if (runtime != null && runtime > 0)
@@ -592,7 +593,7 @@ class _SeasonsListState extends State<SeasonsList> {
                         '• ${runtime}min',
                         style: TextStyle(
                           fontSize: 11,
-                          color: Colors.white.withOpacity(0.5),
+                          color: Colors.white.withAlpha(128),
                         ),
                       ),
                     if (voteAverage != null && voteAverage > 0)
@@ -605,7 +606,7 @@ class _SeasonsListState extends State<SeasonsList> {
                             voteAverage.toStringAsFixed(1),
                             style: TextStyle(
                               fontSize: 11,
-                              color: Colors.white.withOpacity(0.6),
+                              color: Colors.white.withAlpha(153),
                               fontWeight: FontWeight.w600,
                             ),
                           ),
@@ -621,7 +622,7 @@ class _SeasonsListState extends State<SeasonsList> {
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
                       fontSize: 12,
-                      color: Colors.white.withOpacity(0.5),
+                      color: Colors.white.withAlpha(128),
                       height: 1.3,
                     ),
                   ),
@@ -696,3 +697,4 @@ class _SeasonsListState extends State<SeasonsList> {
     );
   }
 }
+
