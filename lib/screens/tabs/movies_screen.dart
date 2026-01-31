@@ -34,6 +34,9 @@ class _MoviesScreenState extends State<MoviesScreen>
 
   Future<void> _loadData({bool loadMore = false}) async {
     if (_isRequestInFlight) return;
+    if (selectedGenreIndex < 0 || selectedGenreIndex >= movieGenreList.length) {
+      return;
+    }
 
     try {
       _isRequestInFlight = true;
@@ -50,6 +53,12 @@ class _MoviesScreenState extends State<MoviesScreen>
         genre['id'],
         loadMore: loadMore,
       );
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to load movies. Please try again.')),
+        );
+      }
     } finally {
       _isRequestInFlight = false;
     }
@@ -60,6 +69,9 @@ class _MoviesScreenState extends State<MoviesScreen>
   }
 
   void _loadMoreData() {
+    if (selectedGenreIndex < 0 || selectedGenreIndex >= movieGenreList.length) {
+      return;
+    }
     final genre = movieGenreList[selectedGenreIndex];
     final tmdbProvider = Provider.of<TmdbProvider>(context, listen: false);
     final key = 'movie_${genre['id']}';
@@ -75,6 +87,12 @@ class _MoviesScreenState extends State<MoviesScreen>
   @override
   Widget build(BuildContext context) {
     super.build(context);
+
+    // Ensure selectedGenreIndex is within bounds
+    if (selectedGenreIndex < 0 || selectedGenreIndex >= movieGenreList.length) {
+      selectedGenreIndex = 0;
+    }
+
     final genre = movieGenreList[selectedGenreIndex];
     final key = 'movie_${genre['id']}';
 

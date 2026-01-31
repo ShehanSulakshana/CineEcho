@@ -87,7 +87,7 @@ class _WatchedTabState extends State<WatchedTab> {
             const SizedBox(width: 12),
             Expanded(
               child: Text(
-                'Remove Item',
+                'Remove from Watched',
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: 20,

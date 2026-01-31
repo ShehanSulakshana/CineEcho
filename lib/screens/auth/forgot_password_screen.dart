@@ -36,10 +36,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
           _isLoading = false;
         });
 
-        _showSnackBar(
-          "Password reset link sent to ${_emailController.text}",
-          Colors.green,
-        );
+        _showSnackBar("Password reset link sent successfully", Colors.green);
       }
     } on FirebaseAuthException catch (e) {
       setState(() => _isLoading = false);
@@ -61,7 +58,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
       _showSnackBar(message, Colors.red);
     } catch (e) {
       setState(() => _isLoading = false);
-      _showSnackBar('An unexpected error occurred', Colors.red);
+      _showSnackBar('Failed to send reset link. Please try again.', Colors.red);
     }
   }
 

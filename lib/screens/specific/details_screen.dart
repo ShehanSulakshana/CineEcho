@@ -125,9 +125,21 @@ class _DetailsScreenState extends State<DetailsScreen> {
     final title =
         widget.dataMap['title'] ?? widget.dataMap['name'] ?? 'Unknown';
     final rating = (widget.dataMap['vote_average'] ?? 0.0).toStringAsFixed(1);
-    final releaseYear = DateTime.parse(
-      widget.dataMap['first_air_date'] ?? widget.dataMap['release_date'],
-    ).year.toString();
+
+    String getReleaseYear() {
+      try {
+        final dateStr =
+            widget.dataMap['first_air_date'] ??
+            widget.dataMap['release_date'] ??
+            '';
+        if (dateStr.isEmpty) return 'N/A';
+        return DateTime.parse(dateStr).year.toString();
+      } catch (e) {
+        return 'N/A';
+      }
+    }
+
+    final releaseYear = getReleaseYear();
     final bannerPath = widget.dataMap['backdrop_path'];
     final posterPath = widget.dataMap['poster_path'];
     final bannerLink = bannerPath == null

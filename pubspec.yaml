@@ -1,5 +1,5 @@
 name: cine_echo
-description: "A new Flutter project."
+description: "CineEcho movie companion app."
 publish_to: 'none'
 
 version: 1.0.0+1
@@ -44,4 +44,11 @@ flutter:
   assets:
     - assets/splash/
     - assets/images/
+
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: assets/app_icon.png
+  min_sdk_android: 21
+  remove_alpha_ios: true
 

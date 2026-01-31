@@ -53,7 +53,7 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
           _startRateLimitTimer(remaining);
         }
       }
-    // ignore: empty_catches
+      // ignore: empty_catches
     } catch (e) {}
   }
 
@@ -181,7 +181,7 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
         backgroundColor: const Color.fromARGB(255, 0, 25, 42),
         title: Text('Thank You!', style: TextStyle(color: Colors.white)),
         content: Text(
-          'Your feedback has been submitted successfully.',
+          'Your feedback has been submitted.',
           style: TextStyle(color: Colors.white.withAlpha(204)),
         ),
         actions: [

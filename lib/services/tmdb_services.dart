@@ -9,12 +9,23 @@ class TmdbServices {
   }) async {
     final url =
         'https://api.themoviedb.org/3$endpoint?api_key=${Env.tmdbApiKey}&page=$page';
-    final response = await http.get(Uri.parse(url));
-    final data = json.decode(response.body);
-    return {
-      'results': data['results'] as List<dynamic>,
-      'total_pages': data['total_pages'] as int,
-    };
+    try {
+      final response = await http
+          .get(Uri.parse(url))
+          .timeout(const Duration(seconds: 15));
+
+      if (response.statusCode != 200) {
+        throw Exception('Failed to fetch data: ${response.statusCode}');
+      }
+
+      final data = json.decode(response.body);
+      return {
+        'results': data['results'] as List<dynamic>? ?? [],
+        'total_pages': (data['total_pages'] as int?) ?? 1,
+      };
+    } catch (e) {
+      throw Exception('Error fetching section data: $e');
+    }
   }
 
   Future<Map<String, dynamic>> fetchGenreDataPaginated(
@@ -29,13 +40,24 @@ class TmdbServices {
         '&language=en-US'
         '&page=$page';
 
-    final response = await http.get(Uri.parse(url));
-    final data = json.decode(response.body);
-    return {
-      'results': data['results'] as List<dynamic>,
-      'total_pages': data['total_pages'] as int,
-      'current_page': page,
-    };
+    try {
+      final response = await http
+          .get(Uri.parse(url))
+          .timeout(const Duration(seconds: 15));
+
+      if (response.statusCode != 200) {
+        throw Exception('Failed to fetch genre data: ${response.statusCode}');
+      }
+
+      final data = json.decode(response.body);
+      return {
+        'results': data['results'] as List<dynamic>? ?? [],
+        'total_pages': (data['total_pages'] as int?) ?? 1,
+        'current_page': page,
+      };
+    } catch (e) {
+      throw Exception('Error fetching genre data: $e');
+    }
   }
 
   Future<List<dynamic>> fetchGenreData(String mediaType, int genreId) async {
@@ -51,15 +73,30 @@ class TmdbServices {
     return data['results'];
   }
 
-  Future<Map<String, dynamic>> fetchDetails(String id, String type, {required bool isSeason}) async {
+  Future<Map<String, dynamic>> fetchDetails(
+    String id,
+    String type, {
+    required bool isSeason,
+  }) async {
     final url =
         'https://api.themoviedb.org/3/${type.trim()}/${id.trim()}'
         '?api_key=${Env.tmdbApiKey}'
         '&append_to_response=videos,credits,recommendations'
         '&language=en-US';
 
-    final response = await http.get(Uri.parse(url));
-    return json.decode(response.body);
+    try {
+      final response = await http
+          .get(Uri.parse(url))
+          .timeout(const Duration(seconds: 15));
+
+      if (response.statusCode != 200) {
+        throw Exception('Failed to fetch details: ${response.statusCode}');
+      }
+
+      return json.decode(response.body) as Map<String, dynamic>? ?? {};
+    } catch (e) {
+      throw Exception('Error fetching details: $e');
+    }
   }
 
   Future<Map<String, dynamic>> fetchCastDetails(String id) async {
@@ -67,8 +104,20 @@ class TmdbServices {
         'https://api.themoviedb.org/3/person/$id'
         '?api_key=${Env.tmdbApiKey}'
         '&append_to_response=movie_credits';
-    final response = await http.get(Uri.parse(url));
-    return json.decode(response.body);
+
+    try {
+      final response = await http
+          .get(Uri.parse(url))
+          .timeout(const Duration(seconds: 15));
+
+      if (response.statusCode != 200) {
+        throw Exception('Failed to fetch cast details: ${response.statusCode}');
+      }
+
+      return json.decode(response.body) as Map<String, dynamic>? ?? {};
+    } catch (e) {
+      throw Exception('Error fetching cast details: $e');
+    }
   }
 
   Future<Map<String, dynamic>> searchMulti(String query, {int page = 1}) async {
@@ -83,13 +132,24 @@ class TmdbServices {
         '&page=$page'
         '&language=en-US';
 
-    final response = await http.get(Uri.parse(url));
-    final data = json.decode(response.body);
-    return {
-      'results': data['results'] as List<dynamic>,
-      'total_pages': data['total_pages'] as int,
-      'total_results': data['total_results'] as int,
-    };
+    try {
+      final response = await http
+          .get(Uri.parse(url))
+          .timeout(const Duration(seconds: 15));
+
+      if (response.statusCode != 200) {
+        throw Exception('Search failed: ${response.statusCode}');
+      }
+
+      final data = json.decode(response.body);
+      return {
+        'results': data['results'] as List<dynamic>? ?? [],
+        'total_pages': (data['total_pages'] as int?) ?? 0,
+        'total_results': (data['total_results'] as int?) ?? 0,
+      };
+    } catch (e) {
+      throw Exception('Error searching: $e');
+    }
   }
 
   Future<Map<String, dynamic>> fetchSeasonDetails(
@@ -101,7 +161,20 @@ class TmdbServices {
         '?api_key=${Env.tmdbApiKey}'
         '&language=en-US';
 
-    final response = await http.get(Uri.parse(url));
-    return json.decode(response.body);
+    try {
+      final response = await http
+          .get(Uri.parse(url))
+          .timeout(const Duration(seconds: 15));
+
+      if (response.statusCode != 200) {
+        throw Exception(
+          'Failed to fetch season details: ${response.statusCode}',
+        );
+      }
+
+      return json.decode(response.body) as Map<String, dynamic>? ?? {};
+    } catch (e) {
+      throw Exception('Error fetching season details: $e');
+    }
   }
 }

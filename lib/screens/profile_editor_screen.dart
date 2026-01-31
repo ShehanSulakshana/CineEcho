@@ -70,7 +70,7 @@ class _ProfileEditorScreenState extends State<ProfileEditorScreen> {
         setState(() {
           _selectedImage = File(pickedFile.path);
         });
-        _showSnackBar('Image selected successfully', Colors.green);
+        _showSnackBar('Image selected', Colors.green);
       }
     } catch (e) {
       _showSnackBar('Failed to pick image', Colors.red);
@@ -125,7 +125,7 @@ class _ProfileEditorScreenState extends State<ProfileEditorScreen> {
         );
       }
 
-      _showSnackBar('Profile updated successfully', Colors.green);
+      _showSnackBar('Profile updated', Colors.green);
 
       if (mounted) {
         await Future.delayed(const Duration(milliseconds: 500));
@@ -134,7 +134,7 @@ class _ProfileEditorScreenState extends State<ProfileEditorScreen> {
         }
       }
     } catch (e) {
-      _showSnackBar('Failed to save changes: ${e.toString()}', Colors.red);
+      _showSnackBar('Failed to save profile. Please try again.', Colors.red);
     } finally {
       if (mounted) {
         setState(() => _isLoading = false);
@@ -210,7 +210,7 @@ class _ProfileEditorScreenState extends State<ProfileEditorScreen> {
         );
       }
     } catch (e) {
-      _showSnackBar('Logout failed: ${e.toString()}', Colors.red);
+      _showSnackBar('Failed to logout. Please try again.', Colors.red);
       if (mounted) {
         setState(() => _isLoading = false);
       }

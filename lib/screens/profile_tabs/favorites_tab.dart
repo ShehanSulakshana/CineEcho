@@ -77,7 +77,7 @@ class _FavoritesTabState extends State<FavoritesTab> {
             const SizedBox(width: 12),
             Expanded(
               child: Text(
-                'Remove Favorite',
+                'Remove from Favorites',
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: 20,
@@ -231,7 +231,7 @@ class _FavoritesTabState extends State<FavoritesTab> {
             _showDeleteDialog(title, () async {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
-                  content: Text('Removing...'),
+                  content: Text('Removing from favorites...'),
                   duration: Duration(seconds: 2),
                 ),
               );
@@ -414,7 +414,7 @@ class _FavoritesTabState extends State<FavoritesTab> {
             _showDeleteDialog(title, () async {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
-                  content: Text('Removing series...'),
+                  content: Text('Removing from favorites...'),
                   duration: Duration(seconds: 3),
                 ),
               );

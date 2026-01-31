@@ -11,11 +11,24 @@ class AuthenticationProvider extends ChangeNotifier {
   bool _isLoading = false;
 
   AuthenticationProvider() {
-    _currentUser = _firebaseAuth.currentUser;
-    _firebaseAuth.authStateChanges().listen((User? user) {
-      _currentUser = user;
-      notifyListeners();
-    });
+    _initializeAuth();
+  }
+
+  void _initializeAuth() {
+    try {
+      _currentUser = _firebaseAuth.currentUser;
+      _firebaseAuth.authStateChanges().listen(
+        (User? user) {
+          _currentUser = user;
+          notifyListeners();
+        },
+        onError: (error) {
+          debugPrint('Error listening to auth state changes: $error');
+        },
+      );
+    } catch (e) {
+      debugPrint('Error initializing auth: $e');
+    }
   }
 
   User? get currentUser => _currentUser;

@@ -51,10 +51,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
       if (!mounted) return;
 
-      _showSnackBar(
-        "Account created successfully! Welcome aboard.",
-        Colors.green,
-      );
+      _showSnackBar("Account created successfully", Colors.green);
 
       Navigator.pushAndRemoveUntil(
         context,
@@ -79,10 +76,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
       }
       _showSnackBar(message, Colors.red);
     } catch (e) {
-      _showSnackBar(
-        'An unexpected error occurred: ${e.toString()}',
-        Colors.red,
-      );
+      _showSnackBar('Failed to create account. Please try again.', Colors.red);
     }
   }
 
@@ -375,7 +369,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                             }
 
                             _showSnackBar(
-                              "Signed in with Google successfully!",
+                              "Signed in successfully",
                               Colors.green,
                             );
                             Navigator.pushAndRemoveUntil(
@@ -411,7 +405,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                               Navigator.of(context).pop();
                             }
                             _showSnackBar(
-                              'An unexpected error occurred with Google Sign-In',
+                              'Failed to sign in with Google',
                               Colors.red,
                             );
                           }

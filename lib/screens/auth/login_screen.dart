@@ -43,7 +43,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
       if (!mounted) return;
 
-      _showSnackBar("Welcome back! Signed in successfully.", Colors.green);
+      _showSnackBar("Signed in successfully", Colors.green);
 
       Navigator.pushAndRemoveUntil(
         context,
@@ -305,10 +305,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           Navigator.of(context).pop();
                         }
                         if (credential != null) {
-                          _showSnackBar(
-                            "Signed in with Google successfully!",
-                            Colors.green,
-                          );
+                          _showSnackBar("Signed in successfully", Colors.green);
                           Navigator.pushAndRemoveUntil(
                             // ignore: use_build_context_synchronously
                             context,
@@ -329,7 +326,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           Navigator.of(context).pop();
                         }
                         _showSnackBar(
-                          'An error occurred during Google Sign-In',
+                          'Failed to sign in with Google',
                           Colors.red,
                         );
                       }

@@ -45,61 +45,255 @@ class _SeasonsListState extends State<SeasonsList> {
   }
 
   Future<void> _loadWatchedEpisodes() async {
-    final episodes = await _watchRepo.getWatchedEpisodes();
-    if (mounted) {
+    try {
+      final episodes = await _watchRepo.getWatchedEpisodes();
+      if (!mounted) return;
+
       setState(() {
         _watchedEpisodes.clear();
-        for (var ep in episodes) {
-          if (ep.seriesTmdbId == int.parse(widget.tvId)) {
-            _watchedEpisodes[ep.episodeKey] = true;
+        try {
+          final seriesId = int.parse(widget.tvId);
+          for (var ep in episodes) {
+            if (ep.seriesTmdbId == seriesId) {
+              _watchedEpisodes[ep.episodeKey] = true;
+            }
           }
+        } catch (e) {
+          debugPrint('Error parsing series ID: $e');
         }
       });
+    } catch (e) {
+      debugPrint('Error loading watched episodes: $e');
+      if (mounted) {
+        setState(() {
+          _watchedEpisodes.clear();
+        });
+      }
     }
   }
 
   bool _isSeasonCompleted(int seasonNumber, int episodeCount) {
-    final seriesId = int.parse(widget.tvId);
-    int watchedCount = 0;
+    try {
+      final seriesId = int.parse(widget.tvId);
+      int watchedCount = 0;
 
-    for (int i = 1; i <= episodeCount; i++) {
-      final episodeKey = '${seriesId}_S${seasonNumber}E$i';
-      if (_watchedEpisodes[episodeKey] ?? false) {
-        watchedCount++;
+      for (int i = 1; i <= episodeCount; i++) {
+        final episodeKey = '${seriesId}_S${seasonNumber}E$i';
+        if (_watchedEpisodes[episodeKey] ?? false) {
+          watchedCount++;
+        }
+      }
+
+      return watchedCount == episodeCount && episodeCount > 0;
+    } catch (e) {
+      debugPrint('Error checking season completion: $e');
+      return false;
+    }
+  }
+
+  bool _areAllEpisodesReleased(int seasonNumber) {
+    final episodes = _episodesCache[seasonNumber];
+    if (episodes == null || episodes.isEmpty) return false;
+
+    final now = DateTime.now();
+    for (var episode in episodes) {
+      final airDate = episode['air_date'];
+      if (airDate != null && airDate.isNotEmpty) {
+        try {
+          final date = DateTime.parse(airDate);
+          if (date.isAfter(now)) {
+            return false; // Found unreleased episode
+          }
+        } catch (e) {
+          // If parsing fails, assume not released
+          return false;
+        }
       }
     }
+    return true;
+  }
 
-    return watchedCount == episodeCount && episodeCount > 0;
+  Future<void> _toggleSeasonWatched(int seasonNumber) async {
+    late final bool shouldShowDialog;
+    try {
+      final seriesId = int.parse(widget.tvId);
+      final episodes = _episodesCache[seasonNumber];
+      if (episodes == null || episodes.isEmpty) return;
+
+      // Check if all episodes are released
+      if (!_areAllEpisodesReleased(seasonNumber)) {
+        _showBlockedSnackBar('Cannot mark season with unreleased episodes');
+        return;
+      }
+
+      // Check current completion status
+      final isCurrentlyCompleted = _isSeasonCompleted(
+        seasonNumber,
+        episodes.length,
+      );
+
+      // Collect all updates first
+      final Map<String, bool> updates = {};
+      final targetState = !isCurrentlyCompleted;
+
+      // Prepare updates
+      for (var episode in episodes) {
+        final episodeNumber = episode['episode_number'] ?? 0;
+        final key = '${seriesId}_S${seasonNumber}E$episodeNumber';
+        updates[key] = targetState;
+      }
+
+      // Optimistic UI update - show immediately
+      if (mounted) {
+        setState(() {
+          _watchedEpisodes.addAll(updates);
+        });
+      }
+
+      // Show loading dialog if there are many episodes
+      shouldShowDialog = episodes.length > 5;
+      if (shouldShowDialog && mounted) {
+        _showProcessingDialog(seasonNumber, episodes.length, targetState);
+      }
+
+      // Process in database
+      for (var episode in episodes) {
+        final episodeNumber = episode['episode_number'] ?? 0;
+
+        if (targetState) {
+          await _watchRepo.markEpisodeWatched(
+            seriesId,
+            seasonNumber,
+            episodeNumber,
+          );
+        } else {
+          await _watchRepo.unmarkEpisodeWatched(
+            seriesId,
+            seasonNumber,
+            episodeNumber,
+          );
+        }
+      }
+
+      // Close dialog safely
+      if (shouldShowDialog && mounted) {
+        try {
+          if (Navigator.of(context).canPop()) {
+            Navigator.of(context).pop();
+          }
+        } catch (e) {
+          debugPrint('Error closing dialog: $e');
+        }
+      }
+
+      // Note: Not calling onEpisodesChanged to preserve expanded state
+      // The parent will refresh on next navigation or manual refresh
+    } catch (e) {
+      debugPrint('Error toggling season watched: $e');
+
+      // Close dialog on error
+      if (shouldShowDialog && mounted) {
+        try {
+          if (Navigator.of(context).canPop()) {
+            Navigator.of(context).pop();
+          }
+        } catch (dialogError) {
+          debugPrint('Error closing dialog after error: $dialogError');
+        }
+      }
+
+      // Revert UI on error
+      if (mounted) {
+        _loadWatchedEpisodes();
+        _showBlockedSnackBar('Failed to update season. Please try again.');
+      }
+    }
+  }
+
+  void _showProcessingDialog(int seasonNumber, int episodeCount, bool marking) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => PopScope(
+        canPop: false,
+        child: Dialog(
+          backgroundColor: const Color(0xFF1A1A1A),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                CircularProgressIndicator(strokeWidth: 3, color: blueColor),
+                const SizedBox(height: 20),
+                Text(
+                  marking
+                      ? 'Marking Season $seasonNumber'
+                      : 'Unmarking Season $seasonNumber',
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Processing $episodeCount episodes...',
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.white.withAlpha(179),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
   }
 
   Future<void> _toggleEpisodeWatched(
     int seasonNumber,
     int episodeNumber,
   ) async {
-    final seriesId = int.parse(widget.tvId);
-    final key = '${seriesId}_S${seasonNumber}E$episodeNumber';
-    final isWatched = _watchedEpisodes[key] ?? false;
+    late final bool isWatched;
+    late final String key;
+    try {
+      final seriesId = int.parse(widget.tvId);
+      key = '${seriesId}_S${seasonNumber}E$episodeNumber';
+      isWatched = _watchedEpisodes[key] ?? false;
 
-    if (isWatched) {
-      await _watchRepo.unmarkEpisodeWatched(
-        seriesId,
-        seasonNumber,
-        episodeNumber,
-      );
-      setState(() {
-        _watchedEpisodes[key] = false;
-      });
-      widget.onEpisodesChanged?.call();
-    } else {
-      await _watchRepo.markEpisodeWatched(
-        seriesId,
-        seasonNumber,
-        episodeNumber,
-      );
-      setState(() {
-        _watchedEpisodes[key] = true;
-      });
-      widget.onEpisodesChanged?.call();
+      if (isWatched) {
+        await _watchRepo.unmarkEpisodeWatched(
+          seriesId,
+          seasonNumber,
+          episodeNumber,
+        );
+        setState(() {
+          _watchedEpisodes[key] = false;
+        });
+      } else {
+        await _watchRepo.markEpisodeWatched(
+          seriesId,
+          seasonNumber,
+          episodeNumber,
+        );
+        setState(() {
+          _watchedEpisodes[key] = true;
+        });
+      }
+      // Note: Not calling onEpisodesChanged to preserve expanded state
+    } catch (e) {
+      debugPrint('Error toggling episode watched: $e');
+      if (mounted) {
+        _showBlockedSnackBar('Failed to update episode. Please try again.');
+        // Revert the UI change
+        setState(() {
+          _watchedEpisodes[key] = isWatched;
+        });
+      }
     }
   }
 
@@ -163,20 +357,26 @@ class _SeasonsListState extends State<SeasonsList> {
         widget.tvId,
         seasonNumber,
       );
-      final episodes = seasonDetails['episodes'] ?? [];
 
-      if (mounted) {
-        setState(() {
-          _episodesCache[seasonNumber] = episodes;
-          _expandedSeasons[seasonNumber] = true;
-          _loadingSeasons[seasonNumber] = false;
-        });
+      if (!mounted) return;
+
+      final episodes = seasonDetails['episodes'];
+      if (episodes == null || episodes is! List) {
+        throw Exception('Invalid episode data received');
       }
+
+      setState(() {
+        _episodesCache[seasonNumber] = episodes;
+        _expandedSeasons[seasonNumber] = true;
+        _loadingSeasons[seasonNumber] = false;
+      });
     } catch (e) {
+      debugPrint('Error fetching season details: $e');
       if (mounted) {
         setState(() {
           _loadingSeasons[seasonNumber] = false;
         });
+        _showBlockedSnackBar('Failed to load episodes. Check your connection.');
       }
     }
   }
@@ -198,14 +398,20 @@ class _SeasonsListState extends State<SeasonsList> {
   }
 
   Widget _buildSeasonHeader(Map<String, dynamic> season) {
-    final seasonNumber = season['season_number'] ?? 0;
-    final name = season['name'] ?? 'Season $seasonNumber';
-    final episodeCount = season['episode_count'] ?? 0;
-    final airDate = season['air_date'];
-    final posterPath = season['poster_path'];
+    // Safe type casting with defaults
+    final seasonNumber = (season['season_number'] is int)
+        ? season['season_number'] as int
+        : 0;
+    final name = season['name']?.toString() ?? 'Season $seasonNumber';
+    final episodeCount = (season['episode_count'] is int)
+        ? season['episode_count'] as int
+        : 0;
+    final airDate = season['air_date']?.toString();
+    final posterPath = season['poster_path']?.toString();
     final isExpanded = _expandedSeasons[seasonNumber] == true;
     final isLoading = _loadingSeasons[seasonNumber] == true;
     final isCompleted = _isSeasonCompleted(seasonNumber, episodeCount);
+    final canMarkSeason = isExpanded && _areAllEpisodesReleased(seasonNumber);
 
     final borderRadius = BorderRadius.circular(12);
 
@@ -340,22 +546,88 @@ class _SeasonsListState extends State<SeasonsList> {
                   ),
                 ),
                 const SizedBox(width: 8),
+                if (canMarkSeason)
+                  Tooltip(
+                    message: isCompleted
+                        ? 'Unmark all episodes'
+                        : 'Mark all episodes as watched',
+                    child: Material(
+                      color: Colors.transparent,
+                      child: InkWell(
+                        onTap: () {
+                          _toggleSeasonWatched(seasonNumber);
+                        },
+                        borderRadius: BorderRadius.circular(10),
+                        splashColor: blueColor.withAlpha(51),
+                        highlightColor: blueColor.withAlpha(26),
+                        child: Padding(
+                          padding: const EdgeInsets.all(4),
+                          child: AnimatedContainer(
+                            duration: const Duration(milliseconds: 250),
+                            curve: Curves.easeOutCubic,
+                            width: 32,
+                            height: 32,
+                            decoration: BoxDecoration(
+                              color: isCompleted
+                                  ? blueColor
+                                  : Colors.white.withAlpha(13),
+                              borderRadius: BorderRadius.circular(10),
+                              border: Border.all(
+                                color: isCompleted
+                                    ? blueColor
+                                    : Colors.white.withAlpha(77),
+                                width: 2.5,
+                              ),
+                              boxShadow: isCompleted
+                                  ? [
+                                      BoxShadow(
+                                        color: blueColor.withAlpha(128),
+                                        blurRadius: 12,
+                                        spreadRadius: 1,
+                                        offset: const Offset(0, 2),
+                                      ),
+                                    ]
+                                  : null,
+                            ),
+                            child: AnimatedScale(
+                              scale: isCompleted ? 1.0 : 0.0,
+                              duration: const Duration(milliseconds: 250),
+                              curve: Curves.easeOutBack,
+                              child: Icon(
+                                Icons.check_rounded,
+                                size: 20,
+                                color: Colors.white,
+                                key: ValueKey('check_$isCompleted'),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                const SizedBox(width: 12),
                 if (isLoading)
-                  SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      color: blueColor,
+                  Container(
+                    margin: const EdgeInsets.only(right: 8),
+                    child: SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: blueColor,
+                      ),
                     ),
                   )
                 else
-                  Icon(
-                    isExpanded
-                        ? Icons.keyboard_arrow_up_rounded
-                        : Icons.keyboard_arrow_down_rounded,
-                    color: Colors.white.withAlpha(153),
-                    size: 24,
+                  Container(
+                    margin: const EdgeInsets.only(right: 4),
+                    child: Icon(
+                      isExpanded
+                          ? Icons.keyboard_arrow_up_rounded
+                          : Icons.keyboard_arrow_down_rounded,
+                      color: Colors.white.withAlpha(153),
+                      size: 28,
+                    ),
                   ),
               ],
             ),
@@ -366,17 +638,35 @@ class _SeasonsListState extends State<SeasonsList> {
   }
 
   Widget _buildEpisodeItem(Map<String, dynamic> episode, int seasonNumber) {
-    final episodeNumber = episode['episode_number'] ?? 0;
-    final name = episode['name'] ?? 'Episode $episodeNumber';
-    final overview = episode['overview'] ?? '';
-    final airDate = episode['air_date'];
-    final stillPath = episode['still_path'];
-    final runtime = episode['runtime'];
-    final voteAverage = episode['vote_average'];
+    // Safe type casting with defaults
+    final episodeNumber = (episode['episode_number'] is int)
+        ? episode['episode_number'] as int
+        : 0;
+    final name = episode['name']?.toString() ?? 'Episode $episodeNumber';
+    final overview = episode['overview']?.toString() ?? '';
+    final airDate = episode['air_date']?.toString();
+    final stillPath = episode['still_path']?.toString();
+    final runtime = (episode['runtime'] is int)
+        ? episode['runtime'] as int
+        : null;
+    final voteAverage = (episode['vote_average'] is num)
+        ? (episode['vote_average'] as num).toDouble()
+        : null;
 
-    final seriesId = int.parse(widget.tvId);
-    final episodeKey = '${seriesId}_S${seasonNumber}E$episodeNumber';
-    final isWatched = _watchedEpisodes[episodeKey] ?? false;
+    late final int seriesId;
+    late final String episodeKey;
+    late final bool isWatched;
+
+    try {
+      seriesId = int.parse(widget.tvId);
+      episodeKey = '${seriesId}_S${seasonNumber}E$episodeNumber';
+      isWatched = _watchedEpisodes[episodeKey] ?? false;
+    } catch (e) {
+      debugPrint('Error parsing series ID: $e');
+      seriesId = 0;
+      episodeKey = '';
+      isWatched = false;
+    }
 
     final now = DateTime.now();
     bool isUnreleased = false;
@@ -420,48 +710,6 @@ class _SeasonsListState extends State<SeasonsList> {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          GestureDetector(
-            onTap: () {
-              if (isUnreleased) {
-                _showBlockedSnackBar(_blockedMessage());
-                return;
-              }
-              _toggleEpisodeWatched(seasonNumber, episodeNumber);
-            },
-            child: Opacity(
-              opacity: isUnreleased ? 0.55 : 1,
-              child: Container(
-                width: 24,
-                height: 24,
-                margin: const EdgeInsets.only(right: 12, top: 18),
-                decoration: BoxDecoration(
-                  color: isWatched
-                      ? blueColor
-                      : isUnreleased
-                      ? Colors.white.withAlpha(20)
-                      : Colors.transparent,
-                  borderRadius: BorderRadius.circular(6),
-                  border: Border.all(
-                    color: isWatched
-                        ? blueColor
-                        : isUnreleased
-                        ? Colors.orange.withAlpha(128)
-                        : Colors.white.withAlpha(77),
-                    width: 2,
-                  ),
-                ),
-                child: isWatched
-                    ? const Icon(Icons.check, size: 16, color: Colors.white)
-                    : isUnreleased
-                    ? const Icon(
-                        Icons.lock_clock_rounded,
-                        size: 14,
-                        color: Colors.orange,
-                      )
-                    : null,
-              ),
-            ),
-          ),
           if (stillPath != null)
             ClipRRect(
               borderRadius: BorderRadius.circular(6),
@@ -623,6 +871,86 @@ class _SeasonsListState extends State<SeasonsList> {
                   ),
                 ],
               ],
+            ),
+          ),
+          const SizedBox(width: 12),
+          Tooltip(
+            message: isUnreleased
+                ? _blockedMessage()
+                : isWatched
+                ? 'Mark as unwatched'
+                : 'Mark as watched',
+            child: Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: () {
+                  if (isUnreleased) {
+                    _showBlockedSnackBar(_blockedMessage());
+                    return;
+                  }
+                  _toggleEpisodeWatched(seasonNumber, episodeNumber);
+                },
+                borderRadius: BorderRadius.circular(8),
+                splashColor: isUnreleased
+                    ? Colors.orange.withAlpha(51)
+                    : blueColor.withAlpha(51),
+                highlightColor: isUnreleased
+                    ? Colors.orange.withAlpha(26)
+                    : blueColor.withAlpha(26),
+                child: Padding(
+                  padding: const EdgeInsets.all(4),
+                  child: AnimatedOpacity(
+                    opacity: isUnreleased ? 0.5 : 1.0,
+                    duration: const Duration(milliseconds: 200),
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 250),
+                      curve: Curves.easeOutCubic,
+                      width: 28,
+                      height: 28,
+                      margin: const EdgeInsets.only(top: 14),
+                      decoration: BoxDecoration(
+                        color: isWatched
+                            ? blueColor
+                            : isUnreleased
+                            ? Colors.white.withAlpha(20)
+                            : Colors.white.withAlpha(13),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(
+                          color: isWatched
+                              ? blueColor
+                              : isUnreleased
+                              ? Colors.orange.withAlpha(153)
+                              : Colors.white.withAlpha(77),
+                          width: 2.5,
+                        ),
+                        boxShadow: isWatched
+                            ? [
+                                BoxShadow(
+                                  color: blueColor.withAlpha(128),
+                                  blurRadius: 10,
+                                  spreadRadius: 1,
+                                  offset: const Offset(0, 2),
+                                ),
+                              ]
+                            : null,
+                      ),
+                      child: AnimatedScale(
+                        scale: isWatched || isUnreleased ? 1.0 : 0.0,
+                        duration: const Duration(milliseconds: 250),
+                        curve: Curves.easeOutBack,
+                        child: Icon(
+                          isWatched
+                              ? Icons.check_rounded
+                              : Icons.lock_clock_rounded,
+                          size: isUnreleased ? 16 : 18,
+                          color: isWatched ? Colors.white : Colors.orange,
+                          key: ValueKey('icon_${isWatched}_$isUnreleased'),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
             ),
           ),
         ],

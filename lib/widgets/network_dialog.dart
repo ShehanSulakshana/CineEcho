@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'dart:io';
 
 class NetworkDialog extends StatefulWidget {
   final VoidCallback onReload;
@@ -157,7 +156,6 @@ class _NetworkDialogState extends State<NetworkDialog>
                     child: OutlinedButton(
                       onPressed: () {
                         Navigator.pop(context);
-                        exit(0);
                       },
                       style: OutlinedButton.styleFrom(
                         foregroundColor: Colors.white,
@@ -172,10 +170,10 @@ class _NetworkDialogState extends State<NetworkDialog>
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(Icons.exit_to_app_rounded, size: 22),
+                          Icon(Icons.close_rounded, size: 22),
                           const SizedBox(width: 12),
                           Text(
-                            'Exit App',
+                            'Dismiss',
                             style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.w600,
