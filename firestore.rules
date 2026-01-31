@@ -70,6 +70,31 @@ service cloud.firestore {
       }
     }
     
+    match /feedback/{feedbackId} {
+      allow read: if isAuthenticated() && resource.data.userId == request.auth.uid;
+      allow create: if isAuthenticated()
+        && request.resource.data.userId == request.auth.uid
+        && request.resource.data.keys().hasAll(['userId', 'userName', 'userEmail', 'subject', 'message', 'feedbackType', 'timestamp'])
+        && request.resource.data.subject is string
+        && request.resource.data.subject.size() >= 5
+        && request.resource.data.subject.size() <= 100
+        && request.resource.data.message is string
+        && request.resource.data.message.size() >= 10
+        && request.resource.data.message.size() <= 1000
+        && request.resource.data.feedbackType is string
+        && request.resource.data.feedbackType in ['Bug Report', 'Feature Request', 'Suggestion', 'General Feedback', 'Other']
+        && request.resource.data.timestamp is timestamp
+        && !exists(/databases/$(database)/documents/feedback/$(feedbackId))
+        && query('/databases/$(database)/documents/feedback')
+          .where('userId', '==', request.auth.uid)
+          .where('timestamp', '>=', now - duration.value(5, 'm')).size() == 0
+        && query('/databases/$(database)/documents/feedback')
+          .where('userId', '==', request.auth.uid)
+          .where('timestamp', '>=', now - duration.value(24, 'h')).size() < 10;
+      allow delete: if isAuthenticated() && resource.data.userId == request.auth.uid;
+      allow update: if false;
+    }
+    
     match /{document=**} {
       allow read, write: if false;
     }

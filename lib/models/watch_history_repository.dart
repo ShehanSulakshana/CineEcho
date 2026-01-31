@@ -156,9 +156,7 @@ class WatchHistoryRepository {
           final episodeNumber = episode['episodeNumber'] ?? -1;
           if (seasonNumber < 0 || episodeNumber <= 0) continue;
 
-          final episodeKey =
-              '${seriesTmdbId}_S$seasonNumber'
-              'E$episodeNumber';
+          final episodeKey = '${seriesTmdbId}_S${seasonNumber}E$episodeNumber';
           final docRef = _watchedEpisodesRef(uid).doc(episodeKey);
           batch.set(docRef, {
             'seriesTmdbId': seriesTmdbId,
@@ -196,9 +194,7 @@ class WatchHistoryRepository {
           final episodeNumber = episode['episodeNumber'] ?? -1;
           if (seasonNumber < 0 || episodeNumber <= 0) continue;
 
-          final episodeKey =
-              '${seriesTmdbId}_S$seasonNumber'
-              'E$episodeNumber';
+          final episodeKey = '${seriesTmdbId}_S${seasonNumber}E$episodeNumber';
           final docRef = _watchedEpisodesRef(uid).doc(episodeKey);
           batch.delete(docRef);
         }
@@ -464,8 +460,7 @@ class WatchHistoryRepository {
         'seriesWatchMinutes': seriesWatchMinutes,
         'updatedAt': FieldValue.serverTimestamp(),
       }, SetOptions(merge: true));
-    // ignore: empty_catches
-    } catch (e) {
-    }
+      // ignore: empty_catches
+    } catch (e) {}
   }
 }

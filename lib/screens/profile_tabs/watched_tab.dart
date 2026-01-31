@@ -242,6 +242,12 @@ class _WatchedTabState extends State<WatchedTab> {
           },
           onLongPress: () {
             _showDeleteDialog(title, () async {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('Removing...'),
+                  duration: Duration(seconds: 2),
+                ),
+              );
               await _watchRepo.unmarkMovieWatched(movie.tmdbId);
               if (mounted) {
                 _loadContent();
@@ -515,13 +521,22 @@ class _WatchedTabState extends State<WatchedTab> {
               },
               onLongPress: () {
                 _showDeleteDialog(name, () async {
-                  for (var episode in episodes) {
-                    await _watchRepo.unmarkEpisodeWatched(
-                      seriesId,
-                      episode.seasonNumber,
-                      episode.episodeNumber,
-                    );
-                  }
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Removing series episodes...'),
+                      duration: Duration(seconds: 3),
+                    ),
+                  );
+                  // Use Future.wait for parallel deletion instead of sequential
+                  await Future.wait(
+                    episodes.map(
+                      (episode) => _watchRepo.unmarkEpisodeWatched(
+                        seriesId,
+                        episode.seasonNumber,
+                        episode.episodeNumber,
+                      ),
+                    ),
+                  );
                   if (mounted) {
                     _loadContent();
                     widget.onDataChanged?.call();
@@ -751,4 +766,3 @@ class _WatchedTabState extends State<WatchedTab> {
     );
   }
 }
-

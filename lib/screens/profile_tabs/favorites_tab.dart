@@ -228,6 +228,12 @@ class _FavoritesTabState extends State<FavoritesTab> {
           },
           onLongPress: () {
             _showDeleteDialog(title, () async {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('Removing...'),
+                  duration: Duration(seconds: 2),
+                ),
+              );
               await _watchRepo.unmarkMovieFavorite(movieId);
               if (mounted) {
                 _loadFavorites();
@@ -405,6 +411,12 @@ class _FavoritesTabState extends State<FavoritesTab> {
           },
           onLongPress: () {
             _showDeleteDialog(title, () async {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('Removing series...'),
+                  duration: Duration(seconds: 3),
+                ),
+              );
               await _watchRepo.unmarkSeriesFavorite(seriesId);
               if (mounted) {
                 _loadFavorites();
@@ -534,4 +546,3 @@ class _FavoritesTabState extends State<FavoritesTab> {
     );
   }
 }
-

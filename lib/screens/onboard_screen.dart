@@ -5,6 +5,22 @@ import 'package:flutter/material.dart';
 class OnboardScreen extends StatelessWidget {
   const OnboardScreen({super.key});
 
+  void _animateAndNavigate(BuildContext context, Widget screen) {
+    Navigator.push(
+      context,
+      PageRouteBuilder(
+        pageBuilder: (context, animation, secondaryAnimation) => screen,
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          return FadeTransition(
+            opacity: animation,
+            child: ScaleTransition(scale: animation, child: child),
+          );
+        },
+        transitionDuration: const Duration(milliseconds: 400),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -114,12 +130,7 @@ class OnboardScreen extends StatelessWidget {
                         height: 54,
                         child: ElevatedButton(
                           onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => LoginScreen(),
-                              ),
-                            );
+                            _animateAndNavigate(context, LoginScreen());
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Theme.of(context).primaryColor,
@@ -143,12 +154,7 @@ class OnboardScreen extends StatelessWidget {
                         height: 54,
                         child: OutlinedButton(
                           onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => SignUpScreen(),
-                              ),
-                            );
+                            _animateAndNavigate(context, SignUpScreen());
                           },
                           style: OutlinedButton.styleFrom(
                             foregroundColor: Colors.white,
