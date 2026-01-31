@@ -9,7 +9,7 @@
 [![Flutter](https://img.shields.io/badge/Flutter-3.10.3-blue?style=for-the-badge&logo=flutter)](https://flutter.dev)
 [![Firebase](https://img.shields.io/badge/Firebase-Enabled-orange?style=for-the-badge&logo=firebase)](https://firebase.google.com)
 [![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)](LICENSE)
-[![Platform](https://img.shields.io/badge/Platform-Android-blueviolet?style=for-the-badge)](https://flutter.dev)
+[![Platform](https://img.shields.io/badge/Platform-Android%20%7C%20Web%20%7C%20Windows-blueviolet?style=for-the-badge)](https://flutter.dev)
 
 </div>
 
@@ -17,7 +17,7 @@
 
 ## 📱 About CineEcho
 
-CineEcho is a comprehensive Flutter mobile application that revolutionizes how you discover, track, and manage your favorite movies and TV shows. Built with modern technologies and powered by The Movie Database (TMDB) API, CineEcho provides a seamless entertainment experience with personalized recommendations and detailed viewing statistics.
+CineEcho is a comprehensive Flutter mobile application that revolutionizes how you discover, track, and share your favorite movies and TV shows. Built with modern technologies and powered by The Movie Database (TMDB) API, CineEcho provides a seamless entertainment experience with social features and personalized recommendations.
 
 ---
 
@@ -156,70 +156,32 @@ lib/
 
 ---
 
-##  Core Features Explained
+## 🎯 Core Features Explained
 
-###  Movie & TV Show Discovery
+### 🎭 Movie & TV Show Discovery
 - Browse trending, popular, and upcoming titles
-- Easily find any movie or TV series with intuitive navigation
+- View comprehensive metadata including cast, crew, and ratings
 - Access detailed information about movies and TV shows
-- View recommendations based on content you explore
 
-###  Comprehensive Stats Display - *What Makes CineEcho Unique*
-**Detailed Movie/TV Show Information:**
-- **Runtime**: Precise duration display (hours and minutes)
-- **Ratings**: TMDB vote averages with visual indicators  
-- **Release Dates**: Year and full date information
-- **Genres**: Complete genre classification for each title
-- **Overview**: Detailed synopsis and plot information
-- **Cast & Crew**: Full credits with roles and character names
-- **Episode Tracking**: Season and episode numbers with watch status
-
-**Personal Viewing Statistics:**
-- **Total Watch Time**: Animated counter showing hours and minutes watched
-- **Movies Watched**: Count of all completed movies with animated display
-- **Episodes Watched**: Detailed count of TV episodes with visual stats
-- **Watch History**: Chronological view of all watched content
-- **Real-time Updates**: Stats update instantly as you mark content as watched
-
-###  Cast & Crew Discovery
+### �‍🎬 Cast & Crew Discovery
 - View detailed cast and crew information for each movie/TV show
-- Explore complete filmographies of your favorite actors and directors
+- Explore filmographies of your favorite actors and directors
 - Discover other movies and shows featuring specific actors
-- Click on any actor to see their entire body of work
+- Find and follow actors you're interested in
 
-###  Favorites Management
-- Mark movies and TV series as favorites with one tap
-- Quick access to all your favorite content in a dedicated tab
-- Visual favorite indicators on content cards
-- Remove from favorites anytime with long-press gesture
-- Separate favorites lists for movies and TV series
+### �📋 Watchlist Management
+- Create personalized watchlists, TV shows
+- Mark items as watched
 
-###  Watch History Tracking
-- Automatic tracking of watched movies with timestamps
-- Episode-by-episode tracking for TV series
-- Progress indicators showing watched vs. total episodes
-- Mark entire series or individual episodes as watched
-- View complete watch history sorted by most recent
-
-###  Viewing Statistics Dashboard
-- Beautiful animated stat cards showing your viewing habits
-- Total watch time calculated based on watched content (average 120min/movie, 45min/episode)
-- Number of movies completed
-- Number of episodes watched
-- Visual dividers and icons for easy reading
-- Real-time statistics that update with your activity
-
-###  Smart Search
-- Full-text search across movies, TV shows, and people (actors, directors)
+### 🔍 Smart Search
+- Full-text search across movies and TV shows and even People (Actors , Directors)
 - Auto-suggestions for popular titles
-- Quickly find actors and explore their complete filmography
-- Filter and discover content by multiple criteria
 
-###  User Profiles
+### 👤 User Profiles
 - Create and customize your profile
-- View comprehensive viewing statistics with animated displays
-- Manage your favorites and watch history in one place
-- Track your entertainment journey with detailed analytics
+- View viewing statistics and history
+- Manage preferences and settings
+
 ---
 
 ## 🔐 Security Features
@@ -247,9 +209,50 @@ flutter build web --release
 
 ---
 
-## 🤝 Contributing
+## 📚 Project Structure
 
-Fork the repository, create a feature branch, commit your changes, and submit a pull request.
+### Config Layer
+- App constants and configuration
+- API endpoints and settings
+
+### Models Layer
+- Data models for Movies, TV Shows, Users, Posts
+- Entity definitions
+
+### Providers Layer
+- State management using Provider
+- Business logic and data handling
+
+### Screens Layer
+- Authentication flows
+- Home/Dashboard
+- Search and discovery
+- User profiles
+- Detail pages
+
+### Services Layer
+- API integration
+- Firebase operations
+- Local storage management
+
+### Themes Layer
+- Color schemes
+- Typography
+- Component styles
+
+### Widgets Layer
+- Reusable UI components
+- Custom widgets
+- Common UI elements
+
+---
+
+
+### Contribution Guidelines
+- Follow Flutter best practices
+- Write clean, documented code
+- Test your changes thoroughly
+- Update documentation as needed
 
 ---
 
@@ -286,14 +289,4 @@ This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) 
 
 
 </div>
-� License
 
-MIT License - see [LICENSE](LICENSE) file for details.
-
----
-
-<div align="center">
-
-**Built with Flutter** 🎬
-
-© 2026 CineEcho
